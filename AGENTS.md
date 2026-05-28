@@ -9,9 +9,12 @@ This repo is a Svelte 5 port of [react-advanced-cropper](https://github.com/adva
 ## Commands
 
 - `pnpm play` — Vite dev server for the `playground/` app. **Note:** `vite.config.ts` sets `root: './playground'`, so Vite is launched from the repo root but serves the playground.
-- `pnpm test` — Vitest in **browser mode** (Playwright + Chromium, headless). Tests import from `vitest-browser-svelte` and run real DOM interactions; they will fail outside the browser environment.
+- `pnpm storybook` — Storybook 10 dev server (Svelte CSF v5) on port 6006. Stories live in **top-level `stories/`**, not `src/`, to avoid polluting the published `dist/`. Config in `.storybook/main.ts`.
+- `pnpm build-storybook` — Static Storybook build.
+- `pnpm test` — Vitest in **browser mode** (Playwright + Chromium, headless). Tests import from `vitest-browser-svelte` and run real DOM interactions; they will fail outside the browser environment. The Storybook init also added a `storybook` Vitest project (`@storybook/addon-vitest`); both projects run by default.
   - Single test file: `pnpm test tests/MyButton.test.ts`
   - Single test by name: `pnpm test -t 'button increments count on click'`
+  - Only Storybook stories: `pnpm vitest --project=storybook`
 - `pnpm build` — Bundles via `tsdown` and emits Svelte `.d.ts` files via the custom plugin (see below). Output goes to `dist/`.
 - `pnpm dev` — `tsdown --watch` (library rebuild loop; use alongside a consumer, not the playground).
 - `pnpm typecheck` — `svelte-check` against `tsconfig.json` (which only includes `src/`).
@@ -41,4 +44,4 @@ Components use Svelte 5 syntax (`$state`, `$props`, callback props instead of `c
 
 ### Workspace note
 
-`pnpm-workspace.yaml` exists solely to set `allowBuilds: svelte-preprocess: false` — there are no workspace packages. Don't add sub-packages without revisiting this.
+`pnpm-workspace.yaml` is the **allowlist** for pnpm install scripts (`allowBuilds:`), not a multi-package workspace. New dependencies that need install scripts (e.g. `esbuild`, `playwright`) must be listed with `: true`, or `pnpm install` fails with `ERR_PNPM_IGNORED_BUILDS`. There are no sub-packages.
