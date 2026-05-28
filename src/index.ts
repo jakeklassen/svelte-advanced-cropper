@@ -16,9 +16,13 @@ export { default as CropperBackgroundWrapper } from './components/service/Croppe
 export { default as CropperWrapper } from './components/service/CropperWrapper.svelte'
 export { default as StretchableBoundary } from './components/service/StretchableBoundary.svelte'
 
-// M1+M2 stubs (real impl in M3 / M6)
+// Gestures (M3)
 export { default as DraggableElement } from './components/service/DraggableElement.svelte'
-export { default as TransformableImage } from './components/service/TransformableImage.svelte'
+// DraggableArea is the React port's alias for DraggableElement (1-LOC re-export).
+export { default as DraggableArea } from './components/service/DraggableElement.svelte'
+export { default as TransformableImage, TransformableImageEvent } from './components/service/TransformableImage.svelte'
+
+// Stub remaining for M6
 export { default as ArtificialTransition } from './components/service/ArtificialTransition.svelte'
 
 // Re-export the engine surface (decision 5, issue #1)
