@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project intent
 
-This repo is a Svelte 5 port of [react-advanced-cropper](https://github.com/advanced-cropper/react-advanced-cropper). The port is broken into 6 milestone GitHub issues (#1–#6). #1 carries the locked-in architectural decisions:
+This repo is a Svelte 5 port of [react-advanced-cropper](https://github.com/advanced-cropper/react-advanced-cropper). The port shipped across 6 milestone GitHub issues (#1–#6, all closed). #1 carries the locked-in architectural decisions:
 
 - **Context, not prop drilling** — internal `cropper` instance shared via Svelte `setContext` / `getContext`.
 - **Polymorphic slots support both shapes** — snippets are preferred; component-as-prop kept for React-API parity.
