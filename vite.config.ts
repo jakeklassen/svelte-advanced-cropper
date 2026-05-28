@@ -11,11 +11,26 @@ const dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(file
 export default defineConfig({
   root: './playground',
   plugins: [svelte()],
+  css: {
+    preprocessorOptions: {
+      scss: {
+        // Upstream advanced-cropper SCSS uses legacy @import — silence the
+        // deprecation noise (same as scripts/build-styles.mjs does for the
+        // package CSS pipeline).
+        silenceDeprecations: ['import', 'global-builtin'],
+      },
+    },
+  },
   test: {
+    passWithNoTests: true,
     projects: [{
       extends: true,
       test: {
         root: '.',
+        // tmp/ holds the upstream React/engine source clones (port reference);
+        // their tests reach into source paths Vitest can't resolve here.
+        exclude: ['**/node_modules/**', '**/dist/**', 'tmp/**'],
+        passWithNoTests: true,
         browser: {
           enabled: true,
           provider: playwright(),
