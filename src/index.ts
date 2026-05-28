@@ -22,6 +22,12 @@ export { default as DraggableElement } from './components/service/DraggableEleme
 export { default as DraggableArea } from './components/service/DraggableElement.svelte'
 export { default as TransformableImage, TransformableImageEvent } from './components/service/TransformableImage.svelte'
 
+// Stencils + BoundingBox (M4)
+export { default as BoundingBox } from './components/service/BoundingBox.svelte'
+export type { HandlerProps, LineProps } from './components/service/BoundingBox.types.js'
+export { default as RectangleStencil } from './components/stencils/RectangleStencil.svelte'
+export { default as CircleStencil } from './components/stencils/CircleStencil.svelte'
+
 // Stub remaining for M6
 export { default as ArtificialTransition } from './components/service/ArtificialTransition.svelte'
 
