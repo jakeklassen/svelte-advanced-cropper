@@ -7,6 +7,7 @@
     getOptions,
   } from 'advanced-cropper'
   import TransformableImage from './TransformableImage.svelte'
+  import { tryGetCropperContext } from '../../context.js'
 
   interface DesiredCropperRef {
     transformImage: (transform: ImageTransform) => void
@@ -19,8 +20,8 @@
   interface MoveImageOptions { touch?: boolean; mouse?: boolean }
 
   interface Props {
-    /** The cropper accessor — needs `transformImage`, `transformImageEnd`, `getTransitions`. (M5 migrates this to context.) */
-    cropper: DesiredCropperRef
+    /** The cropper accessor. Optional — if omitted, falls back to `getCropperContext()`. */
+    cropper?: DesiredCropperRef
     /** Enable touch-rotate. Default false. */
     rotateImage?: boolean | RotateImageOptions
     /** Enable pinch-to-scale / wheel-to-scale. Default true. */
@@ -43,10 +44,13 @@
     children,
     class: className,
     style,
-    cropper,
+    cropper: cropperProp,
     timeout,
     disabled,
   }: Props = $props()
+
+  const cropperFromCtx = tryGetCropperContext<DesiredCropperRef>()
+  const cropper = $derived(cropperProp ?? cropperFromCtx?.())
 
   // The React port wraps these in useMemo (`useMoveImageOptions`, etc.) for
   // referential stability between renders. In Svelte 5 a `$derived` gives us
@@ -65,14 +69,16 @@
     getOptions(moveImage, { touch: true, mouse: true }, { touch: false, mouse: false }),
   )
 
-  const transitions = $derived(cropper.getTransitions())
+  const transitions = $derived(
+    cropper?.getTransitions() ?? ({ active: false, duration: 0, timingFunction: 'ease' } as CropperTransitions),
+  )
 </script>
 
 <TransformableImage
   class={className}
   {style}
-  onTransform={cropper.transformImage}
-  onTransformEnd={cropper.transformImageEnd}
+  onTransform={cropper?.transformImage}
+  onTransformEnd={cropper?.transformImageEnd}
   touchMove={moveImageOptions.touch}
   mouseMove={moveImageOptions.mouse}
   touchScale={scaleImageOptions.touch}

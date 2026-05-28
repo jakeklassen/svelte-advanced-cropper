@@ -6,6 +6,7 @@
     type CropperTransitions,
     getBackgroundStyle,
   } from 'advanced-cropper'
+  import { tryGetCropperContext } from '../../context.js'
 
   interface DesiredCropperRef {
     getState: () => CropperState | null
@@ -15,23 +16,26 @@
 
   interface Props {
     class?: ClassValue
-    /** The cropper accessor — needs `getState`, `getTransitions`, `getImage`. (M5 migrates this to context.) */
-    cropper: DesiredCropperRef
+    /** The cropper accessor. Optional — if omitted, falls back to `getCropperContext()`. */
+    cropper?: DesiredCropperRef
     /** Cross-origin mode. `true` (default) → `'anonymous'`; pass a string for `'use-credentials'`. */
     crossOrigin?: 'anonymous' | 'use-credentials' | boolean
     style?: string
   }
 
-  let { class: className, style, cropper, crossOrigin = true }: Props = $props()
+  let { class: className, style, cropper: cropperProp, crossOrigin = true }: Props = $props()
+
+  const cropperFromCtx = tryGetCropperContext<DesiredCropperRef>()
+  const cropper = $derived(cropperProp ?? cropperFromCtx?.())
 
   // Recompute the image transform on every render. The engine's getBackgroundStyle
   // produces `transform`, `width`, `height`, `transition` CSS based on the image
   // + state + active transitions.
   // (Renamed `state` → `cropperState` — svelte-check treats the bare name `state`
   // as a potential store auto-subscribe target inside an expression context.)
-  const cropperState = $derived(cropper.getState())
-  const transitions = $derived(cropper.getTransitions())
-  const image = $derived(cropper.getImage())
+  const cropperState = $derived(cropper?.getState() ?? null)
+  const transitions = $derived(cropper?.getTransitions() ?? { active: false, duration: 0, timingFunction: 'ease' } as CropperTransitions)
+  const image = $derived(cropper?.getImage() ?? null)
   const transformStyles = $derived(
     image && cropperState ? getBackgroundStyle(image, cropperState, transitions) : null,
   )

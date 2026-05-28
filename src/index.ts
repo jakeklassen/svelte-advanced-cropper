@@ -28,6 +28,22 @@ export type { HandlerProps, LineProps } from './components/service/BoundingBox.t
 export { default as RectangleStencil } from './components/stencils/RectangleStencil.svelte'
 export { default as CircleStencil } from './components/stencils/CircleStencil.svelte'
 
+// Engine integration + composer (M5)
+export { default as AbstractCropper } from './components/AbstractCropper.svelte'
+export type {
+  AbstractCropperProps,
+  AbstractCropperRef,
+  AbstractCropperSettings,
+} from './components/AbstractCropper.types.js'
+export { CropperInstance } from './instance/CropperInstance.svelte'
+export { CropperImageLoader } from './instance/CropperImageLoader.svelte'
+export {
+  getCropperContext,
+  setCropperContext,
+  tryGetCropperContext,
+  type CropperContext,
+} from './context.js'
+
 // Stub remaining for M6
 export { default as ArtificialTransition } from './components/service/ArtificialTransition.svelte'
 

@@ -3,6 +3,7 @@
   import type { ClassValue } from 'svelte/elements'
   import type { CropperState } from 'advanced-cropper'
   import CropperFade from './CropperFade.svelte'
+  import { tryGetCropperContext } from '../../context.js'
 
   interface DesiredCropperRef {
     getState: () => CropperState | null
@@ -11,16 +12,19 @@
   }
 
   interface Props {
-    /** The cropper accessor — needs `getState` and `isLoaded`. (M5 migrates this to context.) */
+    /** The cropper accessor. Optional — if omitted, falls back to `getCropperContext()`. */
     cropper?: DesiredCropperRef
     class?: ClassValue
     style?: string
     children?: Snippet
-    /** When true, the wrapper is rendered greyed-out / non-interactive. (Currently no visual effect — implementation lands with M5's full composition.) */
+    /** When true, the wrapper is rendered greyed-out / non-interactive. */
     disabled?: boolean
   }
 
-  let { cropper, children, class: className, style }: Props = $props()
+  let { cropper: cropperProp, children, class: className, style }: Props = $props()
+
+  const cropperFromCtx = tryGetCropperContext<DesiredCropperRef>()
+  const cropper = $derived(cropperProp ?? cropperFromCtx?.())
 
   const state = $derived(cropper ? cropper.getState() : null)
   const loaded = $derived(cropper ? cropper.isLoaded() : false)

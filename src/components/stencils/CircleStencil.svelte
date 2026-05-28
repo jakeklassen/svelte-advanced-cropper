@@ -16,6 +16,7 @@
   } from 'advanced-cropper'
   import BoundingBox from '../service/BoundingBox.svelte'
   import type { HandlerProps, LineProps } from '../service/BoundingBox.types.js'
+  import { tryGetCropperContext } from '../../context.js'
   import DraggableElement from '../service/DraggableElement.svelte'
   import StencilGrid from '../service/StencilGrid.svelte'
   import StencilOverlay from '../service/StencilOverlay.svelte'
@@ -48,8 +49,8 @@
   }
 
   interface Props {
-    /** The cropper accessor — needs state, transitions, interactions, move/resize methods. (M5 migrates to context.) */
-    cropper: DesiredCropperRef
+    /** The cropper accessor. Optional — if omitted, falls back to `getCropperContext()`. */
+    cropper?: DesiredCropperRef
     coordinates?: Coordinates | ((state: CropperState | null) => Coordinates)
     handlerComponent?: Component<HandlerProps>
     handler?: Snippet<[HandlerProps]>
@@ -76,7 +77,7 @@
   }
 
   let {
-    cropper,
+    cropper: cropperProp,
     coordinates,
     handlerComponent,
     handler: handlerSnippet,
@@ -102,9 +103,20 @@
     disabled,
   }: Props = $props()
 
-  const cropperState = $derived(cropper.getState())
-  const transitions = $derived(cropper.getTransitions())
-  const interactions = $derived(cropper.getInteractions())
+  const cropperFromCtx = tryGetCropperContext<DesiredCropperRef>()
+  const cropper = $derived(cropperProp ?? cropperFromCtx?.())
+
+  const cropperState = $derived(cropper?.getState() ?? null)
+  const transitions = $derived(
+    cropper?.getTransitions() ?? ({ active: false, duration: 0, timingFunction: 'ease' } as CropperTransitions),
+  )
+  const interactions = $derived(
+    cropper?.getInteractions() ?? ({
+      moveCoordinates: false,
+      resizeCoordinates: false,
+      transformImage: { rotate: false, move: false, scale: false },
+    } as CropperInteractions),
+  )
   const resizeAllowed = $derived(resizable && !disabled)
   const moveAllowed = $derived(movable && !disabled)
 
@@ -188,7 +200,7 @@
         >
           {#if grid}
             <StencilGrid
-              visible={cropper.hasInteractions()}
+              visible={cropper?.hasInteractions() ?? false}
               columns={interactions.transformImage.rotate ? 9 : 3}
               rows={interactions.transformImage.rotate ? 9 : 3}
               class={['advanced-cropper-circle-stencil__grid', gridClassName]}
