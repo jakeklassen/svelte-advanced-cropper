@@ -8,6 +8,13 @@ import 'advanced-cropper/themes/default.scss'
 
 const preview: Preview = {
   parameters: {
+    // Pin the Demo to the top of the sidebar so it's the first thing visitors
+    // see; everything else falls under the `*` wildcard in its existing order.
+    options: {
+      storySort: {
+        order: ['Demo', '*'],
+      },
+    },
     controls: {
       matchers: {
         color: /(background|color)$/i,

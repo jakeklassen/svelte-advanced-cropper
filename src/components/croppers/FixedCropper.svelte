@@ -55,10 +55,42 @@
     postProcess: parametersProp?.postProcess ?? (fixedStencil as any),
   })
 
+  // Forward every AbstractCropperRef method — same rationale as Cropper.svelte.
+  // bind:this on <FixedCropper> hands consumers the full imperative API directly.
   let inner = $state<AbstractCropperRef | undefined>(undefined)
-  export function getRef(): AbstractCropperRef | undefined {
-    return inner
-  }
+  export const reset = () => inner?.reset() ?? Promise.resolve()
+  export const refresh = () => inner?.refresh() ?? Promise.resolve()
+  export const clear = () => inner?.clear()
+  export const setImage = (img: import('advanced-cropper').CropperImage) => inner?.setImage(img)
+  export const setCoordinates = (...a: unknown[]) => (inner?.setCoordinates as any)?.(...a)
+  export const setState = (...a: unknown[]) => (inner?.setState as any)?.(...a)
+  export const moveCoordinates = (...a: unknown[]) => (inner?.moveCoordinates as any)?.(...a)
+  export const moveCoordinatesEnd = (...a: unknown[]) => (inner?.moveCoordinatesEnd as any)?.(...a)
+  export const resizeCoordinates = (...a: unknown[]) => (inner?.resizeCoordinates as any)?.(...a)
+  export const resizeCoordinatesEnd = (...a: unknown[]) => (inner?.resizeCoordinatesEnd as any)?.(...a)
+  export const moveImage = (...a: unknown[]) => (inner?.moveImage as any)?.(...a)
+  export const flipImage = (...a: unknown[]) => (inner?.flipImage as any)?.(...a)
+  export const zoomImage = (...a: unknown[]) => (inner?.zoomImage as any)?.(...a)
+  export const rotateImage = (...a: unknown[]) => (inner?.rotateImage as any)?.(...a)
+  export const transformImage = (...a: unknown[]) => (inner?.transformImage as any)?.(...a)
+  export const transformImageEnd = (...a: unknown[]) => (inner?.transformImageEnd as any)?.(...a)
+  export const reconcileState = (...a: unknown[]) => (inner?.reconcileState as any)?.(...a)
+  export const hasInteractions = () => inner?.hasInteractions() ?? false
+  export const getInteractions = () => inner?.getInteractions()
+  export const getCoordinates = (...a: unknown[]) => (inner?.getCoordinates as any)?.(...a)
+  export const getVisibleArea = () => inner?.getVisibleArea()
+  export const getTransforms = () => inner?.getTransforms()
+  export const getStencilCoordinates = () => inner?.getStencilCoordinates()
+  export const getDefaultState = () => inner?.getDefaultState() ?? null
+  export const getCanvas = (opts?: import('advanced-cropper').DrawOptions) =>
+    inner?.getCanvas(opts) ?? null
+  export const getSettings = () => inner?.getSettings()
+  export const getState = () => inner?.getState() ?? null
+  export const getTransitions = () =>
+    inner?.getTransitions() ?? ({ active: false, duration: 0, timingFunction: 'ease' } as import('advanced-cropper').CropperTransitions)
+  export const getImage = () => inner?.getImage() ?? null
+  export const isLoading = () => inner?.isLoading() ?? false
+  export const isLoaded = () => inner?.isLoaded() ?? false
 </script>
 
 <AbstractCropper

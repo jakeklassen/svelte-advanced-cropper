@@ -90,4 +90,11 @@ export interface AbstractCropperProps {
 
   /** Extra parameters forwarded to the engine instance (postProcess, etc.). */
   parameters?: Partial<AbstractCropperInstanceParameters<AbstractCropperSettings>>
+
+  /**
+   * Pass-through props for the inner `CropperBackgroundWrapper` — escape
+   * hatch for gesture toggles like `scaleImage`, `moveImage`, `rotateImage`
+   * without needing to swap the wrapper component entirely.
+   */
+  backgroundWrapperProps?: Record<string, unknown>
 }

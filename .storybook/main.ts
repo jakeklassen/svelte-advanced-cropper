@@ -12,6 +12,7 @@ const config: StorybookConfig = {
     "@storybook/addon-a11y",
     "@storybook/addon-docs"
   ],
-  "framework": "@storybook/svelte-vite"
+  "framework": "@storybook/svelte-vite",
+  "staticDirs": ["../stories/assets"]
 };
 export default config;
