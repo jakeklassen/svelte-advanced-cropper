@@ -4,6 +4,8 @@ import { render } from 'vitest-browser-svelte'
 import AbstractCropper from '../src/components/AbstractCropper.svelte'
 import Cropper from '../src/components/croppers/Cropper.svelte'
 import CircleStencil from '../src/components/stencils/CircleStencil.svelte'
+import CropperPreview from '../src/components/helpers/CropperPreview.svelte'
+import PreviewProbe from './fixtures/PreviewProbe.svelte'
 
 // Engine styles — needed by the layout/gesture test below, where the
 // `advanced-cropper__background-wrapper` class must actually resolve to
@@ -277,6 +279,27 @@ test('dragging the background pans the visible area (gesture surface fills bound
     expect(moved).toBeGreaterThan(0.5)
   } finally {
     unmount(ref)
+    target.remove()
+  }
+})
+
+// ── #10: CropperPreview forwards *Props to its sub-components ────────────────
+test('CropperPreview forwards backgroundProps to the background component', () => {
+  const target = makeTarget()
+  // Override the background with a probe and forward a value through it; the
+  // probe renders that value into a data-attr we can assert on.
+  const component = mount(CropperPreview, {
+    target,
+    props: {
+      backgroundComponent: PreviewProbe,
+      backgroundProps: { probe: 'forwarded-ok' },
+    },
+  }) as any
+  flushSync()
+  try {
+    expect(target.querySelector('[data-probe="forwarded-ok"]')).toBeTruthy()
+  } finally {
+    unmount(component)
     target.remove()
   }
 })

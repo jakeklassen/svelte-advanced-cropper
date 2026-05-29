@@ -2,6 +2,7 @@
   import { defineMeta } from '@storybook/addon-svelte-csf'
   import CropperPreview from '../src/components/helpers/CropperPreview.svelte'
   import Cropper from '../src/components/croppers/Cropper.svelte'
+  import PreviewLabelWrapper from './PreviewLabelWrapper.svelte'
   import type { CropperRef } from '../src/components/croppers/Cropper.types.js'
 
   const { Story } = defineMeta({
@@ -33,6 +34,13 @@ Exposes \`refresh()\` and \`update(cropper)\` for imperative control.
   function onUpdate() {
     previewRef?.refresh()
   }
+
+  // Second story: a custom wrapper + forwarded props.
+  let cropperRef2 = $state<CropperRef | undefined>(undefined)
+  let previewRef2 = $state<CropperPreview | undefined>(undefined)
+  function onUpdate2() {
+    previewRef2?.refresh()
+  }
 </script>
 
 <Story name="Live preview tracking a Cropper">
@@ -58,6 +66,40 @@ Exposes \`refresh()\` and \`update(cropper)\` for imperative control.
         />
       </div>
       <p style="margin:0.5em 0 0;color:#666">Drag the cropper — preview updates live.</p>
+    </div>
+  </div>
+</Story>
+
+<Story name="Custom wrapper via component + props pass-through">
+  <div style="font-family:sans-serif;display:flex;gap:1.5em;align-items:flex-start">
+    <div>
+      <p style="margin:0 0 0.5em;color:#666">Live cropper</p>
+      <div style="width:400px;height:300px;background:#222">
+        <Cropper
+          bind:this={cropperRef2 as any}
+          src="https://picsum.photos/seed/preview-props/1200/800"
+          onUpdate={onUpdate2}
+          style="height:100%"
+        />
+      </div>
+    </div>
+    <div>
+      <p style="margin:0 0 0.5em;color:#666">Preview with a custom wrapper</p>
+      <!--
+        `wrapperComponent` swaps the wrapper; `wrapperProps` forwards arbitrary
+        props (here `accent` + `label`) straight through to it. Same pattern
+        applies to backgroundComponent/backgroundProps and
+        boundaryComponent/boundaryProps.
+      -->
+      <div style="width:160px;height:120px">
+        <CropperPreview
+          bind:this={previewRef2 as any}
+          cropper={cropperRef2 as any}
+          wrapperComponent={PreviewLabelWrapper}
+          wrapperProps={{ accent: '#2563eb', label: 'forwarded via wrapperProps' }}
+          style="height:100%"
+        />
+      </div>
     </div>
   </div>
 </Story>
