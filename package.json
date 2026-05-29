@@ -29,6 +29,7 @@
     "dev": "tsdown --watch",
     "play": "vite",
     "test": "vitest",
+    "test:ci": "vitest run tests/",
     "typecheck": "svelte-check --tsconfig ./tsconfig.json",
     "release": "bumpp",
     "prepublishOnly": "pnpm run build",

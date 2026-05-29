@@ -64,6 +64,7 @@
     onInteractionStart,
     onInteractionEnd,
     parameters = {},
+    backgroundWrapperProps = {},
     stencilComponent: StencilComponent = RectangleStencil as Component<any>,
     stencil: stencilSnippet,
     stencilProps = {},
@@ -106,12 +107,25 @@
       ...(stencilInstance ? { aspectRatio: stencilInstance.getAspectRatio?.() } : {}),
     }
 
+    // Merge the stencil-derived constraints (aspectRatio, etc.) INTO the
+    // settings first, then build the default-settings wrappers from that
+    // merged object. Order matters: createDefaultSettings produces an
+    // `aspectRatio` resolver from `params.aspectRatio`, so it must see the
+    // constrained value. The React port does exactly this in
+    // useCropperInstance (`{ ...extendedSettings, ...createDefaultSettings(extendedSettings) }`).
+    // Passing `userSettings` here instead would rebuild aspectRatio from the
+    // pre-constraint settings (undefined → free aspect), silently discarding
+    // the stencil's constraint — which is what broke aspect-ratio chips and
+    // let the CircleStencil resize into an oval.
     const constrained = stencilConstraints(userSettings, stencilOpts)
-
-    const merged = {
+    const extendedSettings = {
       ...userSettings,
       ...constrained,
-      ...createDefaultSettings(userSettings),
+    }
+
+    const merged = {
+      ...extendedSettings,
+      ...createDefaultSettings(extendedSettings),
     }
 
     return {
@@ -201,8 +215,15 @@
     }
   })
 
-  // Auto-reconcile when idle
+  // Auto-reconcile when idle. The React port uses `useLayoutEffect` with no
+  // dependency array so it runs after every render — meaning any change to
+  // settings / stencilProps / parameters triggers a reconcile that lets the
+  // engine pick up the new constraints (aspect ratio, imageRestriction, …).
+  // In Svelte we re-create that behavior by *reading* those props inside the
+  // effect so they become tracked deps. Without this, changing aspectRatio
+  // or imageRestriction at runtime is a no-op — the engine never re-evaluates.
   $effect(() => {
+    settings; stencilProps; parameters
     if (!autoReconcileState || autoReconcilePaused) return
     if (cropper.data?.state && !cropper.hasInteractions()) {
       cropper.reconcileState()
@@ -315,12 +336,28 @@
   setCropperContext(() => api)
 </script>
 
-<CropperWrapper cropper={api} class={className} {style}>
+<!-- 'advanced-cropper' class is load-bearing — the engine SCSS makes it
+     `display: flex; flex-direction: column; max-height: 100%; overflow: hidden`
+     which is what lets the boundary's `flex-grow: 1` fill the container.
+     Without this, a cropper given an explicit parent height (e.g. 520px)
+     overflows because the wrapper isn't a flex container. -->
+<CropperWrapper cropper={api} class={['advanced-cropper', className]} {style}>
   <StretchableBoundary
     bind:this={boundaryRef}
     class={['advanced-cropper__boundary', boundaryClassName]}
   >
-    <CropperBackgroundWrapper cropper={api} {disabled}>
+    <!-- 'advanced-cropper__background-wrapper' is load-bearing: the engine SCSS
+         makes it `position: absolute; inset: 0` so the gesture container fills
+         the whole boundary. Without it the TransformableImage div collapses to
+         the image's box, so drag-to-move only registers on the image pixels and
+         not the letterbox/dark regions — image panning appears dead. (Class is
+         applied AFTER the spread so it always wins; any caller class merges in.) -->
+    <CropperBackgroundWrapper
+      cropper={api}
+      {disabled}
+      {...backgroundWrapperProps}
+      class={['advanced-cropper__background-wrapper', (backgroundWrapperProps as Record<string, unknown>).class as import('svelte/elements').ClassValue]}
+    >
       {#if stateExists}
         <CropperBackgroundImage
           bind:this={backgroundImageRef}
