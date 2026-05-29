@@ -40,10 +40,16 @@
     style?: string
     /** Component override for the preview background. */
     backgroundComponent?: Component<any>
+    /** Extra props forwarded to the background component. */
+    backgroundProps?: Record<string, unknown>
     /** Component override for the boundary. */
     boundaryComponent?: Component<any>
+    /** Extra props forwarded to the boundary component. */
+    boundaryProps?: Record<string, unknown>
     /** Component override for the wrapper. */
     wrapperComponent?: Component<any>
+    /** Extra props forwarded to the wrapper component. */
+    wrapperProps?: Record<string, unknown>
     /** Optional snippet to render extra UI inside the preview content (e.g. labels). */
     children?: Snippet
   }
@@ -61,8 +67,11 @@
     boundaryClassName,
     style,
     backgroundComponent: BackgroundComponent = CropperPreviewBackground as Component<any>,
+    backgroundProps = {},
     boundaryComponent: BoundaryComponent = StretchableBoundary as Component<any>,
+    boundaryProps = {},
     wrapperComponent: WrapperComponent = CropperPreviewWrapper as Component<any>,
+    wrapperProps = {},
     children,
   }: Props = $props()
 
@@ -134,12 +143,16 @@
   })
 </script>
 
+<!-- `*Props` are spread first so the explicit attributes below (class, cropper,
+     style, …) always win — matching the React port's ordering. -->
 <WrapperComponent
+  {...wrapperProps}
   class={[className, 'advanced-cropper-preview']}
   cropper={instance}
   {style}
 >
   <BoundaryComponent
+    {...boundaryProps}
     bind:this={boundaryRef as any}
     stretchAlgorithm={stretchPreviewBoundary}
     class={['advanced-cropper-preview__boundary', boundaryClassName]}
@@ -150,6 +163,7 @@
     >
       {#if instance}
         <BackgroundComponent
+          {...backgroundProps}
           cropper={instance}
           {size}
           class={[

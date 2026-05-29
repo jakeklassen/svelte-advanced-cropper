@@ -4,6 +4,8 @@ import { render } from 'vitest-browser-svelte'
 import AbstractCropper from '../src/components/AbstractCropper.svelte'
 import Cropper from '../src/components/croppers/Cropper.svelte'
 import CircleStencil from '../src/components/stencils/CircleStencil.svelte'
+import CropperPreview from '../src/components/helpers/CropperPreview.svelte'
+import PreviewProbe from './fixtures/PreviewProbe.svelte'
 
 // Engine styles — needed by the layout/gesture test below, where the
 // `advanced-cropper__background-wrapper` class must actually resolve to
@@ -194,6 +196,47 @@ test('CircleStencil keeps a 1:1 ratio even when set to a non-square size', async
   }
 })
 
+// ── Coverage gap (#8): rotation is wired but was never verified ─────────────
+// rotateImage applies a *relative* angle that accumulates in
+// state.transforms.rotate, and getCanvas() then draws through the rotated
+// `prepareSource` path — exactly the geometry a port can silently break.
+test('rotateImage accumulates and getCanvas survives the rotated draw path', async () => {
+  const target = makeTarget()
+  const ref = mount(Cropper, { target, props: { src: SRC } }) as any
+  flushSync()
+  try {
+    await waitFor(() => {
+      flushSync()
+      return ref.getCanvas?.() ?? null
+    })
+
+    // Baseline: no rotation.
+    expect(ref.getState().transforms.rotate).toBe(0)
+
+    // Rotate +90 (transitions off for deterministic, synchronous state).
+    ref.rotateImage(90, { transitions: false })
+    flushSync()
+    expect(ref.getState().transforms.rotate).toBe(90)
+
+    // The rotated export path must still produce a real, non-empty canvas.
+    let canvas = ref.getCanvas()
+    expect(canvas).toBeInstanceOf(HTMLCanvasElement)
+    expect(canvas.width).toBeGreaterThan(0)
+    expect(canvas.height).toBeGreaterThan(0)
+
+    // Accumulates rather than replaces.
+    ref.rotateImage(90, { transitions: false })
+    flushSync()
+    expect(ref.getState().transforms.rotate).toBe(180)
+    canvas = ref.getCanvas()
+    expect(canvas).toBeInstanceOf(HTMLCanvasElement)
+    expect(canvas.width).toBeGreaterThan(0)
+  } finally {
+    unmount(ref)
+    target.remove()
+  }
+})
+
 // ── Bug #5: the gesture surface fills the boundary and pans the image ───────
 test('dragging the background pans the visible area (gesture surface fills boundary)', async () => {
   const target = makeTarget()
@@ -236,6 +279,27 @@ test('dragging the background pans the visible area (gesture surface fills bound
     expect(moved).toBeGreaterThan(0.5)
   } finally {
     unmount(ref)
+    target.remove()
+  }
+})
+
+// ── #10: CropperPreview forwards *Props to its sub-components ────────────────
+test('CropperPreview forwards backgroundProps to the background component', () => {
+  const target = makeTarget()
+  // Override the background with a probe and forward a value through it; the
+  // probe renders that value into a data-attr we can assert on.
+  const component = mount(CropperPreview, {
+    target,
+    props: {
+      backgroundComponent: PreviewProbe,
+      backgroundProps: { probe: 'forwarded-ok' },
+    },
+  }) as any
+  flushSync()
+  try {
+    expect(target.querySelector('[data-probe="forwarded-ok"]')).toBeTruthy()
+  } finally {
+    unmount(component)
     target.remove()
   }
 })
