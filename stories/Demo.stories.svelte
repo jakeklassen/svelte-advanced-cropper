@@ -157,6 +157,15 @@
     outputSize = null
   }
 
+  // Transforms — rotateImage takes a *relative* angle in degrees and
+  // accumulates into state.transforms.rotate; flipImage(h, v) mirrors.
+  function rotate(delta: number) {
+    cropperRef?.rotateImage(delta)
+  }
+  function flipHorizontal() {
+    cropperRef?.flipImage(true, false)
+  }
+
   // Refresh the live preview whenever the cropper says state changed.
   function onUpdate() {
     previewRef?.refresh()
@@ -285,6 +294,15 @@
           <input type="checkbox" bind:checked={scaleImage} />
           <span>Allow wheel/pinch zoom</span>
         </label>
+
+        <div class="demo__row">
+          <span>Transform image</span>
+          <div class="demo__chips">
+            <button class="demo__chip" onclick={() => rotate(-90)} title="Rotate left 90°">⟲ 90°</button>
+            <button class="demo__chip" onclick={() => rotate(90)} title="Rotate right 90°">⟳ 90°</button>
+            <button class="demo__chip" onclick={flipHorizontal} title="Flip horizontal">⇋ Flip</button>
+          </div>
+        </div>
 
         <div class="demo__row demo__actions">
           <button class="demo__btn demo__btn--primary" onclick={exportCanvas} disabled={exporting}>
