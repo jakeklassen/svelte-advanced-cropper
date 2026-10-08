@@ -1,5 +1,11 @@
 # svelte-advanced-cropper
 
+## 0.1.2
+
+### Patch Changes
+
+- [`4bb8d13`](https://github.com/jakeklassen/svelte-advanced-cropper/commit/4bb8d139d64dfc85d4e9bb6260171447ad280028) Thanks [@jakeklassen](https://github.com/jakeklassen)! - Report `onError` for a `blob:` URL that can no longer be read (revoked, or evicted from memory). With `checkOrientation` on, which is the default, such a load used to hang forever: neither `onReady` nor `onError` fired, because the core reads blob URLs with a request that has no error handler.
+
 ## 0.1.1
 
 ### Patch Changes
