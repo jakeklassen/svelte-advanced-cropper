@@ -1,6 +1,6 @@
 {
 	"name": "svelte-advanced-cropper",
-	"version": "0.1.2",
+	"version": "0.1.3",
 	"description": "Svelte 5 port of react-advanced-cropper: build croppers exactly suited to your design",
 	"keywords": [
 		"advanced-cropper",
