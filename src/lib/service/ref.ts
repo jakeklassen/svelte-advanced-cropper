@@ -55,8 +55,10 @@ export function forwardCropperRef<Settings extends AbstractCropperSettings>(
 			if (!ref) {
 				throw new Error(`Cannot call ${method}() before the cropper is mounted.`);
 			}
+
 			return (ref[method] as (...args: unknown[]) => unknown)(...args);
 		};
 	}
+
 	return result as unknown as AbstractCropperRef<Settings>;
 }

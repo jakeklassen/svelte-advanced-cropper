@@ -59,7 +59,9 @@
 		} else if (remainder < 45) {
 			quarter = (absolute - remainder) / 90;
 		}
+
 		lastQuarter = quarter;
+
 		return {
 			quarter,
 			adjustment: Math.sign(value) * (absolute - quarter * 90)
@@ -74,13 +76,19 @@
 
 	// The quarter buttons first undo the fine adjustment, then snap to the next quarter.
 	function rotateLeft() {
-		if (disabled) return;
+		if (disabled) {
+			return;
+		}
+
 		const { adjustment } = rotation;
 		onRotate?.(adjustment > 0 ? -adjustment : adjustment < 0 ? -90 - adjustment : -90);
 	}
 
 	function rotateRight() {
-		if (disabled) return;
+		if (disabled) {
+			return;
+		}
+
 		const { adjustment } = rotation;
 		onRotate?.(adjustment > 0 ? 90 - adjustment : adjustment < 0 ? -adjustment : 90);
 	}

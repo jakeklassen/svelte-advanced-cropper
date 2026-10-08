@@ -144,6 +144,7 @@
 			)
 			.map((point) => {
 				const name = point.name as CardinalDirection;
+
 				return {
 					name,
 					className: [
@@ -217,6 +218,7 @@
 						});
 					}
 				}
+
 				if (!lastReference) {
 					lastReference = currentReference;
 				}

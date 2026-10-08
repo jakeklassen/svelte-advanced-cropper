@@ -18,11 +18,15 @@
 	let { changed = false, disabled = false, onRotate, onFlip, onReset }: Props = $props();
 
 	function rotate(angle: number) {
-		if (!disabled) onRotate?.(angle);
+		if (!disabled) {
+			onRotate?.(angle);
+		}
 	}
 
 	function flip(horizontal: boolean, vertical: boolean) {
-		if (!disabled) onFlip?.(horizontal, vertical);
+		if (!disabled) {
+			onFlip?.(horizontal, vertical);
+		}
 	}
 </script>
 

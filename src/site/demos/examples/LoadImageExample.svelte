@@ -26,7 +26,10 @@
 			// can be wrong, so it is only the fallback.
 			const reader = new FileReader();
 			reader.addEventListener('load', () => {
-				if (id !== request) return;
+				if (id !== request) {
+					return;
+				}
+
 				image = {
 					// An object URL points at the file without copying it into memory as a string.
 					src: URL.createObjectURL(file),
@@ -73,9 +76,12 @@
 
 	$effect(() => {
 		const src = image?.src;
+
 		// Revoke the previous object URL when the image changes, so the browser can free the file.
 		return () => {
-			if (src) URL.revokeObjectURL(src);
+			if (src) {
+				URL.revokeObjectURL(src);
+			}
 		};
 	});
 </script>

@@ -20,25 +20,34 @@ const base = (process.env.BASE_PATH ?? '') as '' | `/${string}`;
 function highlightImports(): Plugin {
 	const suffix = '?highlight';
 	const prefix = '\0highlight:';
+
 	return {
 		name: 'highlight-imports',
 		enforce: 'pre',
 		async resolveId(source, importer) {
-			if (!source.endsWith(suffix)) return null;
+			if (!source.endsWith(suffix)) {
+				return null;
+			}
+
 			const resolved = await this.resolve(source.slice(0, -suffix.length), importer, {
 				skipSelf: true
 			});
+
 			// A virtual id, so that no other plugin (e.g. the Svelte compiler) handles it.
 			return resolved && `${prefix}${resolved.id}.js`;
 		},
 		async load(id) {
-			if (!id.startsWith(prefix)) return null;
+			if (!id.startsWith(prefix)) {
+				return null;
+			}
+
 			const file = id.slice(prefix.length, -'.js'.length);
 			this.addWatchFile(file);
 			const code = await readFile(file, 'utf8');
 			const extension = file.split('.').pop() ?? 'text';
 			const lang =
 				{ svelte: 'svelte', ts: 'ts', js: 'js', css: 'css', scss: 'scss' }[extension] ?? 'text';
+
 			return `export default ${JSON.stringify({ code, html: highlight(code, lang) })};`;
 		}
 	};

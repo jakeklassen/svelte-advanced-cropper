@@ -199,8 +199,12 @@
 			on(element, 'mousedown', onMouseDown, options),
 			on(element, 'wheel', onWheel, options)
 		];
+
 		return () => {
-			for (const cleanup of cleanups) cleanup();
+			for (const cleanup of cleanups) {
+				cleanup();
+			}
+
 			debouncedProcessEnd.clear();
 			container = undefined;
 		};

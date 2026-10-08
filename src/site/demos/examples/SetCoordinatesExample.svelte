@@ -18,7 +18,9 @@
 	// array is applied in turn, and each one respects the cropper's restrictions.
 	function resize(width = 1, height = 1) {
 		const initial = cropper?.getCoordinates();
-		if (!cropper || !initial) return;
+		if (!cropper || !initial) {
+			return;
+		}
 
 		cropper.setCoordinates([
 			({ coordinates }) =>

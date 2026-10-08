@@ -14,7 +14,9 @@
 	// Move the image by a quarter of the stencil size.
 	function move(direction: 'left' | 'right' | 'top' | 'bottom') {
 		const coordinates = cropper?.getCoordinates();
-		if (!cropper || !coordinates) return;
+		if (!cropper || !coordinates) {
+			return;
+		}
 
 		const { width, height } = coordinates;
 		if (direction === 'left') {

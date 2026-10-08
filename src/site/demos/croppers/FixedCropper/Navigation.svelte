@@ -11,11 +11,15 @@
 	let { zoom, onZoom }: Props = $props();
 
 	function zoomIn() {
-		if (isNumber(zoom)) onZoom?.(Math.min(1, zoom + 0.25), true);
+		if (isNumber(zoom)) {
+			onZoom?.(Math.min(1, zoom + 0.25), true);
+		}
 	}
 
 	function zoomOut() {
-		if (isNumber(zoom)) onZoom?.(Math.max(0, zoom - 0.25), true);
+		if (isNumber(zoom)) {
+			onZoom?.(Math.max(0, zoom - 0.25), true);
+		}
 	}
 </script>
 

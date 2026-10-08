@@ -57,12 +57,17 @@ export function useCropperImage(
 	// setting the same image again, produce one onLoad (for the latest image) or none.
 	$effect(() => {
 		const value = image;
-		if (!value) return;
+		if (!value) {
+			return;
+		}
+
 		untrack(() => {
 			loaded = true;
 			const id = request;
 			void tick().then(() => {
-				if (id === request && image === value) untrack(options).onLoad?.(value);
+				if (id === request && image === value) {
+					untrack(options).onLoad?.(value);
+				}
 			});
 		});
 	});
@@ -77,7 +82,10 @@ export function useCropperImage(
 		const { src } = options();
 		untrack(() => {
 			const next = src || null;
-			if (initialized && currentSrc === next) return;
+			if (initialized && currentSrc === next) {
+				return;
+			}
+
 			initialized = true;
 			currentSrc = next;
 			const id = ++request;
@@ -111,13 +119,19 @@ export function useCropperImage(
 
 				Promise.all(promises).then(
 					(responses) => {
-						if (!current()) return;
+						if (!current()) {
+							return;
+						}
+
 						onLoadingEnd?.();
 						loading = false;
 						applyImage((responses as [CropperImage])[0]);
 					},
 					() => {
-						if (!current()) return;
+						if (!current()) {
+							return;
+						}
+
 						onError?.();
 						onLoadingEnd?.();
 						loading = false;
@@ -128,7 +142,9 @@ export function useCropperImage(
 				loading = false;
 				if (unloadTime) {
 					void promiseTimeout(unloadTime).then(() => {
-						if (current()) image = null;
+						if (current()) {
+							image = null;
+						}
 					});
 				} else {
 					image = null;

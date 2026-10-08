@@ -28,6 +28,7 @@
 	// A square stencil that leaves room for the zoom slider below it.
 	const stencilSize = ({ boundary }: CropperState) => {
 		const size = Math.min(boundary.height - 80, boundary.width - 40);
+
 		return { width: size, height: size };
 	};
 

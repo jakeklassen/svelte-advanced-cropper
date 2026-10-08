@@ -33,6 +33,7 @@
 		if (file) {
 			onUpload?.(URL.createObjectURL(file));
 		}
+
 		// Clear the input, so that the same file can be uploaded again.
 		event.currentTarget.value = '';
 	}

@@ -50,13 +50,18 @@
 
 	function onUpload(url: string) {
 		onReset();
-		if (uploadedUrl) URL.revokeObjectURL(uploadedUrl);
+		if (uploadedUrl) {
+			URL.revokeObjectURL(uploadedUrl);
+		}
+
 		uploadedUrl = url;
 		src = url;
 	}
 
 	$effect(() => () => {
-		if (uploadedUrl) URL.revokeObjectURL(uploadedUrl);
+		if (uploadedUrl) {
+			URL.revokeObjectURL(uploadedUrl);
+		}
 	});
 
 	function onDownload() {

@@ -23,7 +23,9 @@
 	// Resize the box (clamped to the container), keep it centred, and tell the cropper
 	// its container changed. The cropper can't detect that on its own.
 	async function updateCoordinates(newWidth: number, newHeight: number) {
-		if (!container) return;
+		if (!container) {
+			return;
+		}
 
 		width = Math.min(Math.max(0, newWidth), container.clientWidth);
 		height = Math.min(Math.max(0, newHeight), container.clientHeight);
@@ -49,7 +51,9 @@
 	});
 
 	onMount(() => {
-		if (container) void updateCoordinates(container.clientWidth, container.clientHeight);
+		if (container) {
+			void updateCoordinates(container.clientWidth, container.clientHeight);
+		}
 	});
 </script>
 

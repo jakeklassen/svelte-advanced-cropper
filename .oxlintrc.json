@@ -1,6 +1,7 @@
 {
 	"$schema": "./node_modules/oxlint/configuration_schema.json",
 	"plugins": ["typescript", "unicorn", "oxc", "import", "vitest"],
+	"jsPlugins": ["@stylistic/eslint-plugin"],
 	"categories": {
 		"correctness": "error",
 		"suspicious": "warn"
@@ -13,6 +14,20 @@
 		"browser": true
 	},
 	"rules": {
+		"curly": ["error", "all"],
+		"@stylistic/padding-line-between-statements": [
+			"error",
+			{
+				"blankLine": "always",
+				"prev": "*",
+				"next": "return"
+			},
+			{
+				"blankLine": "always",
+				"prev": "block-like",
+				"next": "*"
+			}
+		],
 		"typescript/no-non-null-assertion": "error",
 		"import/no-unassigned-import": [
 			"warn",

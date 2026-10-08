@@ -14,6 +14,7 @@
 	// Start with a stencil covering 80% of the visible area, centred in it.
 	function defaultSize({ visibleArea, imageSize }: CropperState) {
 		const area = visibleArea ?? imageSize;
+
 		return {
 			width: area.width * 0.8,
 			height: area.height * 0.8

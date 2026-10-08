@@ -45,9 +45,12 @@
 		if (stencil) {
 			for (const key of Object.keys(stencil)) {
 				// Skip Svelte's dev-mode `$set`/`$on`/`$destroy` stubs.
-				if (!key.startsWith('$')) result[key] = stencil[key];
+				if (!key.startsWith('$')) {
+					result[key] = stencil[key];
+				}
 			}
 		}
+
 		return result;
 	}
 

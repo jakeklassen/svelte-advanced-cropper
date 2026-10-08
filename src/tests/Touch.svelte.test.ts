@@ -14,6 +14,7 @@ async function mountCropper(props: Record<string, unknown> = {}) {
 	});
 	const cropper = (): CropperRef => screen.component.getCropper();
 	await waitFor(() => onReady.mock.calls.length > 0);
+
 	return { cropper, container: screen.container };
 }
 
@@ -39,7 +40,10 @@ describe('touch', () => {
 		cropper().setCoordinates({ width: 150, height: 100 }, { transitions: false });
 		await nextFrame();
 		const area = container.querySelector('.advanced-cropper-rectangle-stencil__draggable-area');
-		if (!area) throw new Error('missing draggable area');
+		if (!area) {
+			throw new Error('missing draggable area');
+		}
+
 		const box = area.getBoundingClientRect();
 		const x = box.left + box.width / 2;
 		const y = box.top + box.height / 2;
@@ -62,7 +66,10 @@ describe('touch', () => {
 	it('zooms the image with a two-finger pinch', async () => {
 		const { cropper, container } = await mountCropper();
 		const wrapper = container.querySelector('.advanced-cropper__background-wrapper');
-		if (!wrapper) throw new Error('missing background wrapper');
+		if (!wrapper) {
+			throw new Error('missing background wrapper');
+		}
+
 		const box = wrapper.getBoundingClientRect();
 		const cx = box.left + box.width / 2;
 		const cy = box.top + box.height / 2;

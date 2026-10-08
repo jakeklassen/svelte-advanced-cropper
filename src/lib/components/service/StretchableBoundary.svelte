@@ -42,9 +42,11 @@
 		if (size?.width && size?.height && stretcher && boundary) {
 			stretchAlgorithm(boundary, stretcher, size);
 			const result = sizeAlgorithm(boundary, size);
+
 			return Promise.resolve(result.width && result.height ? result : null);
 		} else {
 			reset();
+
 			return Promise.resolve(null);
 		}
 	}

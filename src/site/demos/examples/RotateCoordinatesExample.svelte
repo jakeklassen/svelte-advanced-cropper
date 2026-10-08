@@ -19,6 +19,7 @@
 	// measured from its top-left corner.
 	const diagrams = examples.map((example) => {
 		const rotatedSize = rotateSize(example.image, example.rotate);
+
 		return {
 			...example,
 			coefficient: rotatedSize.height / example.image.height,

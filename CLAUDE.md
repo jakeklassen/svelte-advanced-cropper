@@ -60,5 +60,6 @@ Test gotcha: the core ignores `moveCoordinates` while a transition runs. Tests t
 - SvelteKit 3 removed `$lib`. Use the `#lib` / `#site/*` subpath imports (package.json `imports`). In the site, import `.ts` modules with their extension (`#site/paths.ts`).
 - Runes mode is forced for all project files.
 - No non-null assertions (`!`), enforced by `typescript/no-non-null-assertion`.
-- Formatting: tabs, single quotes, no trailing commas, width 100.
+- Formatting: tabs, single quotes, no trailing commas, width 100. oxfmt formats `.svelte` files too (`"svelte": true`). It does not format `.svx` pages, so keep code samples in them in the same style by hand.
+- Readability lint rules (`pnpm lint:fix` applies them): every `if`/`for`/`while` body is a braced block (`curly: all`, no one-line `if (x) return;`), and `@stylistic/padding-line-between-statements` requires a blank line before every `return` that follows another statement and after every block (`if {}`, loops, function declarations). The stylistic rules load through oxlint's `jsPlugins`.
 - CI: `.github/workflows/ci.yml` (format, lint, check, unit, strict build, e2e) and `pages.yml` (deploys `build/` to GitHub Pages with `BASE_PATH=/<repo>`).

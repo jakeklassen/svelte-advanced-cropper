@@ -76,10 +76,12 @@
 		if (!disabled && touches.length) {
 			onMoveEnd?.();
 		}
+
 		if (hovered) {
 			onLeave?.();
 			hovered = false;
 		}
+
 		touches = [];
 	};
 
@@ -178,6 +180,7 @@
 			if (e.preventDefault && e.cancelable) {
 				e.preventDefault();
 			}
+
 			e.stopPropagation();
 		}
 	};
@@ -200,8 +203,12 @@
 			on(element, 'touchstart', onTouchStart, options),
 			on(element, 'mousedown', onMouseDown, options)
 		];
+
 		return () => {
-			for (const cleanup of cleanups) cleanup();
+			for (const cleanup of cleanups) {
+				cleanup();
+			}
+
 			container = undefined;
 		};
 	}

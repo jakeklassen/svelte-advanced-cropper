@@ -5,6 +5,7 @@
 	// A 300px square stencil, shrunk to fit when the cropper is narrower than that.
 	function stencilSize({ boundary }: CropperState) {
 		const size = Math.min(300, boundary.width - 40, boundary.height - 40);
+
 		return { width: size, height: size };
 	}
 </script>

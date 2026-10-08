@@ -24,7 +24,10 @@
 	}
 
 	function onpointerdown(event: PointerEvent) {
-		if (event.button !== 0) return;
+		if (event.button !== 0) {
+			return;
+		}
+
 		focus = true;
 		line?.setPointerCapture(event.pointerId);
 		update(event.clientX);

@@ -108,6 +108,7 @@
 	const instance: CropperPreviewDesiredCropperRef = $derived.by(() => {
 		void revision;
 		const source = cropper || internalInstance || propsInstance;
+
 		return {
 			getState: () => source.getState(),
 			getTransitions: () => source.getTransitions(),

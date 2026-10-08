@@ -31,7 +31,9 @@ describe('CropperPreview', () => {
 		const source = await render(PreviewHarness, { src: createTestImage(), onReady });
 		await waitFor(() => onReady.mock.calls.length > 0);
 		const real = source.component.getCropper();
-		if (!real) throw new Error('no cropper');
+		if (!real) {
+			throw new Error('no cropper');
+		}
 
 		// A plain object whose getters Svelte cannot track.
 		let ready = false;

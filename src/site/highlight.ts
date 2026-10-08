@@ -12,6 +12,7 @@ function escapeSvelte(html: string) {
 /** Highlights a code string to HTML. */
 export function highlight(code: string, lang = 'svelte'): string {
 	const language = shiki.getLoadedLanguages().includes(lang) ? lang : 'text';
+
 	return shiki.codeToHtml(code.trimEnd(), { lang: language, theme: 'github-light' });
 }
 

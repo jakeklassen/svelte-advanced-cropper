@@ -13,7 +13,9 @@
 
 	setTabsContext({
 		register(label) {
-			if (!labels.includes(label)) labels.push(label);
+			if (!labels.includes(label)) {
+				labels.push(label);
+			}
 		},
 		get active() {
 			return selected ?? labels[0];

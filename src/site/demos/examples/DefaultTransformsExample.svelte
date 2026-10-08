@@ -25,14 +25,18 @@
 		if (file) {
 			src = URL.createObjectURL(file);
 		}
+
 		event.currentTarget.value = '';
 	}
 
 	// Revoke the previous object URL so the browser can free the old file.
 	$effect(() => {
 		const current = src;
+
 		return () => {
-			if (current.startsWith('blob:')) URL.revokeObjectURL(current);
+			if (current.startsWith('blob:')) {
+				URL.revokeObjectURL(current);
+			}
 		};
 	});
 </script>

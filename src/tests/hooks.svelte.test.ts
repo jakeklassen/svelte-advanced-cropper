@@ -80,7 +80,10 @@ describe('useCropperImage setImage', () => {
 		const hook = () => screen.component.getHook();
 		await waitFor(() => log.some((entry) => entry.startsWith('load')));
 		const image = hook().getImage();
-		if (!image) throw new Error('no image');
+		if (!image) {
+			throw new Error('no image');
+		}
+
 		log.length = 0;
 
 		hook().setImage({ ...image, width: 1 });

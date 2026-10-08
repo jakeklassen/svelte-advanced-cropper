@@ -19,7 +19,10 @@
 	// Collect headings after each navigation (the content element stays the same).
 	$effect(() => {
 		void page.url.pathname;
-		if (!content) return;
+		if (!content) {
+			return;
+		}
+
 		headings = Array.from(content.querySelectorAll<HTMLElement>('h2[id], h3[id]')).map(
 			(element) => ({
 				id: element.id,

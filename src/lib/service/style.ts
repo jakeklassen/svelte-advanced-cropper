@@ -5,15 +5,22 @@
 export function styleToString(
 	style: Record<string, string | number | null | undefined> | null | undefined
 ): string {
-	if (!style) return '';
+	if (!style) {
+		return '';
+	}
+
 	let result = '';
 	for (const [key, value] of Object.entries(style)) {
-		if (value === undefined || value === null || value === '') continue;
+		if (value === undefined || value === null || value === '') {
+			continue;
+		}
+
 		const property = key.startsWith('--')
 			? key
 			: key.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
 		result += `${property}: ${String(value)};`;
 	}
+
 	return result;
 }
 

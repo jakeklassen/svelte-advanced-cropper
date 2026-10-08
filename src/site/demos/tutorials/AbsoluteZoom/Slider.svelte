@@ -21,16 +21,23 @@
 	// Mouse and touch dragging: start on the slider, follow the pointer anywhere on the page.
 	function draggable(line: HTMLDivElement) {
 		const drag = (e: MouseEvent | TouchEvent) => {
-			if (!focus) return;
+			if (!focus) {
+				return;
+			}
+
 			const position = 'touches' in e ? e.touches[0].clientX : e.clientX;
 			const { left, width } = line.getBoundingClientRect();
 			onChange?.(clamp((position - left) / width));
-			if (e.cancelable) e.preventDefault();
+			if (e.cancelable) {
+				e.preventDefault();
+			}
 		};
+
 		const start = (e: MouseEvent | TouchEvent) => {
 			focus = true;
 			drag(e);
 		};
+
 		const options = { passive: false };
 		const cleanups = [
 			on(line, 'mousedown', start, options),
@@ -40,6 +47,7 @@
 			on(window, 'mouseup', stop),
 			on(window, 'touchend', stop)
 		];
+
 		return () => cleanups.forEach((cleanup) => cleanup());
 	}
 

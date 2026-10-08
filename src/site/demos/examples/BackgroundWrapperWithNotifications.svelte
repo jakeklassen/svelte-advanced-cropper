@@ -31,6 +31,7 @@
 		clearTimeout(hideTimer);
 		hideTimer = setTimeout(() => (notificationVisible = false), 1500);
 	}
+
 	$effect(() => () => clearTimeout(hideTimer));
 
 	function showNotification(type: 'touch' | 'wheel') {
@@ -57,6 +58,7 @@
 				notificationVisible = false;
 			}
 		}
+
 		// Events the image handles must not also scroll the page.
 		if (!event.defaultPrevented) {
 			nativeEvent.preventDefault();

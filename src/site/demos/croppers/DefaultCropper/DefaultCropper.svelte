@@ -23,6 +23,7 @@
 	function getDefaultState() {
 		const currentState = cropper?.getState();
 		const defaultState = cropper?.getDefaultState();
+
 		return currentState && defaultState
 			? {
 					...defaultState,

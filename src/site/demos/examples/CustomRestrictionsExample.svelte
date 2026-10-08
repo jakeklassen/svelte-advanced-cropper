@@ -45,7 +45,9 @@
 		if (file) {
 			const reader = new FileReader();
 			reader.addEventListener('load', () => {
-				if (typeof reader.result === 'string') src = reader.result;
+				if (typeof reader.result === 'string') {
+					src = reader.result;
+				}
 			});
 			reader.readAsDataURL(file);
 		}

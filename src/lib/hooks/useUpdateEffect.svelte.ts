@@ -4,6 +4,7 @@ function sameDeps(a: unknown, b: unknown): boolean {
 	if (Array.isArray(a) && Array.isArray(b)) {
 		return a.length === b.length && a.every((value, index) => Object.is(value, b[index]));
 	}
+
 	return Object.is(a, b);
 }
 
@@ -26,7 +27,10 @@ export function useUpdateEffect(effect: () => void | (() => void), deps: () => u
 
 	$effect(() => {
 		const current = deps();
-		if (sameDeps(previous, current)) return;
+		if (sameDeps(previous, current)) {
+			return;
+		}
+
 		previous = current;
 		untrack(() => {
 			cleanup?.();

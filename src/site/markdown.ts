@@ -11,11 +11,16 @@ interface HastNode {
 
 function walk(node: HastNode, visit: (node: HastNode) => void) {
 	visit(node);
-	for (const child of node.children ?? []) walk(child, visit);
+	for (const child of node.children ?? []) {
+		walk(child, visit);
+	}
 }
 
 function textOf(node: HastNode): string {
-	if (node.type === 'text') return node.value ?? '';
+	if (node.type === 'text') {
+		return node.value ?? '';
+	}
+
 	return (node.children ?? []).map(textOf).join('');
 }
 
@@ -30,9 +35,15 @@ export function slugify(text: string): string {
 /** Prefixes root-relative links and images with the deploy base path (e.g. GitHub Pages). */
 export function rehypeBasePath(base: string) {
 	return () => (tree: HastNode) => {
-		if (!base) return;
+		if (!base) {
+			return;
+		}
+
 		walk(tree, (node) => {
-			if (node.type !== 'element' || !node.properties) return;
+			if (node.type !== 'element' || !node.properties) {
+				return;
+			}
+
 			for (const attribute of ['href', 'src']) {
 				const value = node.properties[attribute];
 				if (typeof value === 'string' && value.startsWith('/') && !value.startsWith('//')) {
@@ -53,7 +64,10 @@ export function rehypeHeadingIds() {
 		walk(tree, (node) => {
 			if (node.type === 'element' && ['h2', 'h3', 'h4'].includes(node.tagName ?? '')) {
 				node.properties ??= {};
-				if (node.properties.id) return;
+				if (node.properties.id) {
+					return;
+				}
+
 				const slug = slugify(textOf(node));
 				const count = seen.get(slug) ?? 0;
 				seen.set(slug, count + 1);

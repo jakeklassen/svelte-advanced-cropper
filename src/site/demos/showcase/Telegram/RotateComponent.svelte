@@ -44,7 +44,10 @@
 
 	function range(start: number, end: number) {
 		const result: number[] = [];
-		for (let current = start; current < end; current += step) result.push(current);
+		for (let current = start; current < end; current += step) {
+			result.push(current);
+		}
+
 		return result;
 	}
 
@@ -89,7 +92,10 @@
 	});
 
 	function onMove(directions: MoveDirections) {
-		if (!width) return;
+		if (!width) {
+			return;
+		}
+
 		const shift = -(directions.left / density) * step;
 		if (value + shift > to) {
 			onChange?.(to - value);

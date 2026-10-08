@@ -115,7 +115,10 @@
 	}
 
 	function setImage(value: string) {
-		if (uploaded) URL.revokeObjectURL(uploaded);
+		if (uploaded) {
+			URL.revokeObjectURL(uploaded);
+		}
+
 		uploaded = undefined;
 		src = value;
 	}
@@ -126,6 +129,7 @@
 			setImage(URL.createObjectURL(file));
 			uploaded = src;
 		}
+
 		// Allow picking the same file again.
 		event.currentTarget.value = '';
 	}
@@ -142,8 +146,11 @@
 
 	onMount(() => {
 		readHash();
+
 		return () => {
-			if (uploaded) URL.revokeObjectURL(uploaded);
+			if (uploaded) {
+				URL.revokeObjectURL(uploaded);
+			}
 		};
 	});
 </script>

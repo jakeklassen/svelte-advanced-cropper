@@ -27,7 +27,9 @@ export function drawAdjustedImage(
 	adjustments: Adjustments
 ) {
 	const ctx = canvas.getContext('2d');
-	if (!ctx) return;
+	if (!ctx) {
+		return;
+	}
 
 	canvas.width = image.naturalWidth;
 	canvas.height = image.naturalHeight;
@@ -62,7 +64,9 @@ function applyAdjustments(
 	height: number,
 	{ brightness, contrast, saturation, hue }: Adjustments
 ) {
-	if (!width || !height) return;
+	if (!width || !height) {
+		return;
+	}
 
 	const scale = 1 + brightness;
 	const c = 1 + contrast;
@@ -93,5 +97,6 @@ function applyAdjustments(
 		data[i + 1] = rgb[1];
 		data[i + 2] = rgb[2];
 	}
+
 	ctx.putImageData(imageData, 0, 0);
 }

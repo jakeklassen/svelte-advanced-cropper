@@ -10,6 +10,7 @@ async function mountCropper(props: Record<string, unknown> = {}) {
 	const screen = await render(Harness, { src: createTestImage(), onReady, ...props });
 	const cropper = (): CropperRef => screen.component.getCropper();
 	await waitFor(() => onReady.mock.calls.length > 0);
+
 	return { screen, cropper, onReady, container: screen.container };
 }
 
@@ -60,6 +61,7 @@ describe('Cropper', () => {
 		]) {
 			expect.soft(container.querySelector(selector)).not.toBeNull();
 		}
+
 		expect(container.querySelectorAll('.advanced-cropper-simple-handler')).toHaveLength(8);
 		expect(container.querySelectorAll('.advanced-cropper-simple-line')).toHaveLength(4);
 	});
@@ -78,7 +80,10 @@ describe('Cropper', () => {
 	it('fires onReady again when an image is set imperatively', async () => {
 		const { cropper, onReady } = await mountCropper();
 		const image = cropper().getImage();
-		if (!image) throw new Error('no image');
+		if (!image) {
+			throw new Error('no image');
+		}
+
 		cropper().setImage({ ...image });
 		await waitFor(() => onReady.mock.calls.length === 2);
 		expect(onReady).toHaveBeenCalledTimes(2);
@@ -100,6 +105,7 @@ describe('Cropper', () => {
 		await screen.rerender({ stencilProps: { aspectRatio: 16 / 9 } });
 		await waitFor(() => {
 			const c = cropper().getCoordinates();
+
 			return c && Math.abs(c.width / c.height - 16 / 9) < 0.02;
 		});
 	});
@@ -153,7 +159,10 @@ describe('Cropper', () => {
 			'.advanced-cropper-draggable-element.advanced-cropper-rectangle-stencil__draggable-area'
 		);
 		expect(area).not.toBeNull();
-		if (!area) return;
+		if (!area) {
+			return;
+		}
+
 		// No transition: the core ignores moves while one is running.
 		cropper().setCoordinates(
 			{ width: (before?.width ?? 0) / 2, height: (before?.height ?? 0) / 2 },
@@ -179,7 +188,10 @@ describe('Cropper', () => {
 		cropper().zoomImage(2, { transitions: false });
 		const before = cropper().getVisibleArea();
 		const wrapper = container.querySelector('.advanced-cropper__background-wrapper');
-		if (!wrapper) throw new Error('missing background wrapper');
+		if (!wrapper) {
+			throw new Error('missing background wrapper');
+		}
+
 		const box = wrapper.getBoundingClientRect();
 		const x = box.left + 5;
 		const y = box.top + 5;
@@ -194,7 +206,10 @@ describe('Cropper', () => {
 		const { cropper, container } = await mountCropper({ transitions: false });
 		const before = cropper().getVisibleArea()?.width ?? 0;
 		const wrapper = container.querySelector('.advanced-cropper__background-wrapper');
-		if (!wrapper) throw new Error('missing background wrapper');
+		if (!wrapper) {
+			throw new Error('missing background wrapper');
+		}
+
 		const box = wrapper.getBoundingClientRect();
 		wrapper.dispatchEvent(
 			new WheelEvent('wheel', {
@@ -217,7 +232,10 @@ describe('Cropper', () => {
 		const handler = container.querySelector(
 			'.advanced-cropper-bounding-box__handler-wrapper--west .advanced-cropper-draggable-element'
 		);
-		if (!handler) throw new Error('missing west handler');
+		if (!handler) {
+			throw new Error('missing west handler');
+		}
+
 		const box = handler.getBoundingClientRect();
 		const x = box.left + box.width / 2;
 		const y = box.top + box.height / 2;
@@ -232,7 +250,10 @@ describe('Cropper', () => {
 		expect(container.querySelector('.advanced-cropper-rectangle-stencil--disabled')).not.toBeNull();
 		const before = cropper().getCoordinates();
 		const area = container.querySelector('.advanced-cropper-rectangle-stencil__draggable-area');
-		if (!area) throw new Error('missing draggable area');
+		if (!area) {
+			throw new Error('missing draggable area');
+		}
+
 		const box = area.getBoundingClientRect();
 		dispatchMouse(area, 'mousedown', box.left + 10, box.top + 10);
 		dispatchMouse(window, 'mousemove', box.left + 40, box.top + 40);
@@ -246,7 +267,10 @@ describe('transitions', () => {
 		const onTransitionsEnd = vi.fn<(cropper: CropperRef) => void>();
 		const { cropper, container } = await mountCropper({ onTransitionsEnd });
 		const stencil = container.querySelector<HTMLElement>('.advanced-cropper-stencil-wrapper');
-		if (!stencil) throw new Error('missing stencil');
+		if (!stencil) {
+			throw new Error('missing stencil');
+		}
+
 		cropper().setCoordinates({ width: 100, height: 100, left: 0, top: 0 }, { transitions: true });
 		expect(cropper().getTransitions().active).toBe(true);
 		await waitFor(() => onTransitionsEnd.mock.calls.length > 0, { timeout: 2000 });
@@ -265,7 +289,10 @@ describe('FixedCropper', () => {
 			transitions: false
 		});
 		const stencil = container.querySelector<HTMLElement>('.advanced-cropper-stencil-wrapper');
-		if (!stencil) throw new Error('missing stencil');
+		if (!stencil) {
+			throw new Error('missing stencil');
+		}
+
 		expect(stencil.style.width).toBe('200px');
 		expect(stencil.style.height).toBe('100px');
 		const coordinates = cropper().getCoordinates();

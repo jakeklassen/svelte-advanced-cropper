@@ -7,6 +7,7 @@ export function useWindowResize(callback: (...args: unknown[]) => void): void {
 	$effect(() => {
 		window.addEventListener('resize', listener);
 		window.addEventListener('orientationchange', listener);
+
 		return () => {
 			window.removeEventListener('resize', listener);
 			window.removeEventListener('orientationchange', listener);
