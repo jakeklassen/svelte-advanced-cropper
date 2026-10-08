@@ -1,0 +1,38 @@
+# DraggableArea
+
+`DraggableArea` is another name for [`DraggableElement`](/docs/components/DraggableElement): the package exports the same component under both names, as react-advanced-cropper does. The stencils use the `DraggableArea` name for the part you grab to move the stencil, and the default `activationDistance` of 30 pixels suits that role on touch screens.
+
+```
+StencilWrapper
+└─ BoundingBox
+   └─ DraggableArea            (moves the stencil)
+      └─ StencilOverlay
+         └─ preview
+```
+
+## Usage
+
+In a [custom stencil](/docs/tutorials/custom-stencil), forward its moves to the cropper:
+
+```svelte
+<script lang="ts">
+	import { DraggableArea, type CropperRef } from 'svelte-advanced-cropper';
+
+	let { cropper, movable = true }: { cropper: CropperRef; movable?: boolean } = $props();
+</script>
+
+<DraggableArea
+	disabled={!movable}
+	onMove={(directions) => cropper.moveCoordinates(directions)}
+	onMoveEnd={() => cropper.moveCoordinatesEnd()}
+	class="my-stencil__draggable-area"
+>
+	<div class="my-stencil__preview"></div>
+</DraggableArea>
+```
+
+`moveCoordinates` expects on-screen pixels, which is exactly what `onMove` reports.
+
+## Props
+
+The props, the event handling and the CSS class (`advanced-cropper-draggable-element`) are those of [`DraggableElement`](/docs/components/DraggableElement#props). The built-in stencils add `advanced-cropper-rectangle-stencil__draggable-area` (or the `circle-stencil` equivalent) and their `draggableAreaClassName` prop.

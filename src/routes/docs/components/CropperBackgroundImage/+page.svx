@@ -1,0 +1,75 @@
+<script>
+	import Admonition from '#site/components/Admonition.svelte';
+</script>
+
+# CropperBackgroundImage
+
+`CropperBackgroundImage` is the default `backgroundComponent` of the croppers: the `<img>` behind the stencil. It reads the image, the state and the transitions from the cropper and positions, scales and rotates the image with CSS so that it matches the visible area. It renders nothing until an image has loaded.
+
+It sits inside the [`CropperBackgroundWrapper`](/docs/components/CropperBackgroundWrapper), next to the stencil:
+
+```
+CropperBackgroundWrapper
+├─ CropperBackgroundImage   (once the cropper has a state)
+└─ stencil
+```
+
+The element also serves as the source for `getCanvas()`. The cropper binds it through the `ref` prop and draws the cropped area from it.
+
+## Usage
+
+You don't render it yourself. To style it, use the cropper's `backgroundClassName`. To pass extra props to it, use `backgroundProps`:
+
+```svelte
+<Cropper {src} backgroundClassName="my-background" backgroundProps={{ style: 'opacity: 0.8' }} />
+```
+
+## Props
+
+| Prop          | Type                                                 | Default | Description                                                                                                                   |
+| ------------- | ---------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `cropper`     | `{ getState, getTransitions, getImage }`             | —       | **Required.** Passed by the cropper.                                                                                          |
+| `crossOrigin` | `'anonymous'` \| `'use-credentials'` \| `boolean`     | `true`  | The `crossorigin` attribute. `true` means `'anonymous'`, `false` leaves it off. The cropper passes its own `crossOrigin` prop. |
+| `ref`         | `HTMLImageElement` \| `null`                          | `null`  | **Bindable.** The rendered `<img>`, or `null` while there is none.                                                            |
+| `class`       | `ClassValue`                                         | —       | Classes for the `<img>`. The cropper passes `advanced-cropper__background` plus your `backgroundClassName`.                   |
+| `style`       | `string`                                             | —       | Inline style, applied after the computed transform styles, so it wins over them.                                              |
+
+The `<img>` is recreated whenever the image source changes, so `ref` always points at an element showing the current image. A `mousedown` on it is prevented, to stop the browser from dragging the image.
+
+## Custom background components
+
+To replace the background, for example with a `<canvas>` that applies filters as in the [Image Editor tutorial](/docs/tutorials/image-editor), pass your own component as `backgroundComponent`. It receives `cropper`, `crossOrigin`, `class` and everything in `backgroundProps`.
+
+<Admonition type="warning" title="Declare a bindable ref">
+
+A custom background component must declare a bindable `ref` prop and bind it to the element it draws. `getCanvas()` reads that element, and returns `null` without it.
+
+</Admonition>
+
+```svelte
+<script lang="ts">
+	import { getBackgroundStyle, styleToString } from 'svelte-advanced-cropper';
+
+	let { cropper, class: className, ref = $bindable(null) } = $props();
+
+	const image = $derived(cropper.getImage());
+	const state = $derived(cropper.getState());
+	const transitions = $derived(cropper.getTransitions());
+</script>
+
+{#if image && state}
+	<canvas
+		bind:this={ref}
+		class={['advanced-cropper-background-image', className]}
+		style={styleToString(getBackgroundStyle(image, state, transitions))}
+	></canvas>
+{/if}
+```
+
+## CSS classes
+
+| Element | Classes                                                                           |
+| ------- | --------------------------------------------------------------------------------- |
+| Image   | `advanced-cropper-background-image`, plus `advanced-cropper__background` from the cropper |
+
+The base styles position the image absolutely, disable pointer events and selection, and override any `max-width` your site sets on images.

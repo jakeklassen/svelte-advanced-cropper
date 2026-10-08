@@ -1,0 +1,276 @@
+<script>
+	import Admonition from '#site/components/Admonition.svelte';
+</script>
+
+# RectangleStencil
+
+`RectangleStencil` is the default stencil of [`Cropper`](/docs/components/Cropper) and [`FixedCropper`](/docs/components/FixedCropper): a rectangle with eight resize handlers and four draggable edges, which the user can move by dragging its inside. It supports a fixed or a ranged aspect ratio and an optional grid.
+
+The cropper renders the stencil itself, so you don't place it in your markup. Configure it through the cropper's `stencilProps`:
+
+```svelte
+<script lang="ts">
+	import { Cropper } from 'svelte-advanced-cropper';
+</script>
+
+<Cropper {src} stencilProps={{ aspectRatio: 16 / 9, grid: true }} />
+```
+
+Inside, the stencil is built from [`StencilWrapper`](/docs/components/StencilWrapper), [`BoundingBox`](/docs/components/BoundingBox) (resizing), [`DraggableArea`](/docs/components/DraggableArea) (moving), [`StencilOverlay`](/docs/components/StencilOverlay) (the darkened surroundings) and `StencilGrid`. It renders nothing until the cropper has a state.
+
+## Props
+
+### `aspectRatio`
+
+**Type:** `number | { minimum?: number; maximum?: number }`
+
+The aspect ratio (width divided by height) of the crop area. A number fixes it, and an object allows a range. By default the ratio is free. See [Set the aspect ratio](/docs/guides/recipes#set-the-aspect-ratio).
+
+### `minAspectRatio`
+
+**Type:** `number`
+
+The lowest allowed aspect ratio. It is ignored when `aspectRatio` is set.
+
+### `maxAspectRatio`
+
+**Type:** `number`
+
+The highest allowed aspect ratio. It is ignored when `aspectRatio` is set.
+
+### `movable`
+
+**Type:** `boolean` · **Default:** `true`
+
+Whether the user can move the stencil by dragging it.
+
+### `resizable`
+
+**Type:** `boolean` · **Default:** `true`
+
+Whether the user can resize the stencil with its handlers and lines.
+
+### `grid`
+
+**Type:** `boolean` · **Default:** `false`
+
+Draws a 3×3 grid inside the stencil while the user interacts with the cropper. It becomes a finer 9×9 grid while the image is being rotated. See [Add the grid](/docs/guides/recipes#add-the-grid).
+
+### `coordinates`
+
+**Type:** `Coordinates | ((state: CropperState | null) => Coordinates)`
+
+Where to draw the stencil, in boundary pixels. By default it follows the crop area (`getStencilCoordinates(state)`). Override it only when your cropper shows the stencil somewhere else than the crop area.
+
+### `class`
+
+**Type:** `ClassValue`
+
+Classes for the stencil's root element. This is upstream's `className`.
+
+### `movingClassName`
+
+**Type:** `ClassValue`
+
+Classes added to the root element while the user moves the stencil.
+
+### `resizingClassName`
+
+**Type:** `ClassValue`
+
+Classes added to the root element while the user resizes the stencil.
+
+### `previewClassName`
+
+**Type:** `ClassValue`
+
+Classes for the preview element, the transparent area inside the stencil. Use it to draw a border or a mask shape. See [Customize Appearance](/docs/guides/customize-appearance#preview).
+
+### `overlayClassName`
+
+**Type:** `ClassValue`
+
+Classes for the overlay that darkens everything outside the stencil. Its `color` sets the shade. See [Customize Appearance](/docs/guides/customize-appearance#overlay).
+
+### `gridClassName`
+
+**Type:** `ClassValue`
+
+Classes for the grid, when `grid` is on.
+
+### `boundingBoxClassName`
+
+**Type:** `ClassValue`
+
+Classes for the bounding box that holds the handlers and lines. You will rarely need it.
+
+### `draggableAreaClassName`
+
+**Type:** `ClassValue`
+
+Classes for the draggable area that moves the stencil.
+
+### `handlerComponent`
+
+**Type:** `Component` · **Default:** `SimpleHandler`
+
+The component drawn for each handler. It receives the props listed in [`SimpleHandler`](/docs/components/SimpleHandler#props).
+
+### `handlers`
+
+**Type:** `Partial<Record<OrdinalDirection, boolean>>` · **Default:** all eight `true`
+
+```ts
+interface Handlers {
+	eastNorth?: boolean;
+	north?: boolean;
+	westNorth?: boolean;
+	west?: boolean;
+	westSouth?: boolean;
+	south?: boolean;
+	eastSouth?: boolean;
+	east?: boolean;
+}
+```
+
+Which handlers to show. Only the keys set to `true` are drawn, so this shows the corner handlers alone:
+
+```ts
+const handlers = { eastNorth: true, westNorth: true, westSouth: true, eastSouth: true };
+```
+
+Pass `{}` to hide every handler. Through `stencilProps`, `false` and `true` also work, and hide or show them all.
+
+### `handlerClassNames`
+
+**Type:** `HandlerClassNames`
+
+```ts
+interface HandlerClassNames {
+	default?: ClassValue;
+	hover?: ClassValue;
+	disabled?: ClassValue;
+	eastNorth?: ClassValue;
+	north?: ClassValue;
+	westNorth?: ClassValue;
+	west?: ClassValue;
+	westSouth?: ClassValue;
+	south?: ClassValue;
+	eastSouth?: ClassValue;
+	east?: ClassValue;
+}
+```
+
+Classes for the handler elements. `default` goes on every handler, each direction key on that handler only, and `hover` on a handler while the pointer is over it. `disabled` is accepted but not applied, as in react-advanced-cropper. See [Customize the classnames](/docs/guides/customize-appearance#customize-the-classnames).
+
+### `handlerWrapperClassNames`
+
+**Type:** `HandlerClassNames`
+
+Classes for the wrappers around the handlers (the larger, invisible hit areas). `default` and the direction keys are applied. `hover` and `disabled` are accepted but not applied.
+
+### `lineComponent`
+
+**Type:** `Component` · **Default:** `SimpleLine`
+
+The component drawn for each edge. It receives the props listed in [`SimpleLine`](/docs/components/SimpleLine#props).
+
+### `lines`
+
+**Type:** `Partial<Record<CardinalDirection, boolean>>` · **Default:** all four `true`
+
+```ts
+interface Lines {
+	north?: boolean;
+	west?: boolean;
+	south?: boolean;
+	east?: boolean;
+}
+```
+
+Which edges are drawn and can be dragged to resize the stencil. For example, `{ north: true, south: true }` keeps only the top and bottom edges. As with `handlers`, a boolean through `stencilProps` toggles them all.
+
+### `lineClassNames`
+
+**Type:** `LineClassNames`
+
+```ts
+interface LineClassNames {
+	default?: ClassValue;
+	hover?: ClassValue;
+	disabled?: ClassValue;
+	north?: ClassValue;
+	west?: ClassValue;
+	south?: ClassValue;
+	east?: ClassValue;
+}
+```
+
+Classes for the line elements: `default` on every line, a direction key on that line, `hover` while the pointer is over it, and `disabled` while resizing is off.
+
+### `lineWrapperClassNames`
+
+**Type:** `LineClassNames`
+
+Classes for the wrappers around the lines (their hit areas). `default`, `disabled` and the direction keys are applied. `hover` is accepted but not applied.
+
+## Service props
+
+<Admonition type="danger" title="Remember">
+
+Don't pass these yourself. The cropper passes them to the stencil, and its values win over `stencilProps`.
+
+</Admonition>
+
+### `cropper`
+
+**Type:** `CropperRef`
+
+The [cropper](/docs/components/Cropper#methods) that owns the stencil. The stencil reads the state, transitions and interactions from it, and calls `moveCoordinates` and `resizeCoordinates` when the user drags.
+
+### `image`
+
+**Type:** `CropperImage | null`
+
+```ts
+interface CropperImage {
+	src: string;
+	revoke: boolean;
+	transforms: Transforms;
+	arrayBuffer: ArrayBuffer | null;
+	width: number;
+	height: number;
+}
+```
+
+The current image. `RectangleStencil` doesn't use it, but custom stencils may.
+
+### `disabled`
+
+**Type:** `boolean`
+
+The cropper's `disabled` prop. A disabled stencil can't be moved or resized.
+
+## Exports
+
+The cropper binds the stencil with `bind:this` and passes its exports to `stencilConstraints`. That is how the stencil's aspect ratio reaches the cropper settings.
+
+| Export        | Type                                     | Description                                                                                 |
+| ------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `aspectRatio` | `{ minimum: number; maximum: number }`   | `aspectRatio`, or `minAspectRatio` and `maxAspectRatio`, normalized into a range. Read-only. |
+
+React exposes the same value through the stencil's ref (`useImperativeHandle`). A [custom stencil](/docs/tutorials/custom-stencil) can export its own options the same way.
+
+## CSS classes
+
+| Element          | Classes                                                                                                                                                |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Root             | `advanced-cropper-rectangle-stencil`, plus `advanced-cropper-stencil-wrapper` and `advanced-cropper-artificial-transition` from `StencilWrapper`       |
+| Root modifiers   | `--movable` and `--resizable` (when allowed), `--moving` and `--resizing` (during the interaction), `--disabled`                                        |
+| Bounding box     | `advanced-cropper-rectangle-stencil__bounding-box`                                                                                                     |
+| Draggable area   | `advanced-cropper-rectangle-stencil__draggable-area`                                                                                                   |
+| Overlay          | `advanced-cropper-rectangle-stencil__overlay`                                                                                                          |
+| Grid             | `advanced-cropper-rectangle-stencil__grid`                                                                                                             |
+| Preview          | `advanced-cropper-rectangle-stencil__preview`                                                                                                          |
+
+The modifiers are written in full, for example `advanced-cropper-rectangle-stencil--moving`. Only `--movable` has a base style (the move cursor); the others are hooks for themes and your own CSS.

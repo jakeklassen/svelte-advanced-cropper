@@ -1,0 +1,76 @@
+<script>
+	import Admonition from '#site/components/Admonition.svelte';
+</script>
+
+# StretchableBoundary
+
+`StretchableBoundary` is the default `boundaryComponent` of the croppers and of [`CropperPreview`](/docs/components/CropperPreview). The boundary is the area the image is shown in. This component makes that area take the image's proportions, as far as the space available allows, then measures it and reports the size to the cropper, which builds its state on it.
+
+It works with an invisible "stretcher" element: the stretch algorithm sizes the stretcher to the image's aspect ratio, which stretches the boundary around it, and the size algorithm then reads the boundary's final size.
+
+```
+CropperWrapper
+└─ StretchableBoundary            (div.advanced-cropper-boundary)
+   ├─ div.advanced-cropper-boundary__stretcher
+   └─ div.advanced-cropper-boundary__content
+      ├─ CropperBackgroundWrapper
+      └─ CropperCanvas
+```
+
+## Usage
+
+The cropper renders it and calls its exports itself: on reset, on refresh and on every window resize. To change how the boundary is sized, pass algorithms through the cropper's `boundaryProps`:
+
+```svelte
+<script lang="ts">
+	import { Cropper, type BoundaryStretchAlgorithm } from 'svelte-advanced-cropper';
+
+	// Always use the whole container, whatever the image's proportions.
+	// This needs a cropper with a fixed height, set here by the `cropper` class.
+	const fillContainer: BoundaryStretchAlgorithm = (boundary, stretcher) => {
+		stretcher.style.width = `${boundary.clientWidth}px`;
+		stretcher.style.height = `${boundary.clientHeight}px`;
+	};
+</script>
+
+<Cropper {src} class="cropper" boundaryProps={{ stretchAlgorithm: fillContainer }} />
+```
+
+## Props
+
+| Prop                 | Type                                                                            | Default                  | Description                                                                                       |
+| -------------------- | ------------------------------------------------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------- |
+| `stretchAlgorithm`   | <code>(boundary: HTMLElement, stretcher: HTMLElement, size: Size) =&gt; void</code> | `stretchCropperBoundary` | Sizes the stretcher (and with it the boundary) for an image of the given size. `CropperPreview` uses `stretchPreviewBoundary`. |
+| `sizeAlgorithm`      | <code>(boundary: HTMLElement, size: Size) =&gt; Boundary</code>                  | `fillBoundary`           | Measures the stretched boundary and returns its size, which the cropper uses as `state.boundary`. |
+| `class`              | `ClassValue`                                                                    | —                        | Classes for the boundary. The cropper passes `advanced-cropper__boundary` plus `boundaryClassName`. |
+| `style`              | `string`                                                                        | —                        | Inline style for the boundary.                                                                    |
+| `stretcherClassName` | `ClassValue`                                                                    | —                        | Classes for the stretcher.                                                                        |
+| `contentClassName`   | `ClassValue`                                                                    | —                        | Classes for the content element, which holds the children and covers the boundary.                |
+| `children`           | `Snippet`                                                                       | —                        | The background wrapper and the canvas.                                                            |
+
+`stretchCropperBoundary`, `stretchPreviewBoundary` and `fillBoundary` are exported from the core, along with the `BoundaryStretchAlgorithm` and `BoundarySizeAlgorithm` types.
+
+## Exports
+
+| Export      | Signature                                                     | Description                                                                                                                                       |
+| ----------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `stretchTo` | <code>(size: Size &#124; null) =&gt; Promise&lt;Size &#124; null&gt;</code> | Runs both algorithms for an image of `size` and resolves with the boundary size, or with `null` when the size is missing or the boundary measures 0×0. |
+| `reset`     | `() => void`                                                  | Removes the stretcher's inline size, so the boundary goes back to its natural size.                                                               |
+
+The `StretchableBoundaryMethods` type describes these exports.
+
+<Admonition type="warning" title="Custom boundary components">
+
+A component passed as `boundaryComponent` must export `stretchTo` and `reset` with these signatures, because the cropper binds it with `bind:this` and calls them. It receives `class`, a `children` snippet and everything in `boundaryProps`.
+
+</Admonition>
+
+## CSS classes
+
+| Element   | Classes                                                                                  |
+| --------- | ---------------------------------------------------------------------------------------- |
+| Boundary  | `advanced-cropper-boundary`, plus `advanced-cropper__boundary` from the cropper or `advanced-cropper-preview__boundary` from the preview |
+| Stretcher | `advanced-cropper-boundary__stretcher`                                                   |
+| Content   | `advanced-cropper-boundary__content`                                                     |
+
+The boundary is `position: relative` and blocks text selection. The content fills it absolutely, and the stretcher is limited to the boundary's size and ignores the pointer.

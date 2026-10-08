@@ -1,0 +1,100 @@
+<script>
+	import Example from '#site/components/Example.svelte';
+	import Admonition from '#site/components/Admonition.svelte';
+	import CropperPreviewDemo from '#site/demos/components/CropperPreviewDemo.svelte';
+	import source from '#site/demos/components/CropperPreviewDemo.svelte?highlight';
+</script>
+
+# CropperPreview
+
+`CropperPreview` shows the cropped area of an image at whatever size you give it, live, without drawing to a canvas. It is a standalone component: put it anywhere on the page and point it at a cropper. The preview keeps the crop's aspect ratio, so it fits the crop inside its own box and centers it.
+
+<Example {source} title="CropperPreviewDemo">
+	<CropperPreviewDemo />
+</Example>
+
+## Usage
+
+There are three ways to tell the preview what to show. When more than one is given, the first in this list wins.
+
+1. **The `cropper` prop.** Pass the value of `bind:this` on a `Cropper` or `FixedCropper`. The preview reads the cropper's reactive state, so it follows every change by itself.
+
+   ```svelte
+   <script lang="ts">
+   	import { Cropper, CropperPreview, type CropperRef } from 'svelte-advanced-cropper';
+
+   	let cropper: CropperRef | undefined = $state();
+   </script>
+
+   <Cropper bind:this={cropper} {src} />
+   <CropperPreview {cropper} class="preview" />
+   ```
+
+2. **The `update()` export.** Bind the preview and hand it a cropper from a callback, for example `onUpdate={(cropper) => preview?.update(cropper)}`. This mirrors the React recipe, and helps when the preview and the cropper live in different components.
+
+3. **Static props.** Pass `state`, `image` and `transitions` yourself, for example values you saved earlier. `loaded` and `loading` control the fade-in.
+
+Give the preview a size with CSS. It fills its box, and its default background is transparent.
+
+<Admonition type="info" title="Differs from React">
+
+In React, `cropper` takes a ref object (`cropper={cropperRef}`) and the preview only re-renders when its parent does, which is why the React docs drive it with `update()` from `onUpdate`. In Svelte, `cropper` takes the bound instance itself, and the preview updates on its own.
+
+</Admonition>
+
+## Props
+
+| Prop                  | Type                                       | Default                    | Description                                                                                          |
+| --------------------- | ------------------------------------------ | -------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `cropper`             | `CropperPreviewDesiredCropperRef` \| `null` | —                          | The cropper to mirror: the `bind:this` value of a cropper, or any object with the same getters.      |
+| `state`               | `CropperState` \| `null`                    | `null`                     | Static mode: the state to show.                                                                       |
+| `image`               | `CropperImage` \| `null`                    | `null`                     | Static mode: the image to show.                                                                       |
+| `transitions`         | `CropperTransitions` \| `null`              | `null`                     | Static mode: transitions to animate with.                                                             |
+| `loaded`              | `boolean`                                  | `true`                     | Static mode: whether the image counts as loaded. The preview fades in when it is.                     |
+| `loading`             | `boolean`                                  | `false`                    | Static mode: whether an image is loading.                                                             |
+| `class`               | `ClassValue`                               | —                          | Classes for the root element. Upstream's `className`.                                                 |
+| `style`               | `string`                                   | —                          | Inline style for the root element.                                                                    |
+| `contentClassName`    | `ClassValue`                               | —                          | Classes for the content box, the element sized to the crop's aspect ratio.                            |
+| `backgroundComponent` | `Component`                                | `CropperPreviewBackground` | Draws the image. It receives `cropper`, `size` (the content size) and `class`.                       |
+| `backgroundProps`     | `Record<string, any>`                      | —                          | Extra props for `backgroundComponent`, spread first.                                                  |
+| `backgroundClassName` | `ClassValue`                               | —                          | Classes for the image, next to `advanced-cropper-preview__image`.                                     |
+| `boundaryComponent`   | `Component`                                | `StretchableBoundary`      | Measures the available space. It must export `stretchTo()` like [`StretchableBoundary`](/docs/components/StretchableBoundary). |
+| `boundaryProps`       | `Record<string, any>`                      | —                          | Extra props for `boundaryComponent`. They can override its `stretchAlgorithm`.                       |
+| `boundaryClassName`   | `ClassValue`                               | —                          | Classes for the boundary, next to `advanced-cropper-preview__boundary`.                               |
+| `wrapperComponent`    | `Component`                                | `CropperPreviewWrapper`    | The root component. It receives `cropper`, `class`, `style` and a `children` snippet.                 |
+| `wrapperProps`        | `Record<string, any>`                      | —                          | Extra props for `wrapperComponent`, spread first.                                                     |
+
+`CropperPreviewDesiredCropperRef` is the part of the cropper the preview reads:
+
+```ts
+interface CropperPreviewDesiredCropperRef {
+	getState: () => CropperState | null;
+	getImage: () => CropperImage | null;
+	getTransitions: () => CropperTransitions | null;
+	isLoading: () => boolean;
+	isLoaded: () => boolean;
+}
+```
+
+## Exports
+
+Bind the preview with `bind:this` to call these. The bound value has the `CropperPreviewRef` type.
+
+| Export    | Signature                                                      | Description                                                                                                                 |
+| --------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `update`  | <code>(cropper?: CropperPreviewDesiredCropperRef &#124; null) =&gt; void</code>  | Shows the given cropper (or stops showing it, when called without one) and refreshes. The `cropper` prop still wins over it. |
+| `refresh` | `() => void`                                                   | Measures the available space again. It runs by itself when the window resizes and when the crop's size changes.             |
+
+Call `refresh()` when the preview's container changes size while the window doesn't.
+
+## CSS classes
+
+| Element      | Classes                                                                                                                              |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Root         | `advanced-cropper-preview`, `cropper-preview-wrapper` (without the `advanced-` prefix, as upstream)                                  |
+| Fade         | `cropper-preview-wrapper__fade`, `advanced-cropper-fade`, and `advanced-cropper-fade--visible` once loaded                          |
+| Boundary     | `advanced-cropper-boundary`, `advanced-cropper-preview__boundary`                                                                    |
+| Content      | `advanced-cropper-preview__content`                                                                                                  |
+| Image        | `advanced-cropper-background-image`, `advanced-cropper-preview__image`, and `advanced-cropper-preview__image--visible` with an image |
+
+The package also exports the two default parts, `CropperPreviewWrapper` and `CropperPreviewBackground`, as starting points for your own. See [Preview the result](/docs/guides/recipes#preview-the-result) for more examples.

@@ -1,0 +1,104 @@
+# BoundingBox
+
+`BoundingBox` wraps the content of a stencil and adds the resize controls around it: a [line](/docs/components/SimpleLine) along each edge and a [handler](/docs/components/SimpleHandler) at each corner and edge. It turns drags on those controls into resize requests through `onResize`. Both built-in stencils use it, and it is the building block for resizing in a [custom stencil](/docs/tutorials/custom-stencil).
+
+It sits inside the stencil's [`StencilWrapper`](/docs/components/StencilWrapper), around the [`DraggableArea`](/docs/components/DraggableArea) that moves the stencil:
+
+```
+StencilWrapper
+└─ BoundingBox
+   ├─ children (DraggableArea → StencilOverlay → preview)
+   ├─ lines: lineComponent × 4
+   └─ handlers: handlerComponent × 8
+```
+
+## Usage
+
+A minimal custom stencil that can be moved and resized:
+
+```svelte
+<script lang="ts">
+	import {
+		BoundingBox,
+		DraggableArea,
+		StencilWrapper,
+		getStencilCoordinates,
+		type CropperRef
+	} from 'svelte-advanced-cropper';
+
+	let { cropper }: { cropper: CropperRef } = $props();
+
+	const state = $derived(cropper.getState());
+	const box = $derived(getStencilCoordinates(state));
+</script>
+
+{#if state}
+	<StencilWrapper {...box} transitions={cropper.getTransitions()}>
+		<BoundingBox
+			reference={state.coordinates}
+			onResize={(anchor, directions, options) =>
+				cropper.resizeCoordinates(anchor, directions, options)}
+			onResizeEnd={() => cropper.resizeCoordinatesEnd()}
+		>
+			<DraggableArea
+				onMove={(directions) => cropper.moveCoordinates(directions)}
+				onMoveEnd={() => cropper.moveCoordinatesEnd()}
+			>
+				<div class="my-stencil"></div>
+			</DraggableArea>
+		</BoundingBox>
+	</StencilWrapper>
+{/if}
+```
+
+Pass `reference={state.coordinates}`. The box keeps the coordinates from the start of each drag and resizes relative to them, which keeps the resize stable while the stencil changes under the pointer.
+
+## Props
+
+| Prop                       | Type                                                          | Default         | Description                                                                                                  |
+| -------------------------- | ------------------------------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------ |
+| `onResize`                 | <code>(anchor: ResizeAnchor, directions: MoveDirections, options: ResizeOptions) =&gt; void</code> | —               | Called on every drag step of a line or handler. Pass the arguments on to `cropper.resizeCoordinates()`.      |
+| `onResizeEnd`              | `() => void`                                                  | —               | Called when the drag ends. Pass it on to `cropper.resizeCoordinatesEnd()`.                                   |
+| `reference`                | `Coordinates` \| `null`                                        | `null`          | The current crop coordinates. They are passed to `onResize` as `options.reference`, frozen for each drag.    |
+| `disabled`                 | `boolean`                                                     | `false`         | Disables the lines and handlers, and stops `onResize` calls.                                                 |
+| `handlerComponent`         | `Component`                                                   | `SimpleHandler` | Draws each handler. See the [handler props](/docs/components/SimpleHandler#props).                           |
+| `handlers`                 | `boolean` \| `Partial<Record<OrdinalDirection, boolean>>`     | all eight       | Which handlers to draw. `true` or `false` toggles them all.                                                  |
+| `handlerClassNames`        | `HandlerClassNames`                                           | `{}`            | Classes for the handlers: `default`, `hover` and one key per direction. `disabled` is not applied.           |
+| `handlerWrapperClassNames` | `HandlerClassNames`                                           | `{}`            | Classes for the handler wrappers: `default` and one key per direction. `hover` and `disabled` are not applied. |
+| `lineComponent`            | `Component`                                                   | `SimpleLine`    | Draws each line. See the [line props](/docs/components/SimpleLine#props).                                    |
+| `lines`                    | `boolean` \| `Partial<Record<CardinalDirection, boolean>>`    | all four        | Which lines to draw. `true` or `false` toggles them all.                                                     |
+| `lineClassNames`           | `LineClassNames`                                              | `{}`            | Classes for the lines: `default`, `hover`, `disabled` (while disabled) and one key per direction.            |
+| `lineWrapperClassNames`    | `LineClassNames`                                              | `{}`            | Classes for the line wrappers: `default`, `disabled` and one key per direction. `hover` is not applied.      |
+| `class`                    | `ClassValue`                                                  | —               | Classes for the root element. Upstream's `className`.                                                        |
+| `style`                    | `string`                                                      | —               | Inline style for the root element.                                                                           |
+| `children`                 | `Snippet`                                                     | —               | The stencil content, rendered before the lines and handlers.                                                 |
+
+The `HandlerClassNames` and `LineClassNames` types are exported, and are described on the [`RectangleStencil` page](/docs/components/RectangleStencil#handlerclassnames).
+
+## How a drag becomes a resize
+
+For each drag step, `onResize` receives:
+
+- `anchor`: the control being dragged, such as `'east'` or `'westNorth'`.
+- `directions`: the step's `{ left, top }` offset in pixels.
+- `options.reference`: the coordinates when the drag started.
+- `options.preserveAspectRatio`: `true` while the Shift key is held.
+- `options.respectDirection`: `'width'` for the east and west controls and `'height'` for north and south, telling the resize algorithm which dimension the user is changing. It is unset for corners.
+- `options.compensate`: always `true`.
+
+The controls are created in this order: `eastSouth`, `eastNorth`, `east`, `westSouth`, `westNorth`, `west`, `south`, `north` for handlers, and `east`, `west`, `south`, `north` for lines.
+
+## Custom handlers and lines
+
+`handlerComponent` and `lineComponent` take your own components. They receive the props in `HandlerComponentProps` and `LineComponentProps`, both exported from the package. At a minimum, a handler or line renders a [`DraggableElement`](/docs/components/DraggableElement) that forwards `onMove` and `onMoveEnd`. This package also exports the `HandlerWrapper` and `LineWrapper` hit areas that the default components use, so you can reuse their positioning and cursors. [`SimpleHandler`](/docs/components/SimpleHandler#usage) has an example.
+
+## CSS classes
+
+| Element         | Classes                                                                                             |
+| --------------- | --------------------------------------------------------------------------------------------------- |
+| Root            | `advanced-cropper-bounding-box`                                                                     |
+| Handler slot    | `advanced-cropper-bounding-box__handler-wrapper`, `advanced-cropper-bounding-box__handler-wrapper--{direction}` |
+| Handler         | `advanced-cropper-bounding-box__handler`, `advanced-cropper-bounding-box__handler--{direction}` (passed as `wrapperClassName`) |
+| Line            | `advanced-cropper-bounding-box__line`, `advanced-cropper-bounding-box__line--{direction}` (passed as `wrapperClassName`) |
+
+In class names the directions are written in kebab case, such as `east-north`. The lines and the handlers each sit in a plain `<div>` without a class.

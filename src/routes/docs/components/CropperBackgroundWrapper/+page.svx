@@ -1,0 +1,69 @@
+# CropperBackgroundWrapper
+
+`CropperBackgroundWrapper` is the default `backgroundWrapperComponent` of the croppers. It wraps the background image and the stencil in a [`TransformableImage`](/docs/components/TransformableImage), which turns mouse drags, the wheel and touch gestures into image transforms, and forwards those to the cropper.
+
+```
+StretchableBoundary
+└─ CropperBackgroundWrapper → TransformableImage
+   ├─ CropperBackgroundImage
+   └─ stencil
+```
+
+Gestures on the stencil itself don't reach it: the stencil's draggable parts stop those events, so dragging the stencil never pans the image.
+
+## Usage
+
+The cropper renders it for you. Configure it through the cropper's `backgroundWrapperProps`:
+
+```svelte
+<!-- Allow two-finger rotation, and turn off zooming with the wheel -->
+<Cropper
+	{src}
+	backgroundWrapperProps={{
+		rotateImage: true,
+		scaleImage: { touch: true, wheel: false }
+	}}
+/>
+```
+
+```svelte
+<!-- Make the image impossible to move or zoom -->
+<Cropper {src} backgroundWrapperProps={{ moveImage: false, scaleImage: false }} />
+```
+
+## Props
+
+| Prop          | Type                                                           | Default     | Description                                                                                                                                  |
+| ------------- | -------------------------------------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `cropper`     | `{ transformImage, transformImageEnd, getTransitions }`        | —           | **Required.** Passed by the cropper.                                                                                                         |
+| `moveImage`   | `boolean` \| `{ touch?: boolean; mouse?: boolean }`            | `true`      | Moving the image by dragging it. `true` turns on both touch and mouse.                                                                       |
+| `scaleImage`  | `boolean` \| `ScaleImageOptions`                                | `true`      | Zooming the image with a pinch (`touch`) or the wheel (`wheel`). `true` means `{ touch: true, wheel: { ratio: 0.1 } }`.                     |
+| `rotateImage` | `boolean` \| `{ touch?: boolean }`                              | `false`     | Rotating the image with a two-finger gesture.                                                                                                |
+| `timeout`     | `number`                                                       | `500`       | How long after the last wheel event, in milliseconds, the wheel gesture counts as finished. Read once, when the component mounts.             |
+| `disabled`    | `boolean`                                                      | —           | Ignores every gesture and lets the browser handle the events (so the page can scroll). Passed by the cropper.                                 |
+| `class`       | `ClassValue`                                                   | —           | Classes for the root element. The cropper passes `advanced-cropper__background-wrapper` plus `backgroundWrapperClassName`.                 |
+| `style`       | `string`                                                       | —           | Inline style for the root element.                                                                                                           |
+| `children`    | `Snippet`                                                      | —           | The background and the stencil.                                                                                                              |
+
+```ts
+interface ScaleImageOptions {
+	touch?: boolean;
+	// The ratio is the zoom step of one wheel notch.
+	wheel?: boolean | { ratio?: number };
+	adjustStencil?: boolean;
+}
+```
+
+`adjustStencil` is part of the type for compatibility but is not read here. Use the cropper's `transformImage` setting instead.
+
+While a transition runs, gestures are ignored, so they can't fight the animation.
+
+The option objects are normalized by the exported [`useMoveImageOptions`](/docs/hooks/useMoveImageOptions), [`useScaleImageOptions`](/docs/hooks/useScaleImageOptions) and [`useRotateImageOptions`](/docs/hooks/useRotateImageOptions), which you can reuse in a custom wrapper.
+
+## Custom background wrappers
+
+Pass your own component as `backgroundWrapperComponent` to change how gestures behave, for example to require a modifier key for the wheel. It receives `cropper`, `class`, `disabled`, a `children` snippet and everything in `backgroundWrapperProps`. It must render `children` and apply `class` to its root element. Building it on [`TransformableImage`](/docs/components/TransformableImage) with an `onEvent` handler is the simplest route.
+
+## CSS classes
+
+The component adds no classes of its own. Its root element carries the `class` it receives, which with the default cropper is `advanced-cropper__background-wrapper` (absolutely positioned to fill the boundary).

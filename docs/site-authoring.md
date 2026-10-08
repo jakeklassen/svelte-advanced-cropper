@@ -58,7 +58,8 @@ Markdown inside a component needs blank lines around it.
 - `Admonition type`: `note | tip | info | warning | danger`.
 - `Tabs` / `TabItem label="…"`.
 - **Gotchas:**
-  - Outside code spans and fences, `{` starts a Svelte expression and `<Foo>` is markup. Write `&#123;` or wrap the text in backticks.
+  - Outside code spans and fences, `{` starts a Svelte expression and `<Foo>` is markup. Wrap such text in backticks. `&#123;` does **not** work: mdsvex decodes it back to `{`.
+  - In tables, `\|` inside a code span keeps the backslash. Write union types as separate code spans joined by `\|`, or as raw `<code>` with `&#124;`.
   - Inline code and fences are safe.
   - Tables are GitHub-flavoured markdown.
   - Headings `##` / `###` get ids automatically (repeats get `-1`, `-2` suffixes) and feed the "On this page" list.

@@ -1,0 +1,112 @@
+<script>
+	import Admonition from '#site/components/Admonition.svelte';
+</script>
+
+# TransformableImage
+
+`TransformableImage` is the gesture layer behind image moving, zooming and rotating. It renders a `<div>`, listens for mouse drags, the wheel and one- or two-finger touch gestures on it, and turns each step into an `ImageTransform` (a move, a scale and a rotation) that it passes to `onTransform`. [`CropperBackgroundWrapper`](/docs/components/CropperBackgroundWrapper) is a thin adapter around it that forwards those transforms to the cropper.
+
+```
+CropperBackgroundWrapper
+└─ TransformableImage            (div.advanced-cropper__background-wrapper)
+   ├─ CropperBackgroundImage
+   └─ stencil
+```
+
+Drags that start on the stencil never reach it: the stencil's [draggable parts](/docs/components/DraggableElement) stop those events first.
+
+## Usage
+
+Use it to build a custom `backgroundWrapperComponent`. The `onEvent` prop lets you inspect every native event before it is handled, and cancel the transform. This wrapper, for example, only zooms with the wheel while Ctrl (or ⌘) is held, and leaves plain wheel events to the page so it can scroll:
+
+```svelte
+<!-- CtrlWheelWrapper.svelte -->
+<script lang="ts">
+	import type { Snippet } from 'svelte';
+	import type { ClassValue } from 'svelte/elements';
+	import {
+		TransformableImage,
+		isWheelEvent,
+		type CropperRef,
+		type TransformableImageEvent
+	} from 'svelte-advanced-cropper';
+
+	interface Props {
+		cropper: CropperRef;
+		class?: ClassValue;
+		style?: string;
+		disabled?: boolean;
+		children?: Snippet;
+	}
+
+	let { cropper, class: className, style, disabled, children }: Props = $props();
+
+	function onEvent(event: TransformableImageEvent, nativeEvent: Event) {
+		if (isWheelEvent(nativeEvent) && !(nativeEvent.ctrlKey || nativeEvent.metaKey)) {
+			// Skip the transform, and don't call preventDefault on the native event.
+			event.preventDefault();
+		} else {
+			nativeEvent.preventDefault();
+			nativeEvent.stopPropagation();
+		}
+	}
+</script>
+
+<TransformableImage
+	class={className}
+	{style}
+	{onEvent}
+	onTransform={cropper.transformImage}
+	onTransformEnd={cropper.transformImageEnd}
+	disabled={disabled || cropper.getTransitions().active}
+>
+	{@render children?.()}
+</TransformableImage>
+```
+
+```svelte
+<Cropper {src} backgroundWrapperComponent={CtrlWheelWrapper} />
+```
+
+## Props
+
+| Prop             | Type                                                                                | Default | Description                                                                                                                              |
+| ---------------- | ----------------------------------------------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `onTransform`    | <code>(transform: ImageTransform) =&gt; void</code>                                 | —       | Called for each gesture step with the transform to apply.                                                                                |
+| `onTransformEnd` | `() => void`                                                                        | —       | Called once when a gesture ends: on mouse up, when the last finger lifts, or `timeout` milliseconds after the last wheel event.          |
+| `onEvent`        | <code>(event: TransformableImageEvent, nativeEvent: Event) =&gt; unknown</code>     | —       | Called with every native event the component handles, before it acts on it. See below.                                                  |
+| `mouseMove`      | `boolean`                                                                           | `true`  | Move the image by dragging it with the mouse.                                                                                            |
+| `touchMove`      | `boolean`                                                                           | `true`  | Move the image with one finger.                                                                                                          |
+| `touchScale`     | `boolean`                                                                           | `true`  | Zoom with a two-finger pinch.                                                                                                            |
+| `touchRotate`    | `boolean`                                                                           | `false` | Rotate with two fingers.                                                                                                                 |
+| `wheelScale`     | `boolean` \| `{ ratio: number }`                                                     | `true`  | Zoom with the wheel. `ratio` is the zoom step per wheel event, and `true` means `0.1`.                                                   |
+| `timeout`        | `number`                                                                            | `500`   | How long after the last wheel event the wheel gesture ends. Read once, when the component mounts.                                        |
+| `disabled`       | `boolean`                                                                           | —       | Stops producing transforms. Events are still handled (and prevented, unless `preventDefault` is off).                                     |
+| `preventDefault` | `boolean`                                                                           | `true`  | Call `preventDefault()` and `stopPropagation()` on handled events, so the page doesn't scroll or zoom. Ignored when `onEvent` is set.      |
+| `class`          | `ClassValue`                                                                        | —       | Classes for the element. Upstream's `className`.                                                                                         |
+| `style`          | `string`                                                                            | —       | Inline style for the element.                                                                                                            |
+| `children`       | `Snippet`                                                                           | —       | The content: the background and the stencil.                                                                                             |
+
+## `TransformableImageEvent`
+
+`onEvent` receives an instance of this exported class for each native event:
+
+| Member             | Type         | Description                                                                         |
+| ------------------ | ------------ | ----------------------------------------------------------------------------------- |
+| `active`           | `boolean`    | `true` when a gesture is already in progress.                                       |
+| `defaultPrevented` | `boolean`    | `true` after `preventDefault()` was called.                                         |
+| `preventDefault()` | `() => void` | Cancels the transform for this event. It doesn't touch the native event.            |
+
+<Admonition type="warning" title="onEvent replaces the default handling">
+
+When `onEvent` is set, the component no longer prevents the native events itself. Call `nativeEvent.preventDefault()` and `nativeEvent.stopPropagation()` in your handler for the events you keep, as the example above does, or the page will scroll and zoom along with the image.
+
+</Admonition>
+
+## Event handling
+
+The component listens with native, non-passive listeners: `mousedown`, `touchstart` and `wheel` on its element, and `mousemove`, `mouseup`, `touchmove` and `touchend` on `window`. Non-passive listeners are what allow it to prevent page scrolling during touch gestures, which Svelte's `on*` attributes can't do for touch events. Only touches that start inside the element take part in a gesture.
+
+## CSS classes
+
+The component has no class of its own. Its element carries the `class` it receives: with the default cropper that is `advanced-cropper__background-wrapper`.

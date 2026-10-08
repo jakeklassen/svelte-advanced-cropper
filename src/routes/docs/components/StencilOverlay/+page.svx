@@ -1,0 +1,51 @@
+# StencilOverlay
+
+`StencilOverlay` darkens everything outside the stencil. It is an element the size of the stencil with a very large `box-shadow` around it, colored with `currentColor`, so the stencil stays clear while the rest of the image is shaded. It doesn't react to the pointer, so the drag area beneath it still receives events.
+
+Both built-in stencils render it inside their draggable area, around the preview and the grid:
+
+```
+DraggableArea
+└─ StencilOverlay
+   ├─ StencilGrid (optional)
+   └─ div.…__preview
+```
+
+## Usage
+
+Change the shade by setting the overlay's `color`, through the stencil's `overlayClassName` prop:
+
+```svelte
+<Cropper {src} stencilProps={{ overlayClassName: 'light-overlay' }} />
+
+<style>
+	:global(.light-overlay) {
+		color: rgba(255, 255, 255, 0.6);
+	}
+</style>
+```
+
+The class is set on an element inside the stencil, so it needs `:global()` (or a global stylesheet). See [Customize Appearance](/docs/guides/customize-appearance#overlay).
+
+In a [custom stencil](/docs/tutorials/custom-stencil), wrap your stencil's content in it:
+
+```svelte
+<StencilOverlay class="my-stencil__overlay">
+	<div class="my-stencil__preview"></div>
+</StencilOverlay>
+```
+
+## Props
+
+| Prop       | Type         | Default | Description                                         |
+| ---------- | ------------ | ------- | --------------------------------------------------- |
+| `class`    | `ClassValue` | —       | Classes for the overlay. Upstream's `className`.    |
+| `children` | `Snippet`    | —       | Content drawn inside the stencil area.              |
+
+## CSS classes
+
+| Element | Classes                                                                                                   |
+| ------- | --------------------------------------------------------------------------------------------------------- |
+| Overlay | `advanced-cropper-stencil-overlay`, plus `advanced-cropper-rectangle-stencil__overlay` (or `circle-stencil`) in the built-in stencils |
+
+The base style sets the shadow and `pointer-events: none`. The default theme sets the color to semi-transparent black. `CircleStencil` rounds the overlay with `border-radius: 50%`, which also rounds its shadow.

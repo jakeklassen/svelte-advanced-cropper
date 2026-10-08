@@ -1,0 +1,80 @@
+<script>
+	import Admonition from '#site/components/Admonition.svelte';
+</script>
+
+# CropperWrapper
+
+`CropperWrapper` is the default `wrapperComponent` of the croppers: the root element of the whole cropper. It wraps everything in a fade (`CropperFade`), so the cropper stays invisible until the image has loaded and then fades in.
+
+```
+CropperWrapper                    (root: advanced-cropper)
+└─ CropperFade
+   └─ StretchableBoundary
+      ├─ CropperBackgroundWrapper
+      └─ CropperCanvas
+```
+
+## Usage
+
+Replace it to add your own elements around the cropper, such as a toolbar, a loading spinner or a zoom slider. A custom wrapper receives `cropper`, `class`, `style`, `disabled`, a `children` snippet and everything in the cropper's `wrapperProps`.
+
+```svelte
+<!-- CustomWrapper.svelte -->
+<script lang="ts">
+	import type { Snippet } from 'svelte';
+	import type { ClassValue } from 'svelte/elements';
+	import { CropperFade, type CropperRef } from 'svelte-advanced-cropper';
+
+	interface Props {
+		cropper: CropperRef;
+		class?: ClassValue;
+		style?: string;
+		children?: Snippet;
+	}
+
+	let { cropper, class: className, style, children }: Props = $props();
+</script>
+
+<div class={[className, 'custom-wrapper']} {style}>
+	<CropperFade visible={cropper.isLoaded()} class="custom-wrapper__fade">
+		{@render children?.()}
+	</CropperFade>
+	{#if cropper.isLoading()}
+		<div class="custom-wrapper__spinner">Loading…</div>
+	{/if}
+	<button onclick={() => cropper.rotateImage(90)}>Rotate</button>
+</div>
+```
+
+```svelte
+<Cropper {src} wrapperComponent={CustomWrapper} />
+```
+
+<Admonition type="warning" title="Keep class and style">
+
+Apply `class` and `style` to your root element, and render `children`. The base styles of the cropper hang off the `advanced-cropper` class that arrives in `class`. The fade element needs `flex-grow: 1` and `min-height: 0` so that the boundary can fill the wrapper.
+
+</Admonition>
+
+The getters on `cropper` are reactive, so the template above updates when loading starts and ends. The [Absolute Zoom](/docs/tutorials/absolute-zoom) tutorial builds a complete custom wrapper.
+
+## Props
+
+| Prop       | Type                                    | Default | Description                                                                                         |
+| ---------- | --------------------------------------- | ------- | --------------------------------------------------------------------------------------------------- |
+| `cropper`  | `{ getState, isLoading, isLoaded }`     | —       | Passed by the cropper. The fade becomes visible once there is a state and the image has loaded.     |
+| `class`    | `ClassValue`                            | —       | Classes for the root element. The cropper passes `advanced-cropper` plus its own `class`.           |
+| `style`    | `string`                                | —       | Inline style for the root element: the cropper's `style` prop.                                      |
+| `disabled` | `boolean`                               | —       | The cropper's `disabled` prop. The default wrapper ignores it.                                      |
+| `children` | `Snippet`                               | —       | The rest of the cropper.                                                                            |
+
+The cropper also passes `loading` and `loaded` booleans, kept for compatibility with older custom wrappers. They are deprecated: call `cropper.isLoading()` and `cropper.isLoaded()` instead.
+
+## CSS classes
+
+| Element | Classes                                                                                       |
+| ------- | --------------------------------------------------------------------------------------------- |
+| Root    | `advanced-cropper-wrapper`, plus `advanced-cropper` and your `class` from the cropper        |
+| Fade    | `advanced-cropper-wrapper__fade`, `advanced-cropper-fade`, and `advanced-cropper-fade--visible` once loaded |
+
+`CropperFade`, which is exported too, fades its content in and out with an opacity transition according to its `visible` prop.

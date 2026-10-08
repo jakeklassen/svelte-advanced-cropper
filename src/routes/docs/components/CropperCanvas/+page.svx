@@ -1,0 +1,57 @@
+# CropperCanvas
+
+`CropperCanvas` renders two hidden `<canvas>` elements and exports a `draw()` function that paints the cropped area of an image onto them. It is what powers the cropper's `getCanvas()` method. The second canvas is scratch space for applying rotation and flips before the crop is drawn.
+
+The croppers render it inside the boundary, next to the background wrapper, when their `canvas` prop is `true` (the default):
+
+```
+StretchableBoundary
+├─ CropperBackgroundWrapper
+└─ CropperCanvas   (when canvas is true)
+```
+
+## Usage
+
+With `Cropper` or `FixedCropper` you never touch it: call `getCanvas()` on the cropper. You need it when you build your own cropper with [`useAbstractCropper`](/docs/hooks/useAbstractCropper), which expects you to bind it into `refs.canvas`:
+
+```svelte
+<script lang="ts">
+	import {
+		CropperBackgroundImage,
+		CropperCanvas,
+		StretchableBoundary,
+		useAbstractCropper
+	} from 'svelte-advanced-cropper';
+
+	let { src }: { src: string } = $props();
+
+	const { cropper, refs } = useAbstractCropper(() => ({ src }));
+</script>
+
+<StretchableBoundary bind:this={refs.boundary}>
+	<CropperBackgroundImage bind:ref={refs.image} {cropper} />
+	<CropperCanvas bind:this={refs.canvas} />
+</StretchableBoundary>
+```
+
+`cropper.getCanvas()` then works as usual.
+
+## Props
+
+None.
+
+## Exports
+
+| Export | Signature                                                                                          | Description                                                                                                                                       |
+| ------ | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `draw` | <code>(state: CropperState, image: HTMLElement, options?: DrawOptions) =&gt; HTMLCanvasElement &#124; null</code> | Draws the area `state.coordinates` of `image` (an `<img>` or a `<canvas>`), with the state's rotation and flips, and returns the result canvas. Returns `null` before the canvases exist. |
+
+`DrawOptions` sets the size of the result and how it is drawn. The fields are described under [`getCanvas()`](/docs/components/Cropper#getcanvasoptions). The `CropperCanvasMethods` type describes the export.
+
+The same canvas element is returned on every call and redrawn each time. To keep a result, copy it or convert it (with `toBlob()` or `toDataURL()`) before the next draw.
+
+## CSS classes
+
+| Element    | Classes                                       |
+| ---------- | --------------------------------------------- |
+| Each canvas | `advanced-cropper-canvas` (hidden with `display: none`) |
