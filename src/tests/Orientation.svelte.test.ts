@@ -59,17 +59,51 @@ describe('EXIF orientation', () => {
 		}
 
 		expect({ width: canvas.width, height: canvas.height }).toEqual(ORIENTED_SIZE);
+		expect(cornerColours(canvas)).toEqual(EXPECTED_CORNERS.map(([, , colour]) => colour));
+	});
 
-		const context = canvas.getContext('2d');
-		if (!context) {
-			throw new Error('no 2d context');
-		}
-
-		const corners = EXPECTED_CORNERS.map(([x, y]) =>
-			nearestColour(
-				context.getImageData(Math.round(canvas.width * x), Math.round(canvas.height * y), 1, 1).data
-			)
+	it('exports a rotated photo, then frees the full-size copy it drew to rotate it', async () => {
+		const { cropper, container } = await mountCropper({ src: orientedPhoto });
+		cropper().rotateImage(90, { transitions: false });
+		cropper().setCoordinates(
+			{ left: 0, top: 0, width: Infinity, height: Infinity },
+			{ transitions: false }
 		);
-		expect(corners).toEqual(EXPECTED_CORNERS.map(([, , colour]) => colour));
+
+		// Twice: the second export must not depend on what the first one left behind.
+		for (let attempt = 0; attempt < 2; attempt++) {
+			const canvas = cropper().getCanvas();
+			if (!canvas) {
+				throw new Error('getCanvas() returned null');
+			}
+
+			expect({ width: canvas.width, height: canvas.height }).toEqual({
+				width: ORIENTED_SIZE.height,
+				height: ORIENTED_SIZE.width
+			});
+			// The upright photo turned a quarter clockwise.
+			expect(cornerColours(canvas)).toEqual(['yellow', 'red', 'green', 'blue']);
+
+			const scratch = [...container.querySelectorAll('canvas')].filter(
+				(element) => element !== canvas
+			);
+			expect(scratch.map(({ width, height }) => ({ width, height }))).toEqual([
+				{ width: 0, height: 0 }
+			]);
+		}
 	});
 });
+
+/** The colour at each of `EXPECTED_CORNERS`' points, in order. */
+function cornerColours(canvas: HTMLCanvasElement): Colour[] {
+	const context = canvas.getContext('2d');
+	if (!context) {
+		throw new Error('no 2d context');
+	}
+
+	return EXPECTED_CORNERS.map(([x, y]) =>
+		nearestColour(
+			context.getImageData(Math.round(canvas.width * x), Math.round(canvas.height * y), 1, 1).data
+		)
+	);
+}
