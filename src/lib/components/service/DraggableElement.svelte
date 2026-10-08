@@ -20,6 +20,7 @@
 <script lang="ts">
 	import { on } from 'svelte/events';
 	import { distance, type Point, type SimpleTouch } from 'advanced-cropper';
+	import { screenScale } from '../../service/scale';
 
 	let {
 		class: className,
@@ -86,10 +87,14 @@
 				Math.abs(current.clientY - anchor.top - top) < Math.abs(previous.clientY - anchor.top - top)
 		};
 
+		// The pointer moves in screen pixels; inside a scaled container the cropper's pixels are
+		// bigger or smaller, so convert the distance.
+		const scale = screenScale(container);
 		onMove(
 			{
-				left: !useAnchor || !movingToAnchor.left ? current.clientX - previous.clientX : 0,
-				top: !useAnchor || !movingToAnchor.top ? current.clientY - previous.clientY : 0
+				left:
+					!useAnchor || !movingToAnchor.left ? (current.clientX - previous.clientX) / scale.x : 0,
+				top: !useAnchor || !movingToAnchor.top ? (current.clientY - previous.clientY) / scale.y : 0
 			},
 			event
 		);

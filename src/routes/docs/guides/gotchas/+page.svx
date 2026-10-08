@@ -113,13 +113,15 @@ If you replace the boundary's size algorithm with one that measures the on-scree
 
 ### Dragging inside a permanently scaled container
 
-A cropper inside an element that _stays_ scaled, such as a preview pane shrunk with `transform: scale(0.75)`, is sized correctly, but its gestures still work in screen pixels. Drag the stencil below at 75% and 50%: it trails the pointer, moving only as far as the scale allows, so at 50% it covers half the distance your pointer does. Panning the image behaves the same way. react-advanced-cropper has the same limitation.
+A cropper can also live inside an element that _stays_ scaled, such as a preview pane shrunk with `transform: scale(0.75)`. Pointer events report screen pixels, while the cropper works in the container's own, unscaled pixels. A cropper that used the pointer's distances as they are would move the stencil by only 75% of the drag, so it would trail the cursor; react-advanced-cropper behaves that way, and so did svelte-advanced-cropper before 0.1.3. From 0.1.3, drags, pans, pinches and wheel zooms are converted through the container's scale, so they follow the pointer at any scale.
+
+Drag the stencil at each scale. The reading below the demo compares how far it moved with how far the pointer did:
 
 <Example source={scaledContainerSource} title="ScaledContainerExample">
 	<ScaledContainerExample />
 </Example>
 
-Until this is fixed ([#18](https://github.com/jakeklassen/svelte-advanced-cropper/issues/18)), size such containers with `width` and `height` rather than a transform. Opening animations aren't affected: nobody drags while a dialog is still scaling in.
+Only scaling is accounted for. A cropper inside a rotated or skewed container still gets confused, so keep those transforms off its ancestors.
 
 ## Give the cropper a definite height
 

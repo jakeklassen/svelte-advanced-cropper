@@ -2,7 +2,7 @@
 	import { Cropper, type Size } from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 
-	const src = image('photo-1553301208-a3718cc0150e.jpg');
+	const src = image('pexels-photo-1451124.jpeg');
 	const height = 360;
 
 	let scale = $state(0.75);
@@ -13,9 +13,10 @@
 	// Where the current drag started: the pointer and the stencil, in screen pixels.
 	let start: { pointerX: number; pointerY: number; left: number; top: number } | null = null;
 
-	// A small stencil, so it has room to follow a long drag before reaching an edge.
+	// A small stencil on a wide photo, so it has room to follow a long drag before it
+	// reaches an edge (where it stops, whatever the pointer does).
 	function defaultSize({ imageSize }: { imageSize: Size }) {
-		return { width: imageSize.width * 0.4, height: imageSize.height * 0.4 };
+		return { width: imageSize.width * 0.25, height: imageSize.height * 0.25 };
 	}
 
 	function stencilBox() {

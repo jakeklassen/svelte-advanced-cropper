@@ -35,6 +35,7 @@
 		wheelEventToImageTransform,
 		type SimpleTouch
 	} from 'advanced-cropper';
+	import { screenScale, unscaleImageTransform } from '../../service/scale';
 
 	let {
 		onTransform,
@@ -66,13 +67,13 @@
 			return;
 		}
 
-		onTransform(
-			touchesToImageTransform(touches, lastTouches, container, {
-				scale: touchScale,
-				rotate: touchRotate,
-				move: touchMove
-			})
-		);
+		// The core measures in screen pixels; convert to the container's own (see screenScale).
+		const transform = touchesToImageTransform(touches, lastTouches, container, {
+			scale: touchScale,
+			rotate: touchRotate,
+			move: touchMove
+		});
+		onTransform(unscaleImageTransform(transform, screenScale(container)));
 		lastTouches = touches;
 	}
 
@@ -118,7 +119,8 @@
 		processStart();
 		if (onTransform && container) {
 			const ratio = wheelScale === true ? DEFAULT_WHEEL_RATIO : wheelScale.ratio;
-			onTransform(wheelEventToImageTransform(event, container, ratio));
+			const transform = wheelEventToImageTransform(event, container, ratio);
+			onTransform(unscaleImageTransform(transform, screenScale(container)));
 		}
 
 		// A wheel gesture has no end event: it ends after `timeout` ms without wheeling.
