@@ -2,7 +2,9 @@
 	const commands = {
 		npm: 'npm install svelte-advanced-cropper',
 		pnpm: 'pnpm add svelte-advanced-cropper',
-		yarn: 'yarn add svelte-advanced-cropper'
+		yarn: 'yarn add svelte-advanced-cropper',
+		bun: 'bun add svelte-advanced-cropper',
+		aube: 'aube add svelte-advanced-cropper'
 	};
 
 	type Manager = keyof typeof commands;
