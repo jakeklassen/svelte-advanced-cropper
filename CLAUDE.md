@@ -46,8 +46,8 @@ Playwright tests live in `e2e/` (`*.e2e.ts`) and run against `pnpm build && pnpm
 ## Layout and conventions
 
 - `src/lib/` is the published package. Everything public is re-exported from `src/lib/index.ts`, which mirrors upstream `src/index.ts`, including the `advanced-cropper` core re-exports.
-- `src/routes/` is the docs site and is not published. There is no Tailwind. Styles are plain CSS in scoped `<style>` blocks, as with the upstream per-component SCSS.
+- `src/routes/` is the docs site and is not published. There is no Tailwind. Site styles are plain CSS in scoped `<style>` blocks. Library components have **no** `<style>` blocks: cropper CSS ships globally as `style.css` and `themes/*`, compiled from the core SCSS by `scripts/build-styles.ts`.
 - Runes mode is forced for all project files (`vite.config.ts`).
-- `package.json` subpath imports: `#lib` and `#lib/*` map to `src/lib`.
+- `package.json` subpath imports: `#lib` and `#lib/*` map to `src/lib`. SvelteKit 3 removed `$lib`, so always use `#lib`.
 - No non-null assertions (`!`). This is enforced by `typescript/no-non-null-assertion`.
 - Formatting: tabs, single quotes, no trailing commas, width 100.

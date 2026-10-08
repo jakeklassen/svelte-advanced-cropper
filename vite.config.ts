@@ -18,6 +18,12 @@ export default defineConfig({
 			adapter: adapter()
 		})
 	],
+	css: {
+		preprocessorOptions: {
+			// The advanced-cropper core SCSS still uses `@import` and global color functions.
+			scss: { silenceDeprecations: ['import', 'global-builtin', 'color-functions'] }
+		}
+	},
 	test: {
 		expect: { requireAssertions: true },
 		// Remove once src/lib has tests; until then an empty run should not fail.

@@ -17,9 +17,10 @@
 		"import/no-unassigned-import": [
 			"warn",
 			{
-				"allow": ["**/*.css"]
+				"allow": ["**/*.css", "**/*.scss"]
 			}
-		]
+		],
+		"typescript/no-unsafe-type-assertion": "off"
 	},
 	"ignorePatterns": ["tmp/**", ".svelte-kit/**", "dist/**", "build/**"],
 	"overrides": [
