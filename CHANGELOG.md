@@ -1,5 +1,11 @@
 # svelte-advanced-cropper
 
+## 0.1.3
+
+### Patch Changes
+
+- [`965e26e`](https://github.com/jakeklassen/svelte-advanced-cropper/commit/965e26ec9300441e5cdc8cefb349af34fd4c677d) Thanks [@jakeklassen](https://github.com/jakeklassen)! - Make gestures follow the pointer inside a container scaled with a CSS transform. Dragging the stencil or its handles, panning, pinching and wheel zooming used screen pixels as they were, so inside a container scaled to 50% the stencil moved half as far as the pointer and the wheel zoomed around the wrong point.
+
 ## 0.1.2
 
 ### Patch Changes
