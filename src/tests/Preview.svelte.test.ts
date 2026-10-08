@@ -8,7 +8,7 @@ import type { CropperRef } from '#lib';
 describe('CropperPreview', () => {
 	it('mirrors the cropper image and resizes with the coordinates', async () => {
 		const onReady = vi.fn<(cropper: CropperRef) => void>();
-		const screen = render(PreviewHarness, { src: createTestImage(), onReady });
+		const screen = await render(PreviewHarness, { src: createTestImage(), onReady });
 		await waitFor(() => onReady.mock.calls.length > 0);
 		const preview = screen.container.querySelector('.test-preview');
 		const image = await waitFor(() =>
@@ -28,7 +28,7 @@ describe('CropperPreview', () => {
 
 	it('re-reads a non-reactive cropper object on refresh()', async () => {
 		const onReady = vi.fn<(cropper: CropperRef) => void>();
-		const source = render(PreviewHarness, { src: createTestImage(), onReady });
+		const source = await render(PreviewHarness, { src: createTestImage(), onReady });
 		await waitFor(() => onReady.mock.calls.length > 0);
 		const real = source.component.getCropper();
 		if (!real) throw new Error('no cropper');
@@ -42,7 +42,7 @@ describe('CropperPreview', () => {
 			isLoaded: () => ready,
 			isLoading: () => false
 		};
-		const screen = render(AdapterPreviewHarness, { adapter });
+		const screen = await render(AdapterPreviewHarness, { adapter });
 		const visible = () =>
 			screen.container.querySelector('.adapter-preview .advanced-cropper-preview__image--visible');
 		await nextFrame();

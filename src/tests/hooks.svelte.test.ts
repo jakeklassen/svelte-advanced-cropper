@@ -8,7 +8,7 @@ import { createTestImage, waitFor } from './fixtures';
 describe('useCropperImage', () => {
 	it('fires loading callbacks in upstream order, onLoad after loading ends', async () => {
 		const log: string[] = [];
-		render(ImageHarness, { src: createTestImage(), log });
+		await render(ImageHarness, { src: createTestImage(), log });
 		await waitFor(() => log.some((entry) => entry.startsWith('load')));
 		// `end` fires while isLoading() is still true (upstream clears it after the callback);
 		// `load` fires afterwards, once loading has finished.
@@ -17,7 +17,7 @@ describe('useCropperImage', () => {
 
 	it('accepts an updater function in setImage', async () => {
 		const log: string[] = [];
-		const screen = render(ImageHarness, { src: createTestImage(), log });
+		const screen = await render(ImageHarness, { src: createTestImage(), log });
 		const hook = () => screen.component.getHook();
 		await waitFor(() => hook().getImage());
 		const first = hook().getImage();
@@ -30,7 +30,7 @@ describe('useCropperImage', () => {
 		const log: string[] = [];
 		const a = createTestImage(800, 600);
 		const b = createTestImage(400, 300);
-		const screen = render(ImageHarness, { src: a, log });
+		const screen = await render(ImageHarness, { src: a, log });
 		await screen.rerender({ src: b });
 		await screen.rerender({ src: a });
 		const hook = () => screen.component.getHook();
@@ -42,7 +42,7 @@ describe('useCropperImage', () => {
 
 	it('clears loading when src is removed mid-load', async () => {
 		const log: string[] = [];
-		const screen = render(ImageHarness, { src: createTestImage(), log });
+		const screen = await render(ImageHarness, { src: createTestImage(), log });
 		await screen.rerender({ src: null });
 		const hook = () => screen.component.getHook();
 		expect(hook().isLoading()).toBe(false);
@@ -54,7 +54,7 @@ describe('useCropperImage', () => {
 describe('useUpdateEffect', () => {
 	it('skips the mount run and runs only when a dependency changes', async () => {
 		const log: string[] = [];
-		const screen = render(UpdateEffectHarness, { log });
+		const screen = await render(UpdateEffectHarness, { log });
 		flushSync();
 		expect(log).toEqual([]);
 
@@ -76,7 +76,7 @@ describe('useUpdateEffect', () => {
 describe('useCropperImage setImage', () => {
 	it('fires onLoad once for the latest of several images', async () => {
 		const log: string[] = [];
-		const screen = render(ImageHarness, { src: createTestImage(), log });
+		const screen = await render(ImageHarness, { src: createTestImage(), log });
 		const hook = () => screen.component.getHook();
 		await waitFor(() => log.some((entry) => entry.startsWith('load')));
 		const image = hook().getImage();

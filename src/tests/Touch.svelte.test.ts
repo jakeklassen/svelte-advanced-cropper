@@ -6,7 +6,12 @@ import type { CropperRef } from '#lib';
 
 async function mountCropper(props: Record<string, unknown> = {}) {
 	const onReady = vi.fn<(cropper: CropperRef) => void>();
-	const screen = render(Harness, { src: createTestImage(), onReady, transitions: false, ...props });
+	const screen = await render(Harness, {
+		src: createTestImage(),
+		onReady,
+		transitions: false,
+		...props
+	});
 	const cropper = (): CropperRef => screen.component.getCropper();
 	await waitFor(() => onReady.mock.calls.length > 0);
 	return { cropper, container: screen.container };
