@@ -1,5 +1,14 @@
 # svelte-advanced-cropper
 
+## 0.1.4
+
+### Patch Changes
+
+- [#29](https://github.com/jakeklassen/svelte-advanced-cropper/pull/29) [`f9ec160`](https://github.com/jakeklassen/svelte-advanced-cropper/commit/f9ec16078a6034bd77423b287a914b1cc703d149) Thanks [@jakeklassen](https://github.com/jakeklassen)! - Release memory that croppers held onto after loading or exporting a rotated photo:
+
+  - With `checkOrientation` (the default), a photo with an EXIF orientation is shown from a copy the cropper makes of the file. That copy was never released, so every such photo, which includes most portrait photos from phones, stayed in memory until the page closed. It is now released once the photo is replaced, `src` is cleared, or the cropper is destroyed. Your own `src` URL is never revoked.
+  - `getCanvas()` on a rotated or flipped image drew the whole photo into a hidden canvas first and kept it there (92 MB for a 24-megapixel photo, measured in Chrome). That canvas is now emptied after each export.
+
 ## 0.1.3
 
 ### Patch Changes
