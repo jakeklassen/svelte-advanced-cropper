@@ -1,0 +1,230 @@
+<script>
+	import Example from '#site/components/Example.svelte';
+	import Admonition from '#site/components/Admonition.svelte';
+	import Tabs from '#site/components/Tabs.svelte';
+	import TabItem from '#site/components/TabItem.svelte';
+	import CodeBlock from '#site/components/CodeBlock.svelte';
+	import AbsoluteZoom from '#site/demos/tutorials/AbsoluteZoom/AbsoluteZoom.svelte';
+	import source from '#site/demos/tutorials/AbsoluteZoom/AbsoluteZoom.svelte?highlight';
+	import cropperSource from '#site/demos/tutorials/AbsoluteZoom/CustomCropper.svelte?highlight';
+	import wrapperSource from '#site/demos/tutorials/AbsoluteZoom/CustomWrapper.svelte?highlight';
+	import navigationSource from '#site/demos/tutorials/AbsoluteZoom/Navigation.svelte?highlight';
+	import sliderSource from '#site/demos/tutorials/AbsoluteZoom/Slider.svelte?highlight';
+</script>
+
+# Absolute Zoom
+
+## Idea
+
+The cropper below looks simple, but it has one feature the default croppers lack: a zoom slider. That is harder than it seems, because the cropper state has no notion of an absolute zoom level. How far the image is zoomed is implied entirely by the size of the visible area.
+
+This tutorial covers two separate problems:
+
+1. Extending the cropper with extra UI, here a slider placed inside the cropper.
+2. Implementing absolute zoom: reading the current zoom level as a number, and zooming the image to a given level.
+
+<Example {source} title="AbsoluteZoom" files={{ 'CustomCropper.svelte': cropperSource, 'CustomWrapper.svelte': wrapperSource, 'Navigation.svelte': navigationSource, 'Slider.svelte': sliderSource }}>
+	<AbsoluteZoom />
+</Example>
+
+## Preparation
+
+### Cropper
+
+The starting point is a minimal custom cropper built on `FixedCropper`. The stencil stays in the middle with a fixed size, and the user moves and zooms the image under it, so the stencil's own handlers, lines and dragging are switched off. `ImageRestriction.stencil` keeps the image covering the stencil at all times.
+
+<Tabs>
+<TabItem label="CustomCropper.svelte">
+
+```svelte
+<script lang="ts">
+	import {
+		FixedCropper,
+		ImageRestriction,
+		type FixedCropperProps,
+		type FixedCropperRef
+	} from 'svelte-advanced-cropper';
+
+	interface Props extends FixedCropperProps {
+		/** The inner cropper, for `bind:cropper`. */
+		cropper?: FixedCropperRef;
+	}
+
+	let { stencilProps, cropper = $bindable(), ...props }: Props = $props();
+</script>
+
+<FixedCropper
+	bind:this={cropper}
+	stencilProps={{
+		handlers: false,
+		lines: false,
+		movable: false,
+		resizable: false,
+		...stencilProps
+	}}
+	imageRestriction={ImageRestriction.stencil}
+	{...props}
+/>
+```
+
+</TabItem>
+</Tabs>
+
+<Admonition type="info" title="Coming from React">
+
+A React wrapper component forwards its ref to the inner cropper with `forwardRef`. The Svelte equivalent is a bindable prop: the parent writes `<CustomCropper bind:cropper />` and gets the `FixedCropper` instance, with all its methods, in `cropper`.
+
+</Admonition>
+
+### Navigation
+
+The slider and the zoom buttons live in a ready-made `Navigation` component. Its source is in the "Show code" panel of the demo above (`Navigation.svelte` and `Slider.svelte`). Any component with a `zoom` value and an `onZoom` callback would work just as well, so this tutorial won't go through it.
+
+### Extending the cropper
+
+To put the navigation inside the cropper, write a custom **wrapper**. The wrapper is the outermost component of the cropper: it wraps the boundary, the image and the stencil, and it receives the `cropper` itself as a prop, so it can read the state directly. Pass it with the `wrapperComponent` prop.
+
+The default wrapper, [`CropperWrapper`](/docs/components/CropperWrapper), only fades its content in once the image has loaded. A custom wrapper can do the same with `CropperFade`, and add anything else next to the `children` snippet:
+
+<Tabs>
+<TabItem label="CustomWrapper.svelte">
+
+```svelte
+<script lang="ts">
+	import type { Snippet } from 'svelte';
+	import type { ClassValue } from 'svelte/elements';
+	import { CropperFade, type FixedCropperRef } from 'svelte-advanced-cropper';
+	import Navigation from './Navigation.svelte';
+
+	interface Props {
+		cropper: FixedCropperRef;
+		class?: ClassValue;
+		style?: string;
+		children?: Snippet;
+	}
+
+	let { cropper, class: className, style, children }: Props = $props();
+
+	const state = $derived(cropper.getState());
+</script>
+
+<CropperFade class={['custom-wrapper', className]} {style} visible={state && cropper.isLoaded()}>
+	{@render children?.()}
+	<Navigation class="custom-wrapper__navigation" />
+</CropperFade>
+```
+
+</TabItem>
+<TabItem label="Styles">
+
+```css
+:global(.custom-wrapper) {
+	flex-grow: 1;
+	min-height: 0;
+}
+:global(.custom-wrapper__navigation) {
+	max-width: 100%;
+	width: 462px;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	margin: 0 auto;
+}
+/* Only animate the fade, never the cropper's size. */
+:global(.custom-wrapper.advanced-cropper-fade) {
+	transition-property: opacity, visibility;
+}
+```
+
+</TabItem>
+</Tabs>
+
+<Admonition type="tip" title="Restrict the fade transition">
+
+`CropperFade`'s default CSS transitions every property for half a second. Here the fade is the cropper's root element, which also carries the user's size constraints (`max-height` in this demo). If such a value changes, for example when a stylesheet loads late, the transition would animate it, and the cropper could measure its boundary halfway and lay out the stencil off-centre. Limiting `transition-property` to `opacity` and `visibility` avoids that.
+
+</Admonition>
+
+Keep the `class` and `style` props: the cropper passes its own root class (`advanced-cropper`) and the user's `class` and `style` through them. The wrapper also receives `disabled` and the deprecated `loading` / `loaded` flags. Prefer `cropper.isLoading()` and `cropper.isLoaded()`.
+
+## Absolute zoom
+
+`CropperState` has no absolute zoom field, but one can be derived from it. The calculation is not trivial, because it depends on the size restrictions, the stencil size and the image restriction. Fortunately, the core ships it as an extension: `advanced-cropper/extensions/absolute-zoom`. The `advanced-cropper` package is a dependency of `svelte-advanced-cropper`, so the import works without installing anything else.
+
+### Extension functions
+
+Two functions are all you need.
+
+#### `getAbsoluteZoom`
+
+```ts
+getAbsoluteZoom(state: CropperState | null, settings: CoreSettings, normalize = true): number
+```
+
+Returns the current zoom level as a number, taking every restriction into account. `0` is the minimum zoom (the largest visible area the settings allow) and `1` is the maximum zoom (the smallest allowed visible area).
+
+With `normalize` set to `true`, the result is clamped to the `[0, 1]` range.
+
+#### `getZoomFactor`
+
+```ts
+getZoomFactor(state: CropperState | null, settings: CoreSettings, absoluteZoom: number): number
+```
+
+Returns the relative scale that takes the image from the current zoom level to `absoluteZoom`. Put another way, it divides the current visible area size by the visible area size at the target level. A result above `1` means zooming in, below `1` zooming out, which is exactly the kind of value `cropper.zoomImage` accepts.
+
+### How to use
+
+Both functions are straightforward to use.
+
+#### Reading the current zoom
+
+```ts
+const absoluteZoom = $derived(getAbsoluteZoom(cropper.getState(), cropper.getSettings()));
+```
+
+Since the state is reactive, this value follows every zoom gesture, wheel scroll and button press.
+
+#### Zooming to a given level
+
+```ts
+function onZoom(value: number, transitions?: boolean) {
+	cropper.zoomImage(getZoomFactor(cropper.getState(), cropper.getSettings(), value), {
+		transitions: !!transitions
+	});
+}
+```
+
+The slider calls it without transitions, so the image follows the pointer exactly. The buttons pass `true` to animate each step.
+
+## Integration
+
+### Cropper wrapper
+
+Put both pieces into the wrapper, and connect them to the navigation:
+
+<Tabs>
+<TabItem label="CustomWrapper.svelte">
+
+<CodeBlock html={wrapperSource.html} code={wrapperSource.code} />
+
+</TabItem>
+</Tabs>
+
+### Custom cropper
+
+Finally, pass the wrapper to the cropper with `wrapperComponent`. That's the last step: the result is the cropper at the top of this page.
+
+<Tabs>
+<TabItem label="CustomCropper.svelte">
+
+<CodeBlock html={cropperSource.html} code={cropperSource.code} />
+
+</TabItem>
+<TabItem label="AbsoluteZoom.svelte">
+
+<CodeBlock html={source.html} code={source.code} />
+
+</TabItem>
+</Tabs>

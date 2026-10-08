@@ -1,0 +1,327 @@
+<script>
+	import Example from '#site/components/Example.svelte';
+	import Admonition from '#site/components/Admonition.svelte';
+	import Tabs from '#site/components/Tabs.svelte';
+	import TabItem from '#site/components/TabItem.svelte';
+	import CodeBlock from '#site/components/CodeBlock.svelte';
+	import ImageEditor from '#site/demos/tutorials/ImageEditor/ImageEditor.svelte';
+	import source from '#site/demos/tutorials/ImageEditor/ImageEditor.svelte?highlight';
+	import adjustableImageSource from '#site/demos/tutorials/ImageEditor/AdjustableImage.svelte?highlight';
+	import cropperBackgroundSource from '#site/demos/tutorials/ImageEditor/AdjustableCropperBackground.svelte?highlight';
+	import previewBackgroundSource from '#site/demos/tutorials/ImageEditor/AdjustablePreviewBackground.svelte?highlight';
+	import filtersSource from '#site/demos/tutorials/ImageEditor/filters.ts?highlight';
+	import navigationSource from '#site/demos/tutorials/ImageEditor/Navigation.svelte?highlight';
+	import sliderSource from '#site/demos/tutorials/ImageEditor/Slider.svelte?highlight';
+	import buttonSource from '#site/demos/tutorials/ImageEditor/Button.svelte?highlight';
+</script>
+
+# Image Editor
+
+## Idea
+
+This tutorial doesn't build an image editor from scratch. The UI pieces (navigation bar, slider, buttons) are ready-made, and you can read them in the "Show code" panel below. The focus is the interesting part: adding image adjustments (brightness, contrast, saturation and hue) and making the cropper, its preview and its result all show them.
+
+<Example {source} title="ImageEditor" files={{ 'AdjustableImage.svelte': adjustableImageSource, 'AdjustableCropperBackground.svelte': cropperBackgroundSource, 'AdjustablePreviewBackground.svelte': previewBackgroundSource, 'filters.ts': filtersSource, 'Navigation.svelte': navigationSource, 'Slider.svelte': sliderSource, 'Button.svelte': buttonSource }}>
+	<ImageEditor />
+</Example>
+
+## Template
+
+Start with the editor's skeleton: an area for the cropper, a slider that appears for every mode except cropping, and the navigation bar that switches modes. Each adjustment is a number from `-1` to `1`, where `0` leaves the image unchanged.
+
+<Tabs>
+<TabItem label="Svelte">
+
+```svelte
+<script lang="ts">
+	import Navigation, { type Mode } from './Navigation.svelte';
+	import Slider from './Slider.svelte';
+
+	let mode: Mode = $state('crop');
+
+	let adjustments = $state({
+		brightness: 0,
+		hue: 0,
+		saturation: 0,
+		contrast: 0
+	});
+
+	function onChangeValue(value: number) {
+		if (mode !== 'crop') {
+			adjustments[mode] = value;
+		}
+	}
+</script>
+
+<div class="image-editor">
+	<div class="image-editor__cropper">
+		{#if mode !== 'crop'}
+			<Slider class="image-editor__slider" value={adjustments[mode]} onChange={onChangeValue} />
+		{/if}
+	</div>
+	<Navigation {mode} onChange={(next) => (mode = next)} />
+</div>
+```
+
+</TabItem>
+<TabItem label="Styles">
+
+```css
+.image-editor {
+	color: #61dafb;
+	border: solid 1px #2b2a30;
+}
+.image-editor__cropper {
+	position: relative;
+	height: 500px;
+	max-height: 100vh;
+	background: #0f0e13;
+}
+.image-editor__cropper :global(.image-editor__slider) {
+	position: absolute;
+	bottom: 20px;
+	left: 50%;
+	transform: translateX(-50%);
+}
+```
+
+</TabItem>
+</Tabs>
+
+Because `adjustments` is a deeply reactive `$state` object, assigning `adjustments[mode]` is all it takes to update everything that reads it.
+
+## Integrate the cropper
+
+Adding the cropper is simple. The one detail is that the user should only be able to crop in the crop mode. In the other modes the stencil can't be moved or resized, its lines and handlers disappear, the image can't be dragged or zoomed, and the overlay gets darker to put the focus on the image:
+
+<Tabs>
+<TabItem label="Svelte">
+
+```svelte
+<script lang="ts">
+	import { Cropper, type CropperRef } from 'svelte-advanced-cropper';
+	import Navigation, { type Mode } from './Navigation.svelte';
+	import Slider from './Slider.svelte';
+
+	let cropper: CropperRef | undefined = $state();
+	let src = $state('/images/photo.jpg');
+	let mode: Mode = $state('crop');
+	let adjustments = $state({ brightness: 0, hue: 0, saturation: 0, contrast: 0 });
+
+	const cropperEnabled = $derived(mode === 'crop');
+
+	function onChangeValue(value: number) {
+		if (mode !== 'crop') {
+			adjustments[mode] = value;
+		}
+	}
+
+	function onUpload(url: string) {
+		adjustments = { brightness: 0, hue: 0, saturation: 0, contrast: 0 };
+		mode = 'crop';
+		src = url;
+	}
+
+	function onDownload() {
+		const canvas = cropper?.getCanvas();
+		if (canvas) {
+			const link = document.createElement('a');
+			link.download = 'image.png';
+			link.href = canvas.toDataURL('image/png');
+			link.click();
+		}
+	}
+</script>
+
+<div class="image-editor">
+	<div class="image-editor__cropper">
+		<Cropper
+			bind:this={cropper}
+			{src}
+			stencilProps={{
+				movable: cropperEnabled,
+				resizable: cropperEnabled,
+				lines: cropperEnabled,
+				handlers: cropperEnabled,
+				overlayClassName: [
+					'image-editor__cropper-overlay',
+					!cropperEnabled && 'image-editor__cropper-overlay--faded'
+				]
+			}}
+			backgroundWrapperProps={{
+				scaleImage: cropperEnabled,
+				moveImage: cropperEnabled
+			}}
+		/>
+		{#if mode !== 'crop'}
+			<Slider class="image-editor__slider" value={adjustments[mode]} onChange={onChangeValue} />
+		{/if}
+	</div>
+	<Navigation {mode} onChange={(next) => (mode = next)} {onUpload} {onDownload} />
+</div>
+```
+
+</TabItem>
+<TabItem label="Styles">
+
+```css
+/* …the template styles, plus: */
+:global(.image-editor__cropper-overlay) {
+	transition: 0.5s;
+}
+:global(.image-editor__cropper-overlay--faded) {
+	color: rgba(0, 0, 0, 0.9);
+}
+```
+
+</TabItem>
+</Tabs>
+
+The overlay classes need `:global(…)`, because they end up on an element inside the stencil, not in this component.
+
+Now for the hard question: how do the adjustments get onto the image? There are three options:
+
+1. **Change `src`** to a Blob or data URL of the adjusted image. Every change of `src` resets the cropper, losing the user's crop, and encoding a new image on every slider move is slow.
+2. **Call `cropper.setImage()`** with the adjusted image. It replaces the image without resetting the crop, which fixes the first problem, but it's just as slow.
+3. **Replace the background component.** This is the right way, and the rest of this tutorial does it.
+
+### Custom background component
+
+The cropper's background component has two jobs:
+
+- It shows the current image, positioned and scaled to match the cropper state.
+- It hands the cropper the element it should crop from. `getCanvas()` draws the cropped area from that element, so it can be an `HTMLImageElement` or an `HTMLCanvasElement`.
+
+The default one is [`CropperBackgroundImage`](/docs/components/CropperBackgroundImage). Stripped down, it looks like this:
+
+```svelte
+<script lang="ts">
+	import type { ClassValue } from 'svelte/elements';
+	import {
+		getBackgroundStyle,
+		styleToString,
+		type CropperImage,
+		type CropperState,
+		type CropperTransitions
+	} from 'svelte-advanced-cropper';
+
+	interface Props {
+		class?: ClassValue;
+		cropper: {
+			getState: () => CropperState | null;
+			getTransitions: () => CropperTransitions;
+			getImage: () => CropperImage | null;
+		};
+		crossOrigin?: 'anonymous' | 'use-credentials' | boolean;
+		ref?: HTMLImageElement | null;
+	}
+
+	let { class: className, cropper, crossOrigin, ref = $bindable(null) }: Props = $props();
+
+	const state = $derived(cropper.getState());
+	const image = $derived(cropper.getImage());
+	// The core returns a style object (width, height, transform, …). `styleToString`
+	// turns it into a string for the `style` attribute.
+	const style = $derived(
+		image && state ? styleToString(getBackgroundStyle(image, state, cropper.getTransitions())) : ''
+	);
+</script>
+
+{#if image}
+	{#key image.src}
+		<img
+			bind:this={ref}
+			class={['advanced-cropper-background-image', className]}
+			src={image.src}
+			alt=""
+			crossorigin={crossOrigin === true ? 'anonymous' : crossOrigin || undefined}
+			{style}
+		/>
+	{/key}
+{/if}
+```
+
+<Admonition type="warning" title="Don't forget the ref">
+
+The cropper binds the background's element with `bind:ref`. A custom background **must** declare `ref = $bindable(null)` and bind it to the element it draws (`bind:this={ref}`). Without it, the component still renders, but `getCanvas()` has nothing to crop from and returns `null`. In React this is the forwarded ref; in Svelte it is a bindable prop.
+
+</Admonition>
+
+Since the cropper is happy with a canvas, we can draw the adjusted image into one. That is fast, because the browser does the work, and flexible, because you can draw anything you like.
+
+First, an `AdjustableImage` component that replaces the `<img>`. It loads the source into a hidden `<img>` (through the library's `CropperSource`), then draws it into a canvas with the adjustments applied, again whenever an adjustment changes:
+
+<Tabs>
+<TabItem label="AdjustableImage.svelte">
+
+<CodeBlock html={adjustableImageSource.html} code={adjustableImageSource.code} />
+
+</TabItem>
+<TabItem label="filters.ts">
+
+<CodeBlock html={filtersSource.html} code={filtersSource.code} />
+
+</TabItem>
+</Tabs>
+
+The drawing itself is in `filters.ts`. The adjustments map directly onto CSS filter functions (`brightness()`, `contrast()`, `saturate()` and `hue-rotate()`), and a canvas 2D context accepts the same syntax in its `filter` property.
+
+<Admonition type="note" title="Safari">
+
+`CanvasRenderingContext2D.filter` works in Chrome and Firefox, but Safari still ships it only behind a "Canvas Filters" feature flag ([MDN compatibility data](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/filter#browser_compatibility)). The React tutorial loads the `context-filter-polyfill` package for that. This port doesn't need a dependency: `filters.ts` checks whether the property exists and, if not, applies the same four filters pixel by pixel using the formulas from the CSS Filter Effects specification. Any canvas filter library would work as well.
+
+</Admonition>
+
+Then, wrap `AdjustableImage` in a background component. It takes the cropper, computes the position with `getBackgroundStyle`, and passes `ref` through with `bind:ref`:
+
+<Tabs>
+<TabItem label="AdjustableCropperBackground.svelte">
+
+<CodeBlock html={cropperBackgroundSource.html} code={cropperBackgroundSource.code} />
+
+</TabItem>
+</Tabs>
+
+Pass it to the cropper, together with the adjustments. Everything in `backgroundProps` is spread onto the background component, so the four values arrive as props:
+
+```svelte
+<Cropper
+	…
+	backgroundComponent={AdjustableCropperBackground}
+	backgroundProps={adjustments}
+/>
+```
+
+The adjustments now show in the cropper and in the result of `getCanvas()`, so the download button saves the adjusted crop.
+
+## Preview
+
+`CropperPreview` is built much like the cropper itself, and it has a background component of its own. The adjusted preview background differs from the cropper's in only one way: it is positioned with `getPreviewStyle`, which also needs the preview's `size`.
+
+<Tabs>
+<TabItem label="AdjustablePreviewBackground.svelte">
+
+<CodeBlock html={previewBackgroundSource.html} code={previewBackgroundSource.code} />
+
+</TabItem>
+</Tabs>
+
+Pass it to `CropperPreview`, along with the cropper bound with `bind:this`:
+
+```svelte
+<CropperPreview
+	{cropper}
+	backgroundComponent={AdjustablePreviewBackground}
+	backgroundProps={adjustments}
+/>
+```
+
+A preview doesn't use its background for cropping, so this component needs no `ref`.
+
+<Admonition type="info" title="Coming from React">
+
+The React version refreshes the preview from the cropper's `onUpdate` callback (`previewRef.current?.update(cropper)`). In Svelte, `cropper={cropper}` is enough: the preview reads the cropper's reactive state and follows every change on its own.
+
+</Admonition>
+
+That's the whole editor shown at the top of the page. The last piece in its source is a reset button, which appears once any adjustment differs from zero, and sets them all back.
