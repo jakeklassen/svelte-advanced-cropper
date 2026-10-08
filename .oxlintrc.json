@@ -1,0 +1,33 @@
+{
+	"$schema": "./node_modules/oxlint/configuration_schema.json",
+	"plugins": ["typescript", "unicorn", "oxc", "import", "vitest"],
+	"categories": {
+		"correctness": "error",
+		"suspicious": "warn"
+	},
+	"options": {
+		"typeAware": true
+	},
+	"env": {
+		"builtin": true,
+		"browser": true
+	},
+	"rules": {
+		"typescript/no-non-null-assertion": "error",
+		"import/no-unassigned-import": [
+			"warn",
+			{
+				"allow": ["**/*.css"]
+			}
+		]
+	},
+	"ignorePatterns": ["tmp/**", ".svelte-kit/**", "dist/**", "build/**"],
+	"overrides": [
+		{
+			"files": ["src/app.d.ts"],
+			"rules": {
+				"unicorn/require-module-specifiers": "off"
+			}
+		}
+	]
+}
