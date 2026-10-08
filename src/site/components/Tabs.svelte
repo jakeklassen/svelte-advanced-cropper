@@ -56,9 +56,12 @@
 	.tabs__list {
 		display: flex;
 		gap: 0.25rem;
-		border-bottom: 1px solid var(--color-border);
 		margin-bottom: 0.75rem;
+		/* Scrolls sideways when the tabs don't fit. The divider is an inset shadow, not a
+		   border the tabs overlap with a negative margin: overflow-x makes the list clip
+		   vertically too, so an overlap would show a vertical scrollbar. */
 		overflow-x: auto;
+		box-shadow: inset 0 -1px 0 var(--color-border);
 	}
 	.tabs__tab {
 		appearance: none;
@@ -69,7 +72,6 @@
 		font-weight: 600;
 		color: var(--color-muted);
 		border-bottom: 2px solid transparent;
-		margin-bottom: -1px;
 		cursor: pointer;
 	}
 	.tabs__tab--active {
