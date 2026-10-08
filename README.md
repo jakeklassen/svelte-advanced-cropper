@@ -10,6 +10,11 @@ It is a port of [react-advanced-cropper](https://github.com/advanced-cropper/rea
 
 ```sh
 npm install svelte-advanced-cropper
+# or
+pnpm add svelte-advanced-cropper
+yarn add svelte-advanced-cropper
+bun add svelte-advanced-cropper
+aube add svelte-advanced-cropper
 ```
 
 Requires Svelte 5.

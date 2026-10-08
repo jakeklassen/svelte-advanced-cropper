@@ -2,6 +2,8 @@
 	import Example from '#site/components/Example.svelte';
 	import GettingStartedExample from '#site/demos/examples/GettingStartedExample.svelte';
 	import source from '#site/demos/examples/GettingStartedExample.svelte?highlight';
+	import Tabs from '#site/components/Tabs.svelte';
+	import TabItem from '#site/components/TabItem.svelte';
 </script>
 
 # Getting started
@@ -18,9 +20,47 @@ If you are coming from the React version, read [Coming from React](/docs/guides/
 
 ## Installation
 
+<Tabs>
+<TabItem label="npm">
+
 ```shell
 npm install svelte-advanced-cropper
 ```
+
+</TabItem>
+
+<TabItem label="pnpm">
+
+```shell
+pnpm add svelte-advanced-cropper
+```
+
+</TabItem>
+
+<TabItem label="yarn">
+
+```shell
+yarn add svelte-advanced-cropper
+```
+
+</TabItem>
+
+<TabItem label="bun">
+
+```shell
+bun add svelte-advanced-cropper
+```
+
+</TabItem>
+
+<TabItem label="aube">
+
+```shell
+aube add svelte-advanced-cropper
+```
+
+</TabItem>
+</Tabs>
 
 Then import the `Cropper` component, and the styles once somewhere in your app (for example in your root layout):
 
