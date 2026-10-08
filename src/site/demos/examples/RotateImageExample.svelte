@@ -1,6 +1,13 @@
 <script lang="ts">
 	import { Cropper, type CropperRef } from 'svelte-advanced-cropper';
-	import { FlipHorizontal2, FlipVertical2, RotateCcw, RotateCw, Save } from '@lucide/svelte';
+	import {
+		RotateCcw,
+		RotateCw,
+		Save,
+		// Named by the mirror axis that is drawn: a vertical axis means a horizontal flip.
+		TrianglesCenterlineDashedHorizontal as FlipVerticalIcon,
+		TrianglesCenterlineDashedVertical as FlipHorizontalIcon
+	} from '@lucide/svelte';
 	import SquareButton from '#site/demos/shared/SquareButton.svelte';
 	import VerticalButtons from '#site/demos/shared/VerticalButtons.svelte';
 	import { image } from '#site/paths.ts';
@@ -33,10 +40,10 @@
 	/>
 	<VerticalButtons>
 		<SquareButton title="Flip Horizontal" onclick={() => flip(true, false)}>
-			<FlipHorizontal2 />
+			<FlipHorizontalIcon />
 		</SquareButton>
 		<SquareButton title="Flip Vertical" onclick={() => flip(false, true)}>
-			<FlipVertical2 />
+			<FlipVerticalIcon />
 		</SquareButton>
 		<SquareButton title="Rotate Clockwise" onclick={() => rotate(90)}><RotateCw /></SquareButton>
 		<SquareButton title="Rotate Counter-Clockwise" onclick={() => rotate(-90)}>
