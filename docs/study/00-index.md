@@ -51,16 +51,16 @@ Everything upstream exports from `src/index.ts` exists under the same name, exce
    - `useCropperImage` fires `onLoad` once per committed image change, as upstream's effect does, even after several `setImage` calls in a row.
    - Likewise, the cropper fires `onReady` once per change of the displayed image, so `setImage(a); setImage(b); setImage(a)` fires it at most once.
    - `CropperPreview` ignores a stretch that a newer one superseded, or one that finishes after destroy.
-13. **Ref methods that change the state run untracked.** A React user calls them from `useEffect`; the Svelte equivalent is calling them from `$effect`. Without `untrack`, the state they read would become that effect's dependencies and their writes would re-run it until Svelte stopped the loop (`effect_update_depth_exceeded`). Getters (`getState()`, `getCoordinates()`, …) stay tracked, so templates and effects still react to them.
-5. **Styles** ship as a global stylesheet compiled from the core SCSS (`scripts/build-styles.ts`), not as component `<style>` blocks. Scoped styles would raise specificity and break user theme overrides.
-6. **Callbacks** only fire while the cropper is mounted (`getInstance()` returns null otherwise), as upstream's ref is null outside the mounted lifetime.
+5. **Ref methods that change the state run untracked.** A React user calls them from `useEffect`; the Svelte equivalent is calling them from `$effect`. Without `untrack`, the state they read would become that effect's dependencies and their writes would re-run it until Svelte stopped the loop (`effect_update_depth_exceeded`). Getters (`getState()`, `getCoordinates()`, …) stay tracked, so templates and effects still react to them.
+6. **Styles** ship as a global stylesheet compiled from the core SCSS (`scripts/build-styles.ts`), not as component `<style>` blocks. Scoped styles would raise specificity and break user theme overrides.
+7. **Callbacks** only fire while the cropper is mounted (`getInstance()` returns null otherwise), as upstream's ref is null outside the mounted lifetime.
 
-7. **Additive exports** (not exported upstream): `AbstractCropper`, `ArtificialTransition`, `HandlerWrapper`, `LineWrapper`, `CropperInstance`, `styleToString` (core camelCase style objects → style strings, needed by custom backgrounds), and the props/method types of every component.
-8. **Not exported from components:** upstream's class components `DraggableElement` and `TransformableImage` expose internal gesture methods (`processMove`, `processEnd`, …) on their refs. These are implementation details and are not exported.
-9. **Accessibility:** rendered images get `alt=""` and the draggable element `role="presentation"`. Upstream renders neither.
-10. **Internal hooks** (not exported) are adapted to Svelte. `useTransition(getTransitions)` returns `{ run, active }`. `useCropperAutoReconcile(cropper, enabled, isConsistent)` takes a consistency predicate to track.
-11. **`useWindowResize(callback)`** registers the callback it was given. To call a callback prop that may change, pass a wrapper: `useWindowResize(() => onResize?.())`.
-12. **Peer dependency** `svelte@^5.29.0`: the gesture components use `{@attach}`.
+8. **Additive exports** (not exported upstream): `AbstractCropper`, `ArtificialTransition`, `HandlerWrapper`, `LineWrapper`, `CropperInstance`, `styleToString` (core camelCase style objects → style strings, needed by custom backgrounds), and the props/method types of every component.
+9. **Not exported from components:** upstream's class components `DraggableElement` and `TransformableImage` expose internal gesture methods (`processMove`, `processEnd`, …) on their refs. These are implementation details and are not exported.
+10. **Accessibility:** rendered images get `alt=""` and the draggable element `role="presentation"`. Upstream renders neither.
+11. **Internal hooks** (not exported) are adapted to Svelte. `useTransition(getTransitions)` returns `{ run, active }`. `useCropperAutoReconcile(cropper, enabled, isConsistent)` takes a consistency predicate to track.
+12. **`useWindowResize(callback)`** registers the callback it was given. To call a callback prop that may change, pass a wrapper: `useWindowResize(() => onResize?.())`.
+13. **Peer dependency** `svelte@^5.29.0`: the gesture components use `{@attach}`.
 
 ## Tooling notes
 
