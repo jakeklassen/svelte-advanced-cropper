@@ -60,6 +60,7 @@ pre.shiki {
 	border: 1px solid var(--color-border);
 	overflow-x: auto;
 	margin: 1rem 0;
+	tab-size: 2;
 }
 
 pre.shiki code {
