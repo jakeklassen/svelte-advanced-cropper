@@ -2,6 +2,7 @@ import { defineConfig } from 'vitest/config';
 import { playwright } from '@vitest/browser-playwright';
 import adapter from '@sveltejs/adapter-static';
 import { sveltekit } from '@sveltejs/kit/vite';
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import { mdsvex } from 'mdsvex';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
@@ -61,6 +62,7 @@ export default defineConfig({
 
 			extensions: ['.svelte', '.svx'],
 			preprocess: [
+				vitePreprocess(),
 				mdsvex({
 					extensions: ['.svx'],
 					highlight: { highlighter },
