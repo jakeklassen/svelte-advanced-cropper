@@ -220,6 +220,19 @@ describe('transitions', () => {
 	});
 });
 
+describe('boundary size', () => {
+	it('measures the layout size inside a scaled container', async () => {
+		// A dialog that scales in, or any scaled ancestor: the on-screen size is 400×320.
+		const { cropper } = await mountCropper({ scale: 0.8 });
+		expect(cropper().getState()?.boundary).toEqual({ width: 500, height: 400 });
+	});
+
+	it('keeps sub-pixel sizes', async () => {
+		const { cropper } = await mountCropper({ width: 500.5, height: 400.25 });
+		expect(cropper().getState()?.boundary).toEqual({ width: 500.5, height: 400.25 });
+	});
+});
+
 describe('FixedCropper', () => {
 	it('locks the stencil size and lets the image move instead', async () => {
 		const { cropper, container } = await mountCropper({

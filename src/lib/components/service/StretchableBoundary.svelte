@@ -17,7 +17,8 @@
 </script>
 
 <script lang="ts">
-	import { fillBoundary, stretchCropperBoundary } from 'advanced-cropper';
+	import { stretchCropperBoundary } from 'advanced-cropper';
+	import { fillLayoutBoundary } from '../../service/boundary';
 
 	let {
 		class: className,
@@ -25,7 +26,8 @@
 		stretcherClassName,
 		contentClassName,
 		stretchAlgorithm = stretchCropperBoundary,
-		sizeAlgorithm = fillBoundary,
+		// Not upstream's fillBoundary: see fillLayoutBoundary for why.
+		sizeAlgorithm = fillLayoutBoundary,
 		children
 	}: StretchableBoundaryProps = $props();
 

@@ -155,6 +155,9 @@ export { useWindowResize } from './hooks/useWindowResize.svelte';
 // custom backgrounds use this to turn them into style strings.
 export { styleToString } from './service/style';
 
+// The default boundary size algorithm: the layout size, unaffected by CSS transforms.
+export { fillLayoutBoundary } from './service/boundary';
+
 // Instance
 export { CropperInstance, type CropperInstanceProps } from './instance/CropperInstance.svelte';
 
