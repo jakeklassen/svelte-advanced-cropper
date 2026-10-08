@@ -240,6 +240,22 @@ describe('Cropper', () => {
 	});
 });
 
+describe('transitions', () => {
+	it('animates the stencil to new coordinates and settles on them', async () => {
+		const onTransitionsEnd = vi.fn<(cropper: CropperRef) => void>();
+		const { cropper, container } = await mountCropper({ onTransitionsEnd });
+		const stencil = container.querySelector<HTMLElement>('.advanced-cropper-stencil-wrapper');
+		if (!stencil) throw new Error('missing stencil');
+		cropper().setCoordinates({ width: 100, height: 100, left: 0, top: 0 }, { transitions: true });
+		expect(cropper().getTransitions().active).toBe(true);
+		await waitFor(() => onTransitionsEnd.mock.calls.length > 0, { timeout: 2000 });
+		await nextFrame();
+		const coordinates = cropper().getStencilCoordinates();
+		expect(parseFloat(stencil.style.width)).toBeCloseTo(coordinates.width, 0);
+		expect(cropper().getTransitions().active).toBe(false);
+	});
+});
+
 describe('FixedCropper', () => {
 	it('locks the stencil size and lets the image move instead', async () => {
 		const { cropper, container } = await mountCropper({

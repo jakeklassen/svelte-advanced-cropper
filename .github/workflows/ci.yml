@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # Installs the node and pnpm versions pinned in mise.toml.
+      - uses: jdx/mise-action@v5
+        with:
+          cache: true
+
+      - run: pnpm install --frozen-lockfile
+
+      # Vitest browser mode and Playwright both run in real Chromium.
+      - run: pnpm exec playwright install --with-deps chromium
+
+      - run: pnpm format:check
+      - run: pnpm lint
+      - run: pnpm check
+      - run: pnpm test:unit --run
+
+      # Builds the site (failing on broken internal links) and packages the library.
+      - run: pnpm build
+        env:
+          STRICT_LINKS: '1'
+
+      - run: pnpm test:e2e

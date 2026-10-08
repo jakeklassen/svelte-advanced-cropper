@@ -8,7 +8,16 @@
 		"image-cropper",
 		"svelte"
 	],
+	"homepage": "https://jakeklassen.github.io/svelte-advanced-cropper/",
+	"bugs": {
+		"url": "https://github.com/jakeklassen/svelte-advanced-cropper/issues"
+	},
 	"license": "MIT",
+	"author": "Jake Klassen",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/jakeklassen/svelte-advanced-cropper.git"
+	},
 	"files": [
 		"dist",
 		"!dist/**/*.test.*",
