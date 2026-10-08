@@ -13,9 +13,9 @@
 		density?: number;
 		/** Receives the rotation to apply, relative to `value`. */
 		onChange?: (shift: number) => void;
-		onBlur?: () => void;
+		/** Called when a drag ends. */
+		onChangeEnd?: () => void;
 		class?: ClassValue;
-		barsClassName?: ClassValue;
 		barClassName?: ClassValue;
 		highlightedBarClassName?: ClassValue;
 		valueBarClassName?: ClassValue;
@@ -30,9 +30,8 @@
 		thickness = 2,
 		density = 10,
 		onChange,
-		onBlur,
+		onChangeEnd,
 		class: className,
-		barsClassName,
 		barClassName,
 		highlightedBarClassName,
 		valueBarClassName,
@@ -54,21 +53,25 @@
 	// The dial is drawn as bars on a half-circle seen edge-on: bars squeeze together and
 	// fade out towards the edges.
 	const bars = $derived.by(() => {
-		const count = width / density;
-		const leftPadding = Math.max(0, Math.floor(count / 2) - Math.round((value - from) / step));
-		const rightPadding = Math.max(0, Math.floor(count / 2) - Math.round((to - value) / step));
+		const visibleBars = width / density;
+		const halfBars = Math.floor(visibleBars / 2);
+		// The half-circle's radius, in bars.
+		const radiusInBars = Math.ceil(visibleBars / 2);
+		// Near the ends of the range, extra bars past `from` and `to` keep the dial full.
+		const extraBarsLeft = Math.max(0, halfBars - Math.round((value - from) / step));
+		const extraBarsRight = Math.max(0, halfBars - Math.round((to - value) / step));
 
 		const values = [
-			...range(from - leftPadding * step, from),
+			...range(from - extraBarsLeft * step, from),
 			...range(from, to + step),
-			...range(to + step, to + step + rightPadding * step)
+			...range(to + step, to + step + extraBarsRight * step)
 		];
 
-		const radius = Math.abs(Math.ceil(count / 2) * step);
+		const radius = radiusInBars * step;
 
 		return values.map((barValue) => {
 			const sign = Math.sign(barValue - value);
-			const visible = count > 0 && Math.abs(barValue - value) / step <= Math.ceil(count / 2);
+			const visible = visibleBars > 0 && Math.abs(barValue - value) / step <= radiusInBars;
 
 			let translate = width / 2 + (sign * width) / 2;
 			let opacity = 0;
@@ -81,9 +84,8 @@
 
 			return {
 				value: barValue,
-				highlighted:
-					(value < 0 && barValue >= value && barValue <= 0) ||
-					(value > 0 && barValue <= value && barValue >= 0),
+				// The bars between zero and the current value.
+				highlighted: Math.min(0, value) <= barValue && barValue <= Math.max(0, value),
 				zero: barValue === 0,
 				opacity,
 				translate: translate - thickness / 2
@@ -107,23 +109,18 @@
 	}
 
 	function onMoveStart() {
-		document.body.classList.add('telegram-rotate-dragging');
 		dragging = true;
 	}
 
 	function onMoveEnd() {
-		document.body.classList.remove('telegram-rotate-dragging');
 		dragging = false;
-		onBlur?.();
+		onChangeEnd?.();
 	}
-
-	// If the dial is destroyed mid-drag, don't leave the grabbing cursor on the page.
-	$effect(() => () => document.body.classList.remove('telegram-rotate-dragging'));
 </script>
 
 <div class={['telegram-rotate-component', className]}>
 	<DraggableArea {onMoveStart} {onMove} {onMoveEnd} useAnchor={false}>
-		<div class={['bars', dragging && 'bars--dragging', barsClassName]} bind:clientWidth={width}>
+		<div class={['bars', dragging && 'bars--dragging']} bind:clientWidth={width}>
 			{#each bars as bar (bar.value)}
 				<div
 					class={[
@@ -191,7 +188,8 @@
 		font-size: 12px;
 		color: inherit;
 	}
-	:global(body.telegram-rotate-dragging) {
+	/* Keep the grabbing cursor while the pointer strays off the dial mid-drag. */
+	:global(body):has(.bars--dragging) {
 		cursor: grabbing !important;
 	}
 </style>

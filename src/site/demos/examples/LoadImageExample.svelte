@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onDestroy } from 'svelte';
 	import { Cropper, type CropperRef } from 'svelte-advanced-cropper';
 	import { getMimeType } from 'advanced-cropper/extensions/mimes';
 	import { X } from '@lucide/svelte';
@@ -12,41 +13,51 @@
 	let input: HTMLInputElement | undefined = $state();
 	let image: Image | null = $state(null);
 
-	// Each pick or clear starts a new request; a read that finishes after a newer one
-	// (or after the demo is destroyed) is ignored.
+	// Each pick or clear starts a new request. A file that finishes reading after a newer
+	// request (or after the demo is destroyed) is ignored.
 	let request = 0;
 
-	function onLoadImage(event: Event & { currentTarget: HTMLInputElement }) {
+	onDestroy(() => request++);
+
+	async function loadImage(event: Event & { currentTarget: HTMLInputElement }) {
 		const file = event.currentTarget.files?.[0];
-
-		if (file) {
-			const id = ++request;
-			// Detect the real MIME type from the file's first bytes, so the result is
-			// exported in the same format. `file.type` alone comes from the extension and
-			// can be wrong, so it is only the fallback.
-			const reader = new FileReader();
-			reader.addEventListener('load', () => {
-				if (id !== request) {
-					return;
-				}
-
-				image = {
-					// An object URL points at the file without copying it into memory as a string.
-					src: URL.createObjectURL(file),
-					type: getMimeType(reader.result, file.type)
-				};
-			});
-			reader.readAsArrayBuffer(file);
-		}
-
 		// Reset the input so that picking the same file again still fires `change`.
 		event.currentTarget.value = '';
+		if (!file) {
+			return;
+		}
+
+		const id = ++request;
+		// Detect the real MIME type from the file's first bytes, so the result is exported
+		// in the same format. `file.type` comes from the extension and can be wrong, so it is
+		// only the fallback.
+		const header = await file.slice(0, 16).arrayBuffer();
+		if (id !== request) {
+			return;
+		}
+
+		image = {
+			// An object URL points at the file without copying it into memory as a string.
+			src: URL.createObjectURL(file),
+			type: getMimeType(header, file.type)
+		};
 	}
 
 	function clear() {
 		request++;
 		image = null;
 	}
+
+	// Revoke the previous object URL when the image changes, so the browser can free the file.
+	$effect(() => {
+		const src = image?.src;
+
+		return () => {
+			if (src) {
+				URL.revokeObjectURL(src);
+			}
+		};
+	});
 
 	function download(blob: Blob, name: string) {
 		const url = URL.createObjectURL(blob);
@@ -58,32 +69,19 @@
 		setTimeout(() => URL.revokeObjectURL(url));
 	}
 
-	function onCrop() {
+	// Export the crop in the format of the original file.
+	function downloadResult() {
 		const canvas = cropper?.getCanvas();
-		const type = image?.type;
-		if (canvas) {
-			canvas.toBlob((blob) => {
-				if (blob) {
-					download(blob, `cropped.${blob.type.split('/')[1] ?? 'png'}`);
-				}
-			}, type);
+		if (!canvas) {
+			return;
 		}
-	}
 
-	$effect(() => () => {
-		request++;
-	});
-
-	$effect(() => {
-		const src = image?.src;
-
-		// Revoke the previous object URL when the image changes, so the browser can free the file.
-		return () => {
-			if (src) {
-				URL.revokeObjectURL(src);
+		canvas.toBlob((blob) => {
+			if (blob) {
+				download(blob, `cropped.${blob.type.split('/')[1] ?? 'png'}`);
 			}
-		};
-	});
+		}, image?.type);
+	}
 </script>
 
 <div class="load-image-example">
@@ -111,7 +109,7 @@
 			Upload image
 		</button>
 		{#if image}
-			<button type="button" class="load-image-example__button" onclick={onCrop}>
+			<button type="button" class="load-image-example__button" onclick={downloadResult}>
 				Download result
 			</button>
 		{/if}
@@ -121,7 +119,7 @@
 		class="load-image-example__file-input"
 		type="file"
 		accept="image/*"
-		onchange={onLoadImage}
+		onchange={loadImage}
 	/>
 </div>
 

@@ -1,3 +1,21 @@
+<script lang="ts" module>
+	const KEY_STEP = 0.05;
+
+	// The value each key moves the slider to, given the current one.
+	const targets: Partial<Record<string, (value: number) => number>> = {
+		ArrowLeft: (value) => value - KEY_STEP,
+		ArrowDown: (value) => value - KEY_STEP,
+		ArrowRight: (value) => value + KEY_STEP,
+		ArrowUp: (value) => value + KEY_STEP,
+		Home: () => 0,
+		End: () => 1
+	};
+
+	function clamp(value: number) {
+		return Math.min(1, Math.max(0, value));
+	}
+</script>
+
 <script lang="ts">
 	import type { ClassValue } from 'svelte/elements';
 
@@ -6,20 +24,18 @@
 		value?: number;
 		onChange?: (value: number) => void;
 		class?: ClassValue;
-		/** Colors and sizes as CSS custom properties, e.g. `--slider-fill: red`. */
-		style?: string;
 		label?: string;
 	}
 
-	let { value = 0, onChange, class: className, style, label = 'Zoom' }: Props = $props();
+	let { value = 0, onChange, class: className, label = 'Zoom' }: Props = $props();
 
-	let line: HTMLDivElement | undefined = $state();
-	let focus = $state(false);
+	let track: HTMLDivElement | undefined = $state();
+	let dragging = $state(false);
 
-	function update(clientX: number) {
-		if (line) {
-			const { left, width } = line.getBoundingClientRect();
-			onChange?.(Math.min(1, Math.max(0, clientX - left) / width));
+	function setValueFromPointer(clientX: number) {
+		if (track) {
+			const { left, width } = track.getBoundingClientRect();
+			onChange?.(clamp((clientX - left) / width));
 		}
 	}
 
@@ -28,31 +44,30 @@
 			return;
 		}
 
-		focus = true;
-		line?.setPointerCapture(event.pointerId);
-		update(event.clientX);
+		dragging = true;
+		track?.setPointerCapture(event.pointerId);
+		setValueFromPointer(event.clientX);
 	}
 
 	function onpointermove(event: PointerEvent) {
-		if (focus) {
+		if (dragging) {
 			event.preventDefault();
-			update(event.clientX);
+			setValueFromPointer(event.clientX);
 		}
 	}
 
 	function onkeydown(event: KeyboardEvent) {
-		const step = { ArrowLeft: -0.05, ArrowDown: -0.05, ArrowRight: 0.05, ArrowUp: 0.05 }[event.key];
-		if (step) {
+		const target = targets[event.key];
+		if (target) {
 			event.preventDefault();
-			onChange?.(Math.min(1, Math.max(0, value + step)));
+			onChange?.(clamp(target(value)));
 		}
 	}
 </script>
 
 <div
 	class={['slider', className]}
-	{style}
-	bind:this={line}
+	bind:this={track}
 	role="slider"
 	tabindex="0"
 	aria-label={label}
@@ -61,25 +76,22 @@
 	aria-valuenow={Math.round(value * 100)}
 	{onpointerdown}
 	{onpointermove}
-	onpointerup={() => (focus = false)}
-	onpointercancel={() => (focus = false)}
+	onpointerup={() => (dragging = false)}
+	onpointercancel={() => (dragging = false)}
 	{onkeydown}
 >
 	<div class="line">
 		<div class="fill" style:flex-grow={value}></div>
-		<div class={['circle', focus && 'circle--focus']} style:left="{value * 100}%">
-			<div class={['inner-circle', focus && 'inner-circle--focus']}></div>
+		<div class={['circle', dragging && 'circle--dragging']} style:left="{value * 100}%">
+			<div class={['inner-circle', dragging && 'inner-circle--dragging']}></div>
 		</div>
 	</div>
 </div>
 
 <style>
+	/* Themeable with --slider-line, --slider-fill, --slider-thumb, --slider-halo and
+	   --slider-line-height, e.g. <Slider --slider-fill="red" />. */
 	.slider {
-		--slider-line: rgba(255, 255, 255, 0.4);
-		--slider-fill: #61dafb;
-		--slider-thumb: var(--slider-fill);
-		--slider-halo: rgba(97, 218, 251, 0.15);
-		--slider-line-height: 2px;
 		width: 100%;
 		height: 20px;
 		display: flex;
@@ -92,8 +104,8 @@
 		outline: none;
 	}
 	.line {
-		background: var(--slider-line);
-		height: var(--slider-line-height);
+		background: var(--slider-line, rgba(255, 255, 255, 0.4));
+		height: var(--slider-line-height, 2px);
 		width: 100%;
 		border-radius: 5px;
 		display: flex;
@@ -101,7 +113,7 @@
 		align-items: center;
 	}
 	.fill {
-		background: var(--slider-fill);
+		background: var(--slider-fill, #61dafb);
 		align-self: stretch;
 		flex-basis: auto;
 		flex-shrink: 0;
@@ -121,16 +133,16 @@
 	}
 	.circle:hover,
 	.slider:focus-visible .circle {
-		background-color: var(--slider-halo);
+		background-color: var(--slider-halo, rgba(97, 218, 251, 0.15));
 	}
-	.circle--focus {
-		background-color: var(--slider-halo);
+	.circle--dragging {
+		background-color: var(--slider-halo, rgba(97, 218, 251, 0.15));
 	}
 	.inner-circle {
 		width: 15px;
 		height: 15px;
 		border-radius: 50%;
-		background-color: var(--slider-thumb);
+		background-color: var(--slider-thumb, var(--slider-fill, #61dafb));
 		transform: scale(1);
 		transition-duration: 0.1s;
 		transition-property: transform;
@@ -138,7 +150,7 @@
 			rgba(0, 0, 0, 0.2) 0 0 7px,
 			rgba(0, 0, 0, 0.15) 0 1px 3px 1px;
 	}
-	.inner-circle--focus {
+	.inner-circle--dragging {
 		transform: scale(1.2);
 	}
 </style>

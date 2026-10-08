@@ -3,45 +3,41 @@
 	import Slider from '../../croppers/FixedCropper/Slider.svelte';
 
 	interface Props {
-		zoom?: number;
+		/** From 0 to 1. */
+		zoom: number;
 		onZoom?: (value: number) => void;
 	}
 
 	let { zoom, onZoom }: Props = $props();
 </script>
 
-<div class="navigation">
-	<div class="wrapper">
-		<ZoomOut class="zoom-icon" size={19} aria-hidden="true" />
-		<Slider
-			class="slider"
-			value={zoom}
-			onChange={onZoom}
-			style="--slider-line: rgb(142, 208, 249); --slider-fill: rgb(29, 161, 242); --slider-halo: rgba(29, 161, 242, 0.15); --slider-line-height: 5px"
-		/>
-		<ZoomIn class="zoom-icon" size={19} aria-hidden="true" />
-	</div>
+<div class="twitter-navigation">
+	<ZoomOut class="twitter-navigation__icon" size={19} aria-hidden="true" />
+	<Slider
+		class="twitter-navigation__slider"
+		value={zoom}
+		onChange={onZoom}
+		--slider-line="rgb(142, 208, 249)"
+		--slider-fill="rgb(29, 161, 242)"
+		--slider-halo="rgba(29, 161, 242, 0.15)"
+		--slider-line-height="5px"
+	/>
+	<ZoomIn class="twitter-navigation__icon" size={19} aria-hidden="true" />
 </div>
 
 <style>
-	.navigation {
+	/* The parent (Wrapper.svelte) sets the width and centres it. */
+	.twitter-navigation {
 		display: flex;
-		width: 100%;
 		align-items: center;
-		justify-content: center;
+		width: 100%;
 		height: 50px;
-	}
-	.wrapper {
-		display: flex;
-		align-items: center;
-		max-width: 400px;
-		width: 100%;
 		color: rgb(101, 119, 134);
 	}
-	.wrapper :global(.zoom-icon) {
+	.twitter-navigation :global(.twitter-navigation__icon) {
 		flex-shrink: 0;
 	}
-	.wrapper :global(.slider) {
+	.twitter-navigation :global(.twitter-navigation__slider) {
 		margin-left: 10px;
 		margin-right: 10px;
 	}

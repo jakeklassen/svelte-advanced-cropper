@@ -1,7 +1,7 @@
 import type { ClassValue } from 'svelte/elements';
 
 /** Class names a TelegramCropper user can pass down to its navigation. */
-export interface PublicNavigationProps {
+export interface NavigationClassNames {
 	class?: ClassValue;
 	buttonClassName?: ClassValue;
 	rotateComponentClassName?: ClassValue;

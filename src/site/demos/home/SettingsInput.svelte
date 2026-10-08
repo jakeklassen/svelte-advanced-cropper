@@ -3,20 +3,21 @@
 		value?: number;
 		label: string;
 		placeholder?: string;
-		onChange?: (value?: number) => void;
 	}
 
-	let { value, label, placeholder, onChange }: Props = $props();
-
-	function oninput(event: Event & { currentTarget: HTMLInputElement }) {
-		const input = event.currentTarget.value;
-		onChange?.(input ? Number(input) : undefined);
-	}
+	let { value = $bindable(), label, placeholder }: Props = $props();
 </script>
 
 <label class="settings-input">
 	<span class="label">{label}</span>
-	<input class="input" type="number" min="0" value={value || ''} {placeholder} {oninput} />
+	<!-- 0 and an empty field both mean "no limit": 0 shows as empty, so the placeholder reads. -->
+	<input
+		class="input"
+		type="number"
+		min="0"
+		bind:value={() => value || undefined, (input) => (value = input || undefined)}
+		{placeholder}
+	/>
 </label>
 
 <style>

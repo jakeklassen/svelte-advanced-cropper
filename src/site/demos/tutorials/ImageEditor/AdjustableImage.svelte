@@ -1,16 +1,12 @@
 <script lang="ts">
 	import type { ClassValue } from 'svelte/elements';
 	import { CropperSource } from 'svelte-advanced-cropper';
-	import { drawAdjustedImage } from './filters';
+	import { drawAdjustedImage, type Adjustments } from './filters.ts';
 
-	interface Props {
+	interface Props extends Partial<Adjustments> {
 		src?: string;
 		class?: ClassValue;
 		crossOrigin?: 'anonymous' | 'use-credentials' | boolean;
-		brightness?: number;
-		saturation?: number;
-		hue?: number;
-		contrast?: number;
 		style?: string;
 		/** The canvas the adjusted image is drawn into. */
 		ref?: HTMLCanvasElement | null;
@@ -29,21 +25,25 @@
 	}: Props = $props();
 
 	let source: HTMLImageElement | HTMLCanvasElement | null = $state(null);
-	// Bumped when the source image finishes loading, so the effect redraws then too.
-	let loads = $state(0);
 
-	// Redraw whenever the image loads or an adjustment changes. The adjustments are read
-	// before the readiness check so they are always tracked, even if the first run
-	// happens before the image has loaded.
-	$effect(() => {
+	// Draws the source image into the canvas, with the adjustments applied. It runs as an
+	// effect, to redraw whenever an adjustment changes, and once more when the image loads.
+	function draw() {
+		// Read the adjustments before the readiness check, so the effect always tracks them,
+		// even when its first run comes before the image has loaded.
 		const adjustments = { brightness, contrast, saturation, hue };
-		void loads;
 		if (ref && source instanceof HTMLImageElement && source.complete) {
 			drawAdjustedImage(ref, source, adjustments);
 		}
-	});
+	}
+
+	$effect(draw);
 </script>
 
+<!--
+	New elements for every image, as upstream keys them by `src`. A fresh canvas starts blank,
+	so the previous picture never shows, stretched to the new image's size, while it loads.
+-->
 {#key src}
 	<canvas bind:this={ref} class={['adjustable-image-element', className]} {style}></canvas>
 	<CropperSource
@@ -51,7 +51,7 @@
 		{src}
 		{crossOrigin}
 		class="adjustable-image-source"
-		onload={() => loads++}
+		onload={draw}
 	/>
 {/key}
 

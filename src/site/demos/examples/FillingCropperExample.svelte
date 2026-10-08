@@ -2,6 +2,8 @@
 	import { Cropper, type CropperState } from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 
+	const src = image('pexels-photo-6524107.jpeg');
+
 	// Make the stencil cover the whole visible area (or the whole image before the
 	// visible area is known).
 	function defaultSize({ imageSize, visibleArea }: CropperState) {
@@ -12,7 +14,7 @@
 	}
 </script>
 
-<Cropper class="filling-cropper-example" src={image('pexels-photo-6524107.jpeg')} {defaultSize} />
+<Cropper class="filling-cropper-example" {src} {defaultSize} />
 
 <style>
 	:global(.filling-cropper-example) {

@@ -1,3 +1,4 @@
+/** Each adjustment is in [-1, 1]; 0 leaves the image unchanged. */
 export interface Adjustments {
 	brightness: number;
 	contrast: number;
@@ -5,8 +6,7 @@ export interface Adjustments {
 	hue: number;
 }
 
-/** Each adjustment is in [-1, 1]; 0 leaves the image unchanged. */
-export function getFilter({ brightness, contrast, saturation, hue }: Adjustments): string {
+function getFilter({ brightness, contrast, saturation, hue }: Adjustments): string {
 	return [
 		`brightness(${100 + brightness * 100}%)`,
 		`contrast(${100 + contrast * 100}%)`,
@@ -68,14 +68,14 @@ function applyAdjustments(
 		return;
 	}
 
-	const scale = 1 + brightness;
-	const c = 1 + contrast;
-	const s = 1 + saturation;
+	const brightnessFactor = 1 + brightness;
+	const contrastFactor = 1 + contrast;
+	const saturationFactor = 1 + saturation;
 	// prettier-ignore
 	const saturate = [
-		0.213 + 0.787 * s, 0.715 - 0.715 * s, 0.072 - 0.072 * s,
-		0.213 - 0.213 * s, 0.715 + 0.285 * s, 0.072 - 0.072 * s,
-		0.213 - 0.213 * s, 0.715 - 0.715 * s, 0.072 + 0.928 * s
+		0.213 + 0.787 * saturationFactor, 0.715 - 0.715 * saturationFactor, 0.072 - 0.072 * saturationFactor,
+		0.213 - 0.213 * saturationFactor, 0.715 + 0.285 * saturationFactor, 0.072 - 0.072 * saturationFactor,
+		0.213 - 0.213 * saturationFactor, 0.715 - 0.715 * saturationFactor, 0.072 + 0.928 * saturationFactor
 	];
 	const cos = Math.cos(hue * 2 * Math.PI);
 	const sin = Math.sin(hue * 2 * Math.PI);
@@ -90,7 +90,7 @@ function applyAdjustments(
 	const { data } = imageData;
 	for (let i = 0; i < data.length; i += 4) {
 		let rgb = [data[i], data[i + 1], data[i + 2]].map((value) =>
-			clamp((clamp(value * scale) - 127.5) * c + 127.5)
+			clamp((clamp(value * brightnessFactor) - 127.5) * contrastFactor + 127.5)
 		);
 		rgb = multiply(rotate, multiply(saturate, rgb));
 		data[i] = rgb[0];

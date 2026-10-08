@@ -18,8 +18,8 @@
 <FixedCropper
 	bind:this={cropper}
 	stencilProps={{
-		handlers: false,
-		lines: false,
+		handlers: {},
+		lines: {},
 		movable: false,
 		resizable: false,
 		...stencilProps

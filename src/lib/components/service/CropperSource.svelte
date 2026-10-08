@@ -10,6 +10,7 @@
 
 <script lang="ts">
 	import { crossOriginAttribute } from '../../service/image';
+
 	let { src, crossOrigin = true, ref = $bindable(null), ...props }: CropperSourceProps = $props();
 </script>
 

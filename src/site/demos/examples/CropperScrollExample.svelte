@@ -2,6 +2,8 @@
 	import { Cropper, ImageRestriction } from 'svelte-advanced-cropper';
 	import BackgroundWrapperWithNotifications from './BackgroundWrapperWithNotifications.svelte';
 	import { image } from '#site/paths.ts';
+
+	const src = image('photo-1633158617942-204b1469bc05.jpg');
 </script>
 
 <Cropper
@@ -17,7 +19,7 @@
 	}}
 	imageRestriction={ImageRestriction.stencil}
 	backgroundWrapperComponent={BackgroundWrapperWithNotifications}
-	src={image('photo-1633158617942-204b1469bc05.jpg')}
+	{src}
 />
 
 <style>

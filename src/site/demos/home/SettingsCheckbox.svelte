@@ -2,23 +2,17 @@
 	import { Check } from '@lucide/svelte';
 
 	interface Props {
-		value?: boolean;
+		checked?: boolean;
 		label: string;
-		onChange?: (value: boolean) => void;
 	}
 
-	let { value = false, label, onChange }: Props = $props();
+	let { checked = $bindable(), label }: Props = $props();
 </script>
 
 <label class="settings-checkbox">
-	<input
-		class="input"
-		type="checkbox"
-		checked={value}
-		onchange={(event) => onChange?.(event.currentTarget.checked)}
-	/>
-	<span class={['box', value && 'box--checked']}>
-		<Check size={12} strokeWidth={3} class={['check', !value && 'check--hidden']} />
+	<input class="input" type="checkbox" bind:checked />
+	<span class={['box', checked && 'box--checked']}>
+		<Check size={12} strokeWidth={3} class={['check', !checked && 'check--hidden']} />
 	</span>
 	<span class="label">{label}</span>
 </label>

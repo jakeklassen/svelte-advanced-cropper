@@ -28,7 +28,7 @@
 
 	const src = $derived(image(images[theme]));
 
-	let stencilComponent: StencilComponent = $state.raw(RectangleStencil);
+	let stencilComponent: StencilComponent = $state(RectangleStencil);
 	// The `grid` prop only sets the initial state; the button toggles it afterwards.
 	let stencilGrid = $state(untrack(() => grid));
 </script>

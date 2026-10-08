@@ -2,7 +2,7 @@
 	import { Cropper, type CropperRef } from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 
-	let src = $state(image('photo-1599140849279-1014532882fe.jpg'));
+	const src = image('photo-1599140849279-1014532882fe.jpg');
 
 	function onChange(cropper: CropperRef) {
 		console.log(cropper.getCoordinates(), cropper.getCanvas());

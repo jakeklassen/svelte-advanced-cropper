@@ -8,24 +8,29 @@
 	} from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 
+	const src = image('photo-1596473322597-91d5b6938b8a.jpg');
+
 	let cropper: CropperRef | undefined = $state();
 	let adjustStencil = $state(false);
 
 	// Start with a stencil covering 80% of the visible area, centred in it.
+	const stencilScale = 0.8;
+	const stencilOffset = (1 - stencilScale) / 2;
+
 	function defaultSize({ visibleArea, imageSize }: CropperState) {
 		const area = visibleArea ?? imageSize;
 
 		return {
-			width: area.width * 0.8,
-			height: area.height * 0.8
+			width: area.width * stencilScale,
+			height: area.height * stencilScale
 		};
 	}
 
 	function defaultPosition({ visibleArea }: CropperState) {
 		return visibleArea
 			? {
-					left: visibleArea.left + 0.1 * visibleArea.width,
-					top: visibleArea.top + 0.1 * visibleArea.height
+					left: visibleArea.left + stencilOffset * visibleArea.width,
+					top: visibleArea.top + stencilOffset * visibleArea.height
 				}
 			: { left: 0, top: 0 };
 	}
@@ -46,10 +51,20 @@
 			left: 19,
 			top: 285
 		}}
-		src={image('photo-1596473322597-91d5b6938b8a.jpg')}
+		{src}
 	/>
 	<label class="adjust-stencil-example__adjust">
-		<input type="checkbox" bind:checked={adjustStencil} onchange={() => cropper?.reset()} />
+		<!-- Start over from the default crop whenever the option changes. -->
+		<input
+			type="checkbox"
+			bind:checked={
+				() => adjustStencil,
+				(checked) => {
+					adjustStencil = checked;
+					cropper?.reset();
+				}
+			}
+		/>
 		Adjust stencil
 	</label>
 </div>

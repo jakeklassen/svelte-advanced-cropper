@@ -5,41 +5,35 @@
 	import VerticalButtons from '#site/demos/shared/VerticalButtons.svelte';
 	import { image } from '#site/paths.ts';
 
+	const src = image('photo-1538888649860-8fb12eb67541.jpg');
+
 	let cropper: CropperRef | undefined = $state();
 
-	function zoom(factor: number) {
-		cropper?.zoomImage(factor);
-	}
+	// Each button moves the image by a quarter of the stencil size, in its direction.
+	const directions = {
+		left: { x: -1, y: 0 },
+		right: { x: 1, y: 0 },
+		top: { x: 0, y: -1 },
+		bottom: { x: 0, y: 1 }
+	};
 
-	// Move the image by a quarter of the stencil size.
-	function move(direction: 'left' | 'right' | 'top' | 'bottom') {
+	function move(direction: keyof typeof directions) {
 		const coordinates = cropper?.getCoordinates();
 		if (!cropper || !coordinates) {
 			return;
 		}
 
-		const { width, height } = coordinates;
-		if (direction === 'left') {
-			cropper.moveImage(-width / 4);
-		} else if (direction === 'right') {
-			cropper.moveImage(width / 4);
-		} else if (direction === 'top') {
-			cropper.moveImage(0, -height / 4);
-		} else {
-			cropper.moveImage(0, height / 4);
-		}
+		const { x, y } = directions[direction];
+		cropper.moveImage((x * coordinates.width) / 4, (y * coordinates.height) / 4);
 	}
 </script>
 
 <div class="transform-image-example">
-	<Cropper
-		bind:this={cropper}
-		class="transform-image-example__cropper"
-		src={image('photo-1538888649860-8fb12eb67541.jpg')}
-	/>
+	<Cropper bind:this={cropper} class="transform-image-example__cropper" {src} />
 	<VerticalButtons>
-		<SquareButton title="Zoom In" onclick={() => zoom(2)}><ZoomIn /></SquareButton>
-		<SquareButton title="Zoom Out" onclick={() => zoom(0.5)}><ZoomOut /></SquareButton>
+		<SquareButton title="Zoom In" onclick={() => cropper?.zoomImage(2)}><ZoomIn /></SquareButton>
+		<SquareButton title="Zoom Out" onclick={() => cropper?.zoomImage(0.5)}><ZoomOut /></SquareButton
+		>
 		<SquareButton title="Move Top" onclick={() => move('top')}><ArrowUp /></SquareButton>
 		<SquareButton title="Move Left" onclick={() => move('left')}><ArrowLeft /></SquareButton>
 		<SquareButton title="Move Right" onclick={() => move('right')}><ArrowRight /></SquareButton>

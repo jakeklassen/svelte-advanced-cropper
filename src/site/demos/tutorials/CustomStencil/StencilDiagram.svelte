@@ -10,7 +10,8 @@
 	let { variant }: Props = $props();
 
 	const id = $props.id();
-	const arrow = `arrow-${id}`;
+	const arrowMarkerId = `${id}-arrow`;
+	const captionId = `${id}-caption`;
 
 	// The circle stencil, centred in a 320×200 picture.
 	const cx = 160;
@@ -23,6 +24,14 @@
 	const handlerIcon = `M${hx - 5} ${hy + 5}L${hx + 5} ${hy - 5}M${hx + 1} ${hy - 5}H${hx + 5}V${hy - 1}M${hx - 5} ${hy + 1}V${hy + 5}H${hx - 1}`;
 	const shade = `M0 0H320V200H0Z M${cx - r} ${cy}a${r} ${r} 0 1 0 ${2 * r} 0a${r} ${r} 0 1 0 ${-2 * r} 0Z`;
 
+	// The resize directions: an arrow out of each edge of the bounding box.
+	const edgeArrows = [
+		{ edge: 'left', x1: cx - r, y1: cy, x2: cx - r - 30, y2: cy },
+		{ edge: 'right', x1: cx + r, y1: cy, x2: cx + r + 30, y2: cy },
+		{ edge: 'top', x1: cx, y1: cy - r, x2: cx, y2: cy - r - 22 },
+		{ edge: 'bottom', x1: cx, y1: cy + r, x2: cx, y2: cy + r + 22 }
+	];
+
 	const titles = {
 		idea: 'A round stencil with a single resize handler in its top-right part',
 		resize: 'Dragging the handler grows the circle in every direction at once',
@@ -31,10 +40,10 @@
 </script>
 
 <figure class="stencil-diagram">
-	<svg viewBox="0 0 320 200" role="img" aria-label={titles[variant]}>
+	<svg viewBox="0 0 320 200" role="img" aria-labelledby={captionId}>
 		<defs>
 			<marker
-				id={arrow}
+				id={arrowMarkerId}
 				viewBox="0 0 10 10"
 				refX="8"
 				refY="5"
@@ -92,7 +101,7 @@
 					y2={cy - (r + 16) * Math.sin(rad)}
 					stroke="#61dafb"
 					stroke-width="2"
-					marker-end="url(#{arrow})"
+					marker-end="url(#{arrowMarkerId})"
 				/>
 			{/each}
 			<circle {cx} {cy} r="3" fill="white" />
@@ -116,54 +125,29 @@
 				y2={hy}
 				stroke="#ffd166"
 				stroke-width="2"
-				marker-end="url(#{arrow})"
+				marker-end="url(#{arrowMarkerId})"
 			/>
 			<circle cx={hx} cy={hy} r="5" fill="#ffd166" />
 			<text x={hx + 6} y={hy - 10} class="stencil-diagram__accent">shift.left</text>
 			<!-- The resize directions. -->
-			<line
-				x1={cx - r}
-				y1={cy}
-				x2={cx - r - 30}
-				y2={cy}
-				stroke="#61dafb"
-				stroke-width="2"
-				marker-end="url(#{arrow})"
-			/>
-			<line
-				x1={cx + r}
-				y1={cy}
-				x2={cx + r + 30}
-				y2={cy}
-				stroke="#61dafb"
-				stroke-width="2"
-				marker-end="url(#{arrow})"
-			/>
-			<line
-				x1={cx}
-				y1={cy - r}
-				x2={cx}
-				y2={cy - r - 22}
-				stroke="#61dafb"
-				stroke-width="2"
-				marker-end="url(#{arrow})"
-			/>
-			<line
-				x1={cx}
-				y1={cy + r}
-				x2={cx}
-				y2={cy + r + 22}
-				stroke="#61dafb"
-				stroke-width="2"
-				marker-end="url(#{arrow})"
-			/>
+			{#each edgeArrows as arrow (arrow.edge)}
+				<line
+					x1={arrow.x1}
+					y1={arrow.y1}
+					x2={arrow.x2}
+					y2={arrow.y2}
+					stroke="#61dafb"
+					stroke-width="2"
+					marker-end="url(#{arrowMarkerId})"
+				/>
+			{/each}
 			<text x={cx - r - 34} y={cy - 8} text-anchor="end">left</text>
 			<text x={cx + r + 34} y={cy - 8}>right</text>
 			<text x={cx + 8} y={cy - r - 10}>top</text>
 			<text x={cx + 8} y={cy + r + 18}>bottom</text>
 		{/if}
 	</svg>
-	<figcaption>{titles[variant]}</figcaption>
+	<figcaption id={captionId}>{titles[variant]}</figcaption>
 </figure>
 
 <style>

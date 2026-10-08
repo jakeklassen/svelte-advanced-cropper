@@ -22,7 +22,9 @@
 
 		return {
 			...example,
-			coefficient: rotatedSize.height / example.image.height,
+			// The image fills the frame's height, so shrink it until its rotated bounding
+			// box fits in the frame instead.
+			scale: example.image.height / rotatedSize.height,
 			aspectRatio: rotatedSize.width / rotatedSize.height
 		};
 	});
@@ -37,24 +39,27 @@
 			>
 				<img
 					class="rotate-coordinates-example__image"
-					style:transform="translate(-50%, -50%) scale({1 / diagram.coefficient}) rotate({diagram.rotate}deg)"
+					style:transform="translate(-50%, -50%) scale({diagram.scale}) rotate({diagram.rotate}deg)"
 					{src}
 					alt="Image rotated by {diagram.rotate} degrees"
 				/>
+				<!-- The stencil is drawn at half size, centred in the frame. -->
 				<div
 					class="rotate-coordinates-example__stencil"
 					style:width="{diagram.stencil.width / 2}px"
 					style:height="{diagram.stencil.height / 2}px"
 				></div>
+				<!--
+					Guides from the frame's left and top edges to the stencil. The stencil's edges sit
+					half its drawn size (a quarter of its real size) away from the centre.
+				-->
 				<div
 					class="rotate-coordinates-example__left"
-					style:left="0px"
 					style:top="calc(50% - {diagram.stencil.height / 4}px)"
 					style:width="calc(50% - {diagram.stencil.width / 4}px)"
 				></div>
 				<div
 					class="rotate-coordinates-example__top"
-					style:top="0px"
 					style:left="calc(50% - {diagram.stencil.width / 4}px)"
 					style:height="calc(50% - {diagram.stencil.height / 4}px)"
 				></div>
@@ -107,5 +112,11 @@
 		border: solid 1px rgba(0, 0, 0, 0.1);
 		position: absolute;
 		z-index: 1;
+	}
+	.rotate-coordinates-example__left {
+		left: 0;
+	}
+	.rotate-coordinates-example__top {
+		top: 0;
 	}
 </style>

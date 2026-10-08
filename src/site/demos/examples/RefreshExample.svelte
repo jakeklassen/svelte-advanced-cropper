@@ -1,63 +1,51 @@
 <script lang="ts">
-	import { onMount, tick } from 'svelte';
 	import {
 		BoundingBox,
 		Cropper,
 		ImageRestriction,
 		anchorMoveToResizeDirections,
-		useWindowResize,
 		type CropperRef,
 		type MoveDirections,
 		type ResizeAnchor
 	} from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 
+	const src = image('photo-1553301208-a3718cc0150e.jpg');
+
 	let cropper: CropperRef | undefined = $state();
-	let container: HTMLDivElement | undefined = $state();
 
-	let width = $state(0);
-	let height = $state(0);
-	let left = $state(0);
-	let top = $state(0);
+	// The container's inner size, kept up to date by Svelte (also on window resizes).
+	let containerWidth = $state(0);
+	let containerHeight = $state(0);
 
-	// Resize the box (clamped to the container), keep it centred, and tell the cropper
-	// its container changed. The cropper can't detect that on its own.
-	async function updateCoordinates(newWidth: number, newHeight: number) {
-		if (!container) {
-			return;
-		}
+	// The size the handles ask for. The box starts as large as the container.
+	let requestedWidth = $state(Infinity);
+	let requestedHeight = $state(Infinity);
 
-		width = Math.min(Math.max(0, newWidth), container.clientWidth);
-		height = Math.min(Math.max(0, newHeight), container.clientHeight);
-		left = container.clientWidth / 2 - width / 2;
-		top = container.clientHeight / 2 - height / 2;
-
-		// Wait for the new size to reach the DOM before the cropper measures it.
-		await tick();
-		cropper?.refresh();
-	}
+	// The box never outgrows the container and stays centred in it.
+	const width = $derived(Math.min(Math.max(0, requestedWidth), containerWidth));
+	const height = $derived(Math.min(Math.max(0, requestedHeight), containerHeight));
+	const left = $derived((containerWidth - width) / 2);
+	const top = $derived((containerHeight - height) / 2);
 
 	// The box stays centred, so it grows by twice the distance the handle moved.
 	function onResize(anchor: ResizeAnchor, directions: MoveDirections) {
 		const resize = anchorMoveToResizeDirections(anchor, directions);
-		void updateCoordinates(
-			width + (resize.left + resize.right) * 2,
-			height + (resize.top + resize.bottom) * 2
-		);
+		requestedWidth = width + (resize.left + resize.right) * 2;
+		requestedHeight = height + (resize.top + resize.bottom) * 2;
 	}
 
-	useWindowResize(() => {
-		void updateCoordinates(width, height);
-	});
-
-	onMount(() => {
-		if (container) {
-			void updateCoordinates(container.clientWidth, container.clientHeight);
-		}
+	// The cropper can't tell that its container changed size, so ask it to measure
+	// itself again whenever the box does. Effects run after the DOM is updated, so the
+	// cropper sees the new size.
+	$effect(() => {
+		void width;
+		void height;
+		cropper?.refresh();
 	});
 </script>
 
-<div class="refresh-example" bind:this={container}>
+<div class="refresh-example" bind:clientWidth={containerWidth} bind:clientHeight={containerHeight}>
 	<BoundingBox
 		class="refresh-example__wrapper"
 		style="width: {width}px; height: {height}px; left: {left}px; top: {top}px;"
@@ -68,7 +56,7 @@
 		<Cropper
 			bind:this={cropper}
 			class="refresh-example__cropper"
-			src={image('photo-1553301208-a3718cc0150e.jpg')}
+			{src}
 			stencilProps={{
 				aspectRatio: 1
 			}}

@@ -2,9 +2,10 @@
 	import HierarchyTree from './HierarchyTree.svelte';
 	import type { HierarchyNode } from './hierarchy.ts';
 
-	const handle = (wrapper: string): HierarchyNode[] => [
+	// A line or handler wrapper, with the DraggableElement inside it.
+	const wrapperWithDraggable = (title: string): HierarchyNode[] => [
 		{
-			title: wrapper,
+			title,
 			kind: 'component',
 			children: [
 				{ title: 'DraggableElement', kind: 'component', to: '/docs/components/DraggableElement' }
@@ -33,14 +34,14 @@
 								kind: 'replaceable',
 								to: '/docs/components/SimpleLine',
 								note: 'lineComponent',
-								children: handle('LineWrapper')
+								children: wrapperWithDraggable('LineWrapper')
 							},
 							{
 								title: 'SimpleHandler',
 								kind: 'replaceable',
 								to: '/docs/components/SimpleHandler',
 								note: 'handlerComponent',
-								children: handle('HandlerWrapper')
+								children: wrapperWithDraggable('HandlerWrapper')
 							},
 							{
 								title: 'DraggableArea',

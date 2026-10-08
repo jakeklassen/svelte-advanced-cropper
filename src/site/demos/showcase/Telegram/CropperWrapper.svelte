@@ -4,7 +4,7 @@
 	import { LoaderCircle } from '@lucide/svelte';
 	import { CropperFade, type CropperRef } from 'svelte-advanced-cropper';
 	import Navigation from './Navigation.svelte';
-	import type { PublicNavigationProps } from './types';
+	import type { NavigationClassNames } from './types.ts';
 
 	interface Props {
 		cropper: CropperRef;
@@ -13,7 +13,7 @@
 		children?: Snippet;
 		spinnerClassName?: ClassValue;
 		navigation?: boolean;
-		navigationProps?: PublicNavigationProps;
+		navigationProps?: NavigationClassNames;
 	}
 
 	let {
@@ -44,9 +44,9 @@
 				{...navigationClassNames}
 				class={['telegram-cropper-wrapper__navigation', navigationClassName]}
 				value={cropper.getTransforms().rotate}
-				onRotate={(angle, options) => cropper.rotateImage(angle, options)}
-				onRotateEnd={() => cropper.transformImageEnd()}
-				onFlip={(horizontal, vertical, options) => cropper.flipImage(horizontal, vertical, options)}
+				onRotate={cropper.rotateImage}
+				onRotateEnd={cropper.transformImageEnd}
+				onFlip={cropper.flipImage}
 				disabled={cropper.getTransitions().active}
 			/>
 		{/if}

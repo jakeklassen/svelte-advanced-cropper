@@ -2,6 +2,8 @@
 	import { Cropper, Priority } from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 
+	const src = image('photo-1602718571797-49d5e9d54563.jpg');
+
 	const defaultVisibleArea = {
 		width: 800,
 		height: 775,
@@ -12,7 +14,7 @@
 
 <Cropper
 	class="default-visible-area-example"
-	src={image('photo-1602718571797-49d5e9d54563.jpg')}
+	{src}
 	{defaultVisibleArea}
 	priority={Priority.visibleArea}
 />

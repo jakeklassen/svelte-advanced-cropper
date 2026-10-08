@@ -16,28 +16,32 @@
 
 	const aspectRatio = 1;
 
-	let example: HTMLDivElement | undefined = $state();
+	let container: HTMLDivElement | undefined = $state();
 	let boundary = $state.raw({ width: 0, height: 0 });
 	let coordinates: Coordinates = $state.raw({ width: 100, height: 100, left: 0, top: 0 });
 	// The coordinates at the start of the current resize, drawn as an outline.
 	let reference: Coordinates | null = $state.raw(null);
 
+	// The box can be any size, but it must stay inside the boundary.
+	const sizeRestrictions = $derived({
+		minWidth: 0,
+		minHeight: 0,
+		maxWidth: boundary.width,
+		maxHeight: boundary.height
+	});
+	const positionRestrictions = $derived({
+		left: 0,
+		top: 0,
+		right: boundary.width,
+		bottom: boundary.height
+	});
+
 	function onResize(anchor: ResizeAnchor, directions: MoveDirections, options: ResizeOptions) {
 		reference = options.reference || null;
 		coordinates = anchoredResizeCoordinatesAlgorithm(coordinates, anchor, directions, options, {
 			aspectRatio: createAspectRatio(aspectRatio),
-			sizeRestrictions: {
-				maxWidth: boundary.width,
-				maxHeight: boundary.height,
-				minWidth: 0,
-				minHeight: 0
-			},
-			positionRestrictions: {
-				left: 0,
-				top: 0,
-				right: boundary.width,
-				bottom: boundary.height
-			}
+			sizeRestrictions,
+			positionRestrictions
 		});
 	}
 
@@ -46,45 +50,42 @@
 	}
 
 	function updateBoundary() {
-		if (example) {
-			boundary = { width: example.clientWidth, height: example.clientHeight };
-			// Keep the box inside the (possibly smaller) boundary.
-			coordinates = moveToPositionRestrictions(
-				{
-					...coordinates,
-					...approximateSize({
-						width: coordinates.width,
-						height: coordinates.height,
-						aspectRatio,
-						sizeRestrictions: {
-							maxWidth: boundary.width,
-							maxHeight: boundary.height,
-							minWidth: 0,
-							minHeight: 0
-						}
-					})
-				},
-				{ left: 0, top: 0, right: boundary.width, bottom: boundary.height }
-			);
+		if (!container) {
+			return;
 		}
+
+		boundary = { width: container.clientWidth, height: container.clientHeight };
+		// Keep the box inside the (possibly smaller) boundary.
+		coordinates = moveToPositionRestrictions(
+			{
+				...coordinates,
+				...approximateSize({
+					width: coordinates.width,
+					height: coordinates.height,
+					aspectRatio,
+					sizeRestrictions
+				})
+			},
+			positionRestrictions
+		);
 	}
 
 	useWindowResize(updateBoundary);
 
 	onMount(() => {
-		if (example) {
+		if (container) {
 			coordinates = {
 				width: 100,
 				height: 100,
-				left: example.clientWidth / 2 - 50,
-				top: example.clientHeight / 2 - 50
+				left: container.clientWidth / 2 - 50,
+				top: container.clientHeight / 2 - 50
 			};
 			updateBoundary();
 		}
 	});
 </script>
 
-<div class="resize-algorithm" bind:this={example}>
+<div class="resize-algorithm" bind:this={container}>
 	<div
 		class="resize-algorithm__boundary"
 		style:width="{boundary.width}px"

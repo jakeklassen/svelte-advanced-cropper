@@ -2,6 +2,7 @@
 	import type { Snippet } from 'svelte';
 	import type { ClassValue } from 'svelte/elements';
 	import type { BoundarySizeAlgorithm, BoundaryStretchAlgorithm, Size } from 'advanced-cropper';
+
 	export type { StretchableBoundaryMethods } from './methods';
 
 	export interface StretchableBoundaryProps {

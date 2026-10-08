@@ -59,6 +59,7 @@
 		'photo-1639141700803-e5836ba39b4b.jpg'
 	].map((name) => ({
 		src: image(name),
+		// Each photo has a small thumbnail next to it: `photo.jpg` → `photo__preview.jpg`.
 		preview: image(name.replace(/(\.\w+)$/, '__preview$1'))
 	}));
 
@@ -83,13 +84,24 @@
 
 	// Prerendering has no URL hash, so the page starts on the default cropper and picks
 	// up the hash once it runs in the browser.
-	let selected: CropperKey = $state('default-cropper');
-	const data = $derived(croppers.find((cropper) => cropper.key === selected) ?? croppers[0]);
-	const hasSettings = $derived(data.settings.length > 0);
+	let selectedKey: CropperKey = $state('default-cropper');
+	const activeCropper = $derived(
+		croppers.find((cropper) => cropper.key === selectedKey) ?? croppers[0]
+	);
 
 	let src = $state(images[0].src);
-	let uploaded: string | undefined;
 	let fileInput: HTMLInputElement | undefined = $state();
+
+	// Free an uploaded image's object URL once it is replaced (a no-op for the photos).
+	$effect(() => {
+		const current = src;
+
+		return () => {
+			if (current.startsWith('blob:')) {
+				URL.revokeObjectURL(current);
+			}
+		};
+	});
 
 	const stencilComponent = $derived(
 		settings.stencilType === 'circle' ? CircleStencil : RectangleStencil
@@ -105,32 +117,22 @@
 	function readHash() {
 		const hash = location.hash.slice(1);
 		const match = croppers.find((cropper) => cropper.key === hash);
-		selected = match ? match.key : croppers[0].key;
+		selectedKey = match ? match.key : croppers[0].key;
 	}
 
 	function select(key: CropperKey) {
-		selected = key;
+		selectedKey = key;
 		// Update the hash without a navigation or a new history entry.
 		void goto(`#${key}`, { shallow: true, replace: true });
 	}
 
-	function setImage(value: string) {
-		if (uploaded) {
-			URL.revokeObjectURL(uploaded);
-		}
-
-		uploaded = undefined;
-		src = value;
-	}
-
-	function onUpload(event: Event & { currentTarget: HTMLInputElement }) {
+	function loadImage(event: Event & { currentTarget: HTMLInputElement }) {
 		const file = event.currentTarget.files?.[0];
 		if (file) {
-			setImage(URL.createObjectURL(file));
-			uploaded = src;
+			src = URL.createObjectURL(file);
 		}
 
-		// Allow picking the same file again.
+		// Reset the input so that picking the same file again still fires `change`.
 		event.currentTarget.value = '';
 	}
 
@@ -144,15 +146,7 @@
 		showSettings = false;
 	}
 
-	onMount(() => {
-		readHash();
-
-		return () => {
-			if (uploaded) {
-				URL.revokeObjectURL(uploaded);
-			}
-		};
-	});
+	onMount(readHash);
 </script>
 
 <svelte:window onhashchange={readHash} />
@@ -163,9 +157,9 @@
 		{#each croppers as cropper (cropper.key)}
 			<button
 				type="button"
-				class={['cell', 'cropper-type', selected === cropper.key && 'cropper-type--active']}
+				class={['cell', 'cropper-type', selectedKey === cropper.key && 'cropper-type--active']}
 				aria-label={cropper.name}
-				aria-pressed={selected === cropper.key}
+				aria-pressed={selectedKey === cropper.key}
 				title={cropper.name}
 				onclick={() => select(cropper.key)}
 			>
@@ -174,7 +168,7 @@
 		{/each}
 	</div>
 	<div class="body">
-		{#if selected === 'mobile-cropper'}
+		{#if selectedKey === 'mobile-cropper'}
 			<TelegramCropper
 				class="croppers-wizard__cropper"
 				{src}
@@ -185,7 +179,7 @@
 				{stencilComponent}
 				{stencilProps}
 			/>
-		{:else if selected === 'default-cropper'}
+		{:else if selectedKey === 'default-cropper'}
 			<DefaultCropper
 				wrapperClassName="croppers-wizard__cropper"
 				{src}
@@ -226,16 +220,14 @@
 		>
 			<Info size={22} />
 		</button>
-		{#if hasSettings}
-			<button
-				type="button"
-				class="round-button settings-button"
-				aria-label="Settings"
-				onclick={openSettings}
-			>
-				<Settings size={22} />
-			</button>
-		{/if}
+		<button
+			type="button"
+			class="round-button settings-button"
+			aria-label="Settings"
+			onclick={openSettings}
+		>
+			<Settings size={22} />
+		</button>
 		<div class={['overlay', showInfo && 'overlay--visible']} inert={!showInfo}>
 			<button
 				type="button"
@@ -245,12 +237,12 @@
 			>
 				<X size={22} />
 			</button>
-			<CroppersWizardInfo {data} />
+			<CroppersWizardInfo cropper={activeCropper} />
 		</div>
 		<CroppersWizardSettings
 			bind:settings={draft}
-			open={showSettings && hasSettings}
-			properties={data.settings}
+			open={showSettings}
+			properties={activeCropper.settings}
 			onClose={closeSettings}
 		/>
 	</div>
@@ -263,7 +255,7 @@
 				style:background-image="url({item.preview})"
 				aria-label="Photo {index + 1}"
 				aria-pressed={item.src === src}
-				onclick={() => setImage(item.src)}
+				onclick={() => (src = item.src)}
 			></button>
 		{/each}
 		<button
@@ -281,7 +273,7 @@
 			accept="image/*"
 			tabindex="-1"
 			bind:this={fileInput}
-			onchange={onUpload}
+			onchange={loadImage}
 		/>
 	</div>
 </div>

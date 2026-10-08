@@ -35,7 +35,8 @@
 			: null;
 	}
 
-	function handleChange(instance: CropperRef) {
+	// Show the reset button only while the state differs from the default one.
+	function updateChanged(instance: CropperRef) {
 		changed = !isEqualState(instance.getState(), getDefaultState());
 		onChange?.(instance);
 	}
@@ -44,7 +45,7 @@
 <div class={['default-cropper', wrapperClassName]}>
 	<Cropper
 		{...props}
-		onChange={handleChange}
+		onChange={updateChanged}
 		class={['default-cropper__cropper', className]}
 		bind:this={cropper}
 	/>

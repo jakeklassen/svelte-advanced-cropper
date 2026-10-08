@@ -45,21 +45,15 @@ Start with the editor's skeleton: an area for the cropper, a slider that appears
 		saturation: 0,
 		contrast: 0
 	});
-
-	function onChangeValue(value: number) {
-		if (mode !== 'crop') {
-			adjustments[mode] = value;
-		}
-	}
 </script>
 
 <div class="image-editor">
 	<div class="image-editor__cropper">
 		{#if mode !== 'crop'}
-			<Slider class="image-editor__slider" value={adjustments[mode]} onChange={onChangeValue} />
+			<Slider class="image-editor__slider" label={mode} bind:value={adjustments[mode]} />
 		{/if}
 	</div>
-	<Navigation {mode} onChange={(next) => (mode = next)} />
+	<Navigation bind:mode />
 </div>
 ```
 
@@ -88,7 +82,7 @@ Start with the editor's skeleton: an area for the cropper, a slider that appears
 </TabItem>
 </Tabs>
 
-Because `adjustments` is a deeply reactive `$state` object, assigning `adjustments[mode]` is all it takes to update everything that reads it.
+Both children take a bindable prop: `bind:mode` lets the navigation switch modes, and `bind:value={adjustments[mode]}` lets the slider write straight into the adjustment it edits. Because `adjustments` is a deeply reactive `$state` object, that write is all it takes to update everything that reads it.
 
 ## Integrate the cropper
 
@@ -110,16 +104,11 @@ Adding the cropper is simple. The one detail is that the user should only be abl
 
 	const cropperEnabled = $derived(mode === 'crop');
 
-	function onChangeValue(value: number) {
-		if (mode !== 'crop') {
-			adjustments[mode] = value;
-		}
-	}
-
-	function onUpload(url: string) {
+	function onUpload(file: File) {
 		adjustments = { brightness: 0, hue: 0, saturation: 0, contrast: 0 };
 		mode = 'crop';
-		src = url;
+		// The full source also revokes the previous URL, so the browser can free that file.
+		src = URL.createObjectURL(file);
 	}
 
 	function onDownload() {
@@ -155,10 +144,10 @@ Adding the cropper is simple. The one detail is that the user should only be abl
 			}}
 		/>
 		{#if mode !== 'crop'}
-			<Slider class="image-editor__slider" value={adjustments[mode]} onChange={onChangeValue} />
+			<Slider class="image-editor__slider" label={mode} bind:value={adjustments[mode]} />
 		{/if}
 	</div>
-	<Navigation {mode} onChange={(next) => (mode = next)} {onUpload} {onDownload} />
+	<Navigation bind:mode {onUpload} {onDownload} />
 </div>
 ```
 

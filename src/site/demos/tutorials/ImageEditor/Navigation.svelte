@@ -1,5 +1,7 @@
 <script lang="ts" module>
-	export type Mode = 'crop' | 'saturation' | 'brightness' | 'contrast' | 'hue';
+	import type { Adjustments } from './filters.ts';
+
+	export type Mode = 'crop' | keyof Adjustments;
 </script>
 
 <script lang="ts">
@@ -11,12 +13,11 @@
 	interface Props {
 		class?: ClassValue;
 		mode?: Mode;
-		onChange?: (mode: Mode) => void;
 		onDownload?: () => void;
-		onUpload?: (url: string) => void;
+		onUpload?: (file: File) => void;
 	}
 
-	let { class: className, mode, onChange, onDownload, onUpload }: Props = $props();
+	let { class: className, mode = $bindable('crop'), onDownload, onUpload }: Props = $props();
 
 	const modes: { mode: Mode; label: string; icon: Component }[] = [
 		{ mode: 'crop', label: 'Crop', icon: Crop },
@@ -28,10 +29,10 @@
 
 	let input: HTMLInputElement | undefined = $state();
 
-	function onLoadImage(event: Event & { currentTarget: HTMLInputElement }) {
+	function uploadSelectedFile(event: Event & { currentTarget: HTMLInputElement }) {
 		const file = event.currentTarget.files?.[0];
 		if (file) {
-			onUpload?.(URL.createObjectURL(file));
+			onUpload?.(file);
 		}
 
 		// Clear the input, so that the same file can be uploaded again.
@@ -43,7 +44,7 @@
 	<Button aria-label="Upload an image" onclick={() => input?.click()}>
 		<Upload size={20} />
 	</Button>
-	<input bind:this={input} type="file" accept="image/*" hidden onchange={onLoadImage} />
+	<input bind:this={input} type="file" accept="image/*" hidden onchange={uploadSelectedFile} />
 	<div class="image-editor-navigation__buttons">
 		{#each modes as item (item.mode)}
 			<Button
@@ -51,7 +52,7 @@
 				aria-label={item.label}
 				aria-pressed={mode === item.mode}
 				active={mode === item.mode}
-				onclick={() => onChange?.(item.mode)}
+				onclick={() => (mode = item.mode)}
 			>
 				<item.icon size={20} />
 			</Button>

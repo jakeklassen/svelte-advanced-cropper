@@ -2,28 +2,28 @@
 	import type { CropperDescription } from './wizard';
 
 	interface Props {
-		data: CropperDescription;
+		cropper: CropperDescription;
 	}
 
-	let { data }: Props = $props();
+	let { cropper }: Props = $props();
 </script>
 
 <div class="croppers-wizard-info">
-	<div class="name">{data.name}</div>
+	<div class="name">{cropper.name}</div>
 	<div class="property">
 		<div class="property-title">Description</div>
-		<div>{data.description}</div>
+		<div>{cropper.description}</div>
 	</div>
-	{#if data.link}
+	{#if cropper.link}
 		<div class="property">
 			<div class="property-title">Link</div>
-			<a href={data.link.href}>{data.link.label}</a>
+			<a href={cropper.link.href}>{cropper.link.label}</a>
 		</div>
 	{/if}
 	<div class="property">
 		<div class="property-title">Features</div>
 		<div class="features">
-			{#each data.features as feature (feature)}
+			{#each cropper.features as feature (feature)}
 				<span class="feature">{feature}</span>
 			{/each}
 		</div>

@@ -2,17 +2,17 @@
 	import { Cropper, type CropperRef } from 'svelte-advanced-cropper';
 	import 'svelte-advanced-cropper/style.css';
 
-	let src = $state('/images/photo.jpg');
+	const src = '/images/photo.jpg';
 
 	function onChange(cropper: CropperRef) {
 		console.log(cropper.getCoordinates(), cropper.getCanvas());
 	}
 </script>
 
-<Cropper {src} {onChange} class="cropper" />
+<Cropper {src} {onChange} class="my-cropper" />
 
 <style>
-	:global(.cropper) {
+	:global(.my-cropper) {
 		height: 500px;
 	}
 </style>

@@ -1,27 +1,22 @@
 <script lang="ts">
 	import type { ClassValue } from 'svelte/elements';
 	import { ZoomIn, ZoomOut } from '@lucide/svelte';
-	import { isNumber } from 'svelte-advanced-cropper';
 	import Slider from './Slider.svelte';
 
 	interface Props {
-		zoom?: number;
+		/** From 0 to 1. */
+		zoom: number;
 		onZoom?: (value: number, transitions?: boolean) => void;
 		class?: ClassValue;
 	}
 
 	let { zoom, onZoom, class: className }: Props = $props();
 
-	function onZoomIn() {
-		if (onZoom && isNumber(zoom)) {
-			onZoom(Math.min(1, zoom + 0.25), true);
-		}
-	}
+	const BUTTON_STEP = 0.25;
 
-	function onZoomOut() {
-		if (onZoom && isNumber(zoom)) {
-			onZoom(Math.max(0, zoom - 0.25), true);
-		}
+	// The buttons zoom in steps, animated.
+	function zoomBy(delta: number) {
+		onZoom?.(Math.min(1, Math.max(0, zoom + delta)), true);
 	}
 </script>
 
@@ -30,7 +25,7 @@
 		type="button"
 		class="absolute-zoom-navigation__button"
 		aria-label="Zoom out"
-		onclick={onZoomOut}
+		onclick={() => zoomBy(-BUTTON_STEP)}
 	>
 		<ZoomOut color="white" size={18} />
 	</button>
@@ -39,7 +34,7 @@
 		type="button"
 		class="absolute-zoom-navigation__button"
 		aria-label="Zoom in"
-		onclick={onZoomIn}
+		onclick={() => zoomBy(BUTTON_STEP)}
 	>
 		<ZoomIn color="white" size={18} />
 	</button>

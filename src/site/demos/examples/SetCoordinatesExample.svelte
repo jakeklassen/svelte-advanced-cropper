@@ -12,26 +12,28 @@
 	import VerticalButtons from '#site/demos/shared/VerticalButtons.svelte';
 	import { image } from '#site/paths.ts';
 
+	const src = image('photo-1532182657011-d3d31357b5d8.jpg');
+
 	let cropper: CropperRef | undefined = $state();
 
 	// Scale the stencil, then re-centre it on its previous centre. Each step of the
 	// array is applied in turn, and each one respects the cropper's restrictions.
-	function resize(width = 1, height = 1) {
-		const initial = cropper?.getCoordinates();
-		if (!cropper || !initial) {
+	function resize(widthFactor = 1, heightFactor = 1) {
+		const initialCoordinates = cropper?.getCoordinates();
+		if (!cropper || !initialCoordinates) {
 			return;
 		}
 
 		cropper.setCoordinates([
 			({ coordinates }) =>
 				coordinates && {
-					width: coordinates.width * width,
-					height: coordinates.height * height
+					width: coordinates.width * widthFactor,
+					height: coordinates.height * heightFactor
 				},
 			({ coordinates }) =>
 				coordinates && {
-					left: initial.left + (initial.width - coordinates.width) / 2,
-					top: initial.top + (initial.height - coordinates.height) / 2
+					left: initialCoordinates.left + (initialCoordinates.width - coordinates.width) / 2,
+					top: initialCoordinates.top + (initialCoordinates.height - coordinates.height) / 2
 				}
 		]);
 	}
@@ -55,7 +57,7 @@
 	<Cropper
 		bind:this={cropper}
 		class="set-coordinates-example__cropper"
-		src={image('photo-1532182657011-d3d31357b5d8.jpg')}
+		{src}
 		stencilProps={{
 			minAspectRatio: 1 / 2
 		}}

@@ -13,7 +13,8 @@
 	let height: number | null = $state(null);
 	let maxArea: number | null = $state(null);
 
-	function showImage() {
+	// Open the resized result in a new tab.
+	function openResultInNewTab() {
 		const canvas = cropper?.getCanvas({
 			maxWidth: maxWidth ?? undefined,
 			minWidth: minWidth ?? undefined,
@@ -21,8 +22,12 @@
 			height: height ?? undefined,
 			maxArea: maxArea ?? undefined
 		});
+		if (!canvas) {
+			return;
+		}
+
 		const newTab = window.open();
-		if (newTab && canvas) {
+		if (newTab) {
 			newTab.document.body.innerHTML = `<img src="${canvas.toDataURL()}">`;
 		}
 	}
@@ -53,7 +58,9 @@
 				<input type="number" min="0" bind:value={maxArea} />
 			</label>
 		</div>
-		<button type="button" class="resize-result-example__button" onclick={showImage}>Crop</button>
+		<button type="button" class="resize-result-example__button" onclick={openResultInNewTab}
+			>Crop</button
+		>
 	</div>
 </div>
 

@@ -18,15 +18,15 @@
 	const settings = $derived(cropper.getSettings());
 
 	const absoluteZoom = $derived(getAbsoluteZoom(state, settings));
+	// Fade in once the image has loaded and the cropper has a state for it.
+	const visible = $derived(state !== null && cropper.isLoaded());
 
-	function onZoom(value: number, transitions?: boolean) {
-		cropper.zoomImage(getZoomFactor(state, settings, value), {
-			transitions: !!transitions
-		});
+	function onZoom(value: number, transitions = false) {
+		cropper.zoomImage(getZoomFactor(state, settings, value), { transitions });
 	}
 </script>
 
-<CropperFade class={['custom-wrapper', className]} {style} visible={state && cropper.isLoaded()}>
+<CropperFade class={['custom-wrapper', className]} {style} {visible}>
 	{@render children?.()}
 	<Navigation class="custom-wrapper__navigation" zoom={absoluteZoom} {onZoom} />
 </CropperFade>

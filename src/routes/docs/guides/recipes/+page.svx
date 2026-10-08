@@ -136,7 +136,7 @@ The essential part is just a few lines:
 	let coordinates: Coordinates | null = $state(null);
 	let result: string | undefined = $state();
 
-	function onCrop() {
+	function crop() {
 		coordinates = cropper?.getCoordinates() ?? null;
 		// The canvas can be post-processed however you like; a data URL is
 		// enough to show the result in an <img>.
@@ -145,7 +145,7 @@ The essential part is just a few lines:
 </script>
 
 <Cropper bind:this={cropper} {src} />
-<button onclick={onCrop}>Crop Image</button>
+<button onclick={crop}>Crop Image</button>
 ```
 
 ### Second approach
@@ -350,7 +350,7 @@ This version takes the MIME type from `File.type`. That value is derived from th
 	let input: HTMLInputElement | undefined = $state();
 	let image: UploadedImage | null = $state(null);
 
-	function onLoadImage(event: Event & { currentTarget: HTMLInputElement }) {
+	function loadImage(event: Event & { currentTarget: HTMLInputElement }) {
 		const file = event.currentTarget.files?.[0];
 		if (file) {
 			image = { src: URL.createObjectURL(file), type: file.type };
@@ -373,7 +373,7 @@ This version takes the MIME type from `File.type`. That value is derived from th
 
 <Cropper src={image?.src} />
 <button onclick={() => input?.click()}>Upload image</button>
-<input bind:this={input} type="file" accept="image/*" hidden onchange={onLoadImage} />
+<input bind:this={input} type="file" accept="image/*" hidden onchange={loadImage} />
 ```
 
 </TabItem>
@@ -394,20 +394,18 @@ This version reads the first bytes of the file and detects the real format with 
 	let input: HTMLInputElement | undefined = $state();
 	let image: UploadedImage | null = $state(null);
 
-	function onLoadImage(event: Event & { currentTarget: HTMLInputElement }) {
+	async function loadImage(event: Event & { currentTarget: HTMLInputElement }) {
 		const file = event.currentTarget.files?.[0];
-		if (file) {
-			const src = URL.createObjectURL(file);
-			const reader = new FileReader();
-			reader.addEventListener('load', () => {
-				// Fall back to the extension-based type if the bytes aren't recognised.
-				image = { src, type: getMimeType(reader.result, file.type) };
-			});
-			reader.readAsArrayBuffer(file);
-		}
-
 		// Allow the same file to be picked again.
 		event.currentTarget.value = '';
+		if (!file) {
+			return;
+		}
+
+		// The format's signature is in the first bytes of the file. Fall back to the
+		// extension-based type if the bytes aren't recognised.
+		const header = await file.slice(0, 16).arrayBuffer();
+		image = { src: URL.createObjectURL(file), type: getMimeType(header, file.type) };
 	}
 
 	$effect(() => {
@@ -423,7 +421,7 @@ This version reads the first bytes of the file and detects the real format with 
 
 <Cropper src={image?.src} />
 <button onclick={() => input?.click()}>Upload image</button>
-<input bind:this={input} type="file" accept="image/*" hidden onchange={onLoadImage} />
+<input bind:this={input} type="file" accept="image/*" hidden onchange={loadImage} />
 ```
 
 <Admonition type="note">
@@ -457,17 +455,21 @@ Open the Network tab in your browser's developer tools and press **Crop Image** 
 
 	let cropper: CropperRef | undefined = $state();
 
-	function onUpload() {
-		cropper?.getCanvas()?.toBlob((blob) => {
-			if (blob) {
-				const form = new FormData();
-				form.append('file', blob);
-				fetch('https://example.com/upload/', { method: 'POST', body: form });
-			}
-		}, 'image/jpeg');
+	function uploadResult() {
+		cropper?.getCanvas()?.toBlob(sendToServer, 'image/jpeg');
+	}
+
+	function sendToServer(blob: Blob | null) {
+		if (!blob) {
+			return;
+		}
+
+		const form = new FormData();
+		form.append('file', blob);
+		fetch('https://example.com/upload/', { method: 'POST', body: form });
 	}
 </script>
 
 <Cropper bind:this={cropper} {src} />
-<button onclick={onUpload}>Upload</button>
+<button onclick={uploadResult}>Upload</button>
 ```

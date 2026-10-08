@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onDestroy } from 'svelte';
 	import { Cropper, type Coordinates, type CropperRef } from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 	import PreviewResults from './PreviewResults.svelte';
@@ -12,6 +13,8 @@
 	// has stopped interacting for half a second.
 	let timeout: ReturnType<typeof setTimeout> | undefined;
 
+	onDestroy(() => clearTimeout(timeout));
+
 	function onChange(cropper: CropperRef) {
 		clearTimeout(timeout);
 		timeout = setTimeout(() => {
@@ -19,8 +22,6 @@
 			preview = cropper.getCanvas()?.toDataURL();
 		}, 500);
 	}
-
-	$effect(() => () => clearTimeout(timeout));
 </script>
 
 <div class="getting-result-example">

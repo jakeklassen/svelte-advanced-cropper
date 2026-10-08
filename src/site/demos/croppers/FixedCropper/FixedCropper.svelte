@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { untrack } from 'svelte';
 	import {
 		CircleStencil,
 		FixedCropper,
@@ -20,22 +19,26 @@
 	let cropper: FixedCropperRef | undefined = $state();
 
 	// The stencil starts as large as the visible area allows.
-	const defaultSize = ({ imageSize, visibleArea }: CropperState) => ({
-		width: (visibleArea || imageSize).width,
-		height: (visibleArea || imageSize).height
-	});
+	function defaultSize({ imageSize, visibleArea }: CropperState) {
+		return {
+			width: (visibleArea ?? imageSize).width,
+			height: (visibleArea ?? imageSize).height
+		};
+	}
 
-	// A square stencil that leaves room for the zoom slider below it.
-	const stencilSize = ({ boundary }: CropperState) => {
-		const size = Math.min(boundary.height - 80, boundary.width - 40);
+	// A square stencil with a 40px margin above and below it and a 20px margin on each side.
+	// The bottom 40px of the boundary overlap the zoom slider (see Wrapper.svelte).
+	function stencilSize({ boundary }: CropperState) {
+		const size = Math.min(boundary.height - 2 * 40, boundary.width - 2 * 20);
 
 		return { width: size, height: size };
-	};
+	}
 
-	// The stencil's aspect ratio depends on its type, so recompute the state on a change.
+	// The stencil's aspect ratio depends on its type, so recompute the state when
+	// `stencilType` changes.
 	$effect(() => {
 		void stencilType;
-		untrack(() => cropper?.refresh());
+		cropper?.refresh();
 	});
 </script>
 

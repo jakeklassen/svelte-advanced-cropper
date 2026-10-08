@@ -2,15 +2,21 @@
 	import { Cropper, ImageRestriction, type CropperRef } from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 
+	const src = image('pexels-photo-10426274.jpeg');
+
 	let cropper: CropperRef | undefined = $state();
-	let restrictionType = $state(ImageRestriction.none);
+	let imageRestriction = $state(ImageRestriction.none);
 
 	// Open the cropped result in a new tab.
-	function showImage() {
-		const result = cropper?.getCanvas()?.toDataURL();
+	function openResultInNewTab() {
+		const canvas = cropper?.getCanvas();
+		if (!canvas) {
+			return;
+		}
+
 		const newTab = window.open();
-		if (newTab && result) {
-			newTab.document.body.innerHTML = `<img src="${result}">`;
+		if (newTab) {
+			newTab.document.body.innerHTML = `<img src="${canvas.toDataURL()}">`;
 		}
 	}
 </script>
@@ -19,20 +25,20 @@
 	<Cropper
 		bind:this={cropper}
 		class="image-restriction-example__cropper"
-		imageRestriction={restrictionType}
-		src={image('pexels-photo-10426274.jpeg')}
+		{imageRestriction}
+		{src}
 	/>
 	<div class="image-restriction-example__panel">
 		<label class="image-restriction-example__panel-left">
 			<span class="image-restriction-example__label">Image Restriction Type</span>
-			<select bind:value={restrictionType} class="image-restriction-example__select">
+			<select bind:value={imageRestriction} class="image-restriction-example__select">
 				<option value={ImageRestriction.fillArea}>fillArea</option>
 				<option value={ImageRestriction.fitArea}>fitArea</option>
 				<option value={ImageRestriction.stencil}>stencil</option>
 				<option value={ImageRestriction.none}>none</option>
 			</select>
 		</label>
-		<button type="button" class="image-restriction-example__button" onclick={showImage}>
+		<button type="button" class="image-restriction-example__button" onclick={openResultInNewTab}>
 			Download
 		</button>
 	</div>

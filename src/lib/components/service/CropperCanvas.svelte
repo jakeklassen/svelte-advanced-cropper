@@ -1,5 +1,6 @@
 <script lang="ts" module>
 	import type { CropperState, DrawOptions } from 'advanced-cropper';
+
 	export type { CropperCanvasMethods } from './methods';
 </script>
 

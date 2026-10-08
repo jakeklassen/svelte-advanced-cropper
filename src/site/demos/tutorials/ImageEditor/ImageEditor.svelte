@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onDestroy } from 'svelte';
 	import { RotateCcw } from '@lucide/svelte';
 	import { Cropper, CropperPreview, type CropperRef } from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
@@ -7,7 +8,14 @@
 	import Button from './Button.svelte';
 	import Navigation, { type Mode } from './Navigation.svelte';
 	import Slider from './Slider.svelte';
-	import type { Adjustments } from './filters';
+	import type { Adjustments } from './filters.ts';
+
+	const noAdjustments: Adjustments = {
+		brightness: 0,
+		hue: 0,
+		saturation: 0,
+		contrast: 0
+	};
 
 	let cropper: CropperRef | undefined = $state();
 
@@ -15,54 +23,37 @@
 
 	let mode: Mode = $state('crop');
 
-	let adjustments: Adjustments = $state({
-		brightness: 0,
-		hue: 0,
-		saturation: 0,
-		contrast: 0
-	});
+	let adjustments: Adjustments = $state({ ...noAdjustments });
 
 	const cropperEnabled = $derived(mode === 'crop');
 
-	const changed = $derived(
+	const adjusted = $derived(
 		Object.values(adjustments).some((value) => Math.round(value * 100) !== 0)
 	);
 
-	function onChangeValue(value: number) {
-		if (mode !== 'crop') {
-			adjustments[mode] = value;
-		}
-	}
-
-	function onReset() {
+	function reset() {
 		mode = 'crop';
-		adjustments = {
-			brightness: 0,
-			hue: 0,
-			saturation: 0,
-			contrast: 0
-		};
+		adjustments = { ...noAdjustments };
 	}
 
-	// Object URLs for uploaded files: revoke each one when it is replaced or the editor
-	// is destroyed, so the file can be garbage-collected.
+	// Uploaded files are shown through object URLs. Each one is revoked when the next upload
+	// replaces it, and the last one when the editor is destroyed, so the browser can free the file.
 	let uploadedUrl: string | undefined;
 
-	function onUpload(url: string) {
-		onReset();
+	function revokeUploadedUrl() {
 		if (uploadedUrl) {
 			URL.revokeObjectURL(uploadedUrl);
 		}
-
-		uploadedUrl = url;
-		src = url;
 	}
 
-	$effect(() => () => {
-		if (uploadedUrl) {
-			URL.revokeObjectURL(uploadedUrl);
-		}
-	});
+	function onUpload(file: File) {
+		reset();
+		revokeUploadedUrl();
+		uploadedUrl = URL.createObjectURL(file);
+		src = uploadedUrl;
+	}
+
+	onDestroy(revokeUploadedUrl);
 
 	function onDownload() {
 		const canvas = cropper?.getCanvas();
@@ -83,8 +74,9 @@
 			stencilProps={{
 				movable: cropperEnabled,
 				resizable: cropperEnabled,
-				lines: cropperEnabled,
-				handlers: cropperEnabled,
+				// `{}` hides every line and handler; `undefined` keeps the default set.
+				lines: cropperEnabled ? undefined : {},
+				handlers: cropperEnabled ? undefined : {},
 				overlayClassName: [
 					'image-editor__cropper-overlay',
 					!cropperEnabled && 'image-editor__cropper-overlay--faded'
@@ -98,12 +90,7 @@
 			backgroundProps={adjustments}
 		/>
 		{#if mode !== 'crop'}
-			<Slider
-				class="image-editor__slider"
-				label={mode}
-				value={adjustments[mode]}
-				onChange={onChangeValue}
-			/>
+			<Slider class="image-editor__slider" label={mode} bind:value={adjustments[mode]} />
 		{/if}
 		<CropperPreview
 			class="image-editor__preview"
@@ -112,14 +99,14 @@
 			backgroundProps={adjustments}
 		/>
 		<Button
-			class={['image-editor__reset-button', !changed && 'image-editor__reset-button--hidden']}
+			class={['image-editor__reset-button', !adjusted && 'image-editor__reset-button--hidden']}
 			aria-label="Reset the adjustments"
-			onclick={onReset}
+			onclick={reset}
 		>
 			<RotateCcw size={20} />
 		</Button>
 	</div>
-	<Navigation {mode} onChange={(next) => (mode = next)} {onUpload} {onDownload} />
+	<Navigation bind:mode {onUpload} {onDownload} />
 </div>
 
 <style>

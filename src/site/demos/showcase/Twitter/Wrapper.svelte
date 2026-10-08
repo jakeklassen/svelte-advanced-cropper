@@ -17,17 +17,15 @@
 	const state = $derived(cropper.getState());
 	const settings = $derived(cropper.getSettings());
 	const absoluteZoom = $derived(getAbsoluteZoom(state, settings));
+	// Fade in once the image has loaded and the cropper has a state for it.
+	const visible = $derived(state !== null && cropper.isLoaded());
 
 	function onZoom(value: number) {
 		cropper.zoomImage(getZoomFactor(state, settings, value), { transitions: false });
 	}
 </script>
 
-<CropperFade
-	class={['twitter-cropper-wrapper', className]}
-	{style}
-	visible={state && cropper.isLoaded()}
->
+<CropperFade class={['twitter-cropper-wrapper', className]} {style} {visible}>
 	<div class="twitter-cropper-wrapper__content">{@render children?.()}</div>
 	<div class="twitter-cropper-wrapper__navigation">
 		<Navigation zoom={absoluteZoom} {onZoom} />

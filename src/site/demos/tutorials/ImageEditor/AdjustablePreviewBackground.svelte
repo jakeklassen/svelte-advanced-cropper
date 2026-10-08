@@ -9,6 +9,7 @@
 		type Size
 	} from 'svelte-advanced-cropper';
 	import AdjustableImage from './AdjustableImage.svelte';
+	import type { Adjustments } from './filters.ts';
 
 	interface DesiredCropperRef {
 		getState: () => CropperState | null;
@@ -16,27 +17,14 @@
 		getImage: () => CropperImage | null;
 	}
 
-	interface Props {
+	interface Props extends Partial<Adjustments> {
 		class?: ClassValue;
 		cropper: DesiredCropperRef;
 		crossOrigin?: 'anonymous' | 'use-credentials' | boolean;
-		brightness?: number;
-		saturation?: number;
-		hue?: number;
-		contrast?: number;
 		size?: Size | null;
 	}
 
-	let {
-		class: className,
-		cropper,
-		crossOrigin,
-		brightness = 0,
-		saturation = 0,
-		hue = 0,
-		contrast = 0,
-		size
-	}: Props = $props();
+	let { class: className, cropper, crossOrigin, size, ...adjustments }: Props = $props();
 
 	const state = $derived(cropper.getState());
 	const transitions = $derived(cropper.getTransitions());
@@ -47,13 +35,4 @@
 	);
 </script>
 
-<AdjustableImage
-	src={image?.src}
-	{crossOrigin}
-	{brightness}
-	{saturation}
-	{hue}
-	{contrast}
-	class={className}
-	{style}
-/>
+<AdjustableImage {...adjustments} src={image?.src} {crossOrigin} class={className} {style} />

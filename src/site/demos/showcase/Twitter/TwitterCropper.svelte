@@ -17,18 +17,18 @@
 	}: Props = $props();
 
 	// A square stencil that fills the cropper, minus a margin.
-	const stencilSize = ({ boundary }: CropperState) => {
+	function stencilSize({ boundary }: CropperState) {
 		const size = Math.min(boundary.height, boundary.width) - 48;
 
 		return { width: size, height: size };
-	};
+	}
 
 	// Start with the largest square that fits in the image.
-	const defaultSize = ({ imageSize }: CropperState) => {
+	function defaultSize({ imageSize }: CropperState) {
 		const size = Math.min(imageSize.height, imageSize.width);
 
 		return { width: size, height: size };
-	};
+	}
 </script>
 
 <FixedCropper

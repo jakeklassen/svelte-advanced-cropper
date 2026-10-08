@@ -98,10 +98,11 @@
 			<div class="property-title">Aspect Ratio</div>
 			<div class="values">
 				{#each aspectRatios as ratio (ratio.label)}
+					{@const active = isActiveRatio(ratio)}
 					<button
 						type="button"
-						class={['option', isActiveRatio(ratio) && 'option--active']}
-						aria-pressed={isActiveRatio(ratio)}
+						class={['option', active && 'option--active']}
+						aria-pressed={active}
 						onclick={() => selectRatio(ratio)}
 					>
 						<svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -141,10 +142,11 @@
 			<div class="property-title">Image Restriction</div>
 			<div class="values">
 				{#each imageRestrictions as restriction (restriction.value)}
+					{@const active = settings.imageRestriction === restriction.value}
 					<button
 						type="button"
-						class={['option', settings.imageRestriction === restriction.value && 'option--active']}
-						aria-pressed={settings.imageRestriction === restriction.value}
+						class={['option', active && 'option--active']}
+						aria-pressed={active}
 						onclick={() => (settings.imageRestriction = restriction.value)}
 					>
 						<restriction.icon size={24} aria-hidden="true" />
@@ -159,10 +161,11 @@
 			<div class="property-title">Stencil Type</div>
 			<div class="values">
 				{#each stencilTypes as type (type.value)}
+					{@const active = settings.stencilType === type.value}
 					<button
 						type="button"
-						class={['option', settings.stencilType === type.value && 'option--active']}
-						aria-pressed={settings.stencilType === type.value}
+						class={['option', active && 'option--active']}
+						aria-pressed={active}
 						onclick={() => (settings.stencilType = type.value)}
 					>
 						<type.icon size={24} aria-hidden="true" />
@@ -177,10 +180,9 @@
 			{#each inputs as input (input.field)}
 				<div class="input">
 					<SettingsInput
-						value={settings[input.field]}
+						bind:value={settings[input.field]}
 						label={input.label}
 						placeholder={input.placeholder}
-						onChange={(value) => (settings[input.field] = value)}
 					/>
 				</div>
 			{/each}
@@ -189,18 +191,10 @@
 	{#if has('scaleImage') || has('grid')}
 		<div class="values checkboxes">
 			{#if has('scaleImage')}
-				<SettingsCheckbox
-					value={settings.scaleImage}
-					label="Scale Image"
-					onChange={(value) => (settings.scaleImage = value)}
-				/>
+				<SettingsCheckbox bind:checked={settings.scaleImage} label="Scale Image" />
 			{/if}
 			{#if has('grid')}
-				<SettingsCheckbox
-					value={settings.grid}
-					label="Stencil Grid"
-					onChange={(value) => (settings.grid = value)}
-				/>
+				<SettingsCheckbox bind:checked={settings.grid} label="Stencil Grid" />
 			{/if}
 		</div>
 	{/if}

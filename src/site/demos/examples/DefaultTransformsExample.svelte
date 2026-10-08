@@ -1,35 +1,32 @@
 <script lang="ts">
-	import { Cropper, type CropperRef } from 'svelte-advanced-cropper';
+	import { Cropper, type CropperRef, type PartialTransforms } from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 
 	let cropper: CropperRef | undefined = $state();
 	let input: HTMLInputElement | undefined = $state();
 	let src = $state(image('farzin-yarahmadi-yR3GrvkWnLA-unsplash.jpg'));
 
+	const transforms: Record<string, PartialTransforms> = {
+		'horizontal-flip': { flip: { horizontal: true } },
+		'vertical-flip': { flip: { vertical: true } },
+		'rotate-90': { rotate: 90 },
+		'rotate-180': { rotate: 180 }
+	};
+
 	let transformsType = $state('rotate-90');
+	const defaultTransforms = $derived(transforms[transformsType]);
 
-	const defaultTransforms = $derived.by(() => {
-		if (transformsType === 'horizontal-flip') {
-			return { flip: { horizontal: true } };
-		} else if (transformsType === 'vertical-flip') {
-			return { flip: { vertical: true } };
-		} else if (transformsType === 'rotate-90') {
-			return { rotate: 90 };
-		} else if (transformsType === 'rotate-180') {
-			return { rotate: 180 };
-		}
-	});
-
-	function onLoadImage(event: Event & { currentTarget: HTMLInputElement }) {
+	function loadImage(event: Event & { currentTarget: HTMLInputElement }) {
 		const file = event.currentTarget.files?.[0];
 		if (file) {
 			src = URL.createObjectURL(file);
 		}
 
+		// Reset the input so that picking the same file again still fires `change`.
 		event.currentTarget.value = '';
 	}
 
-	// Revoke the previous object URL so the browser can free the old file.
+	// Free the previous object URL once it is replaced (a no-op for regular URLs).
 	$effect(() => {
 		const current = src;
 
@@ -53,9 +50,14 @@
 			<span class="default-transforms-example__label">Default Transform</span>
 			<!-- Default transforms apply when the cropper resets, so reset after a change. -->
 			<select
-				bind:value={transformsType}
+				bind:value={
+					() => transformsType,
+					(type) => {
+						transformsType = type;
+						cropper?.reset();
+					}
+				}
 				class="default-transforms-example__select"
-				onchange={() => cropper?.reset()}
 			>
 				<option value="horizontal-flip">Horizontal Flip</option>
 				<option value="vertical-flip">Vertical Flip</option>
@@ -71,7 +73,7 @@
 			class="default-transforms-example__file-input"
 			type="file"
 			accept="image/*"
-			onchange={onLoadImage}
+			onchange={loadImage}
 		/>
 	</div>
 </div>

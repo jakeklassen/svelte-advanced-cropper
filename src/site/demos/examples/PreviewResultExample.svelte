@@ -21,23 +21,20 @@
 		smallPreview?.update(instance);
 	}
 
-	function onRotate() {
-		cropper?.rotateImage(90);
-	}
-
-	function onLoadImage(event: Event & { currentTarget: HTMLInputElement }) {
+	function loadImage(event: Event & { currentTarget: HTMLInputElement }) {
 		const file = event.currentTarget.files?.[0];
 		if (file) {
 			src = URL.createObjectURL(file);
 		}
 
+		// Reset the input so that picking the same file again still fires `change`.
 		event.currentTarget.value = '';
 	}
 
+	// Free the previous object URL once it is replaced (a no-op for regular URLs).
 	$effect(() => {
 		const current = src;
 
-		// Free the previous object URL once it is replaced (a no-op for regular URLs).
 		return () => {
 			if (current.startsWith('blob:')) {
 				URL.revokeObjectURL(current);
@@ -65,7 +62,7 @@
 		<SquareButton title="Upload" onclick={() => input?.click()}>
 			<Upload size={20} />
 		</SquareButton>
-		<SquareButton title="Rotate" onclick={onRotate}>
+		<SquareButton title="Rotate" onclick={() => cropper?.rotateImage(90)}>
 			<RotateCcw size={20} />
 		</SquareButton>
 	</div>
@@ -74,7 +71,7 @@
 		class="preview-result-example__file-input"
 		type="file"
 		accept="image/*"
-		onchange={onLoadImage}
+		onchange={loadImage}
 	/>
 </div>
 

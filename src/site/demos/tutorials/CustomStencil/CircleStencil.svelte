@@ -21,29 +21,26 @@
 	// Read by the cropper through `bind:this` and passed to `stencilConstraints`.
 	export const aspectRatio = 1;
 
-	function onResize(shift: MoveDirections) {
+	function resize(shift: MoveDirections) {
+		// Only the horizontal shift is used, on both axes: the square stencil grows evenly.
 		cropper.resizeCoordinates('center', {
 			left: shift.left,
 			top: shift.left
 		});
-	}
-
-	function onMove(directions: MoveDirections) {
-		cropper.moveCoordinates(directions);
 	}
 </script>
 
 <StencilWrapper class="circle-stencil" {transitions} {...coordinates}>
 	<DraggableElement
 		class="circle-stencil__handler"
-		onMove={onResize}
+		onMove={resize}
 		onMoveEnd={cropper.resizeCoordinatesEnd}
 	>
 		<MoveDiagonal color="white" size={22} />
 	</DraggableElement>
 	<DraggableArea
 		class="circle-stencil__draggable-area"
-		{onMove}
+		onMove={(directions) => cropper.moveCoordinates(directions)}
 		onMoveEnd={cropper.moveCoordinatesEnd}
 	>
 		<StencilOverlay class="circle-stencil__overlay" />

@@ -279,7 +279,7 @@ The first one is what matters. It says how many pixels the pointer moved horizon
 `cropper.resizeCoordinates` takes an **anchor** and the shift. With the `'center'` anchor, the cropper applies the horizontal shift to both the left and the right edge, so the box grows symmetrically around its centre. Because the stencil also has an aspect ratio of `1`, the vertical size follows along:
 
 ```ts
-function onResize(shift: MoveDirections) {
+function resize(shift: MoveDirections) {
 	// Only the horizontal shift is used, on both axes: the square stencil grows evenly.
 	cropper.resizeCoordinates('center', {
 		left: shift.left,
@@ -304,10 +304,11 @@ All four resize directions get the same sign. A resize direction says how far an
 
 ### Last steps
 
-Only the remaining callbacks are left, and they are trivial, because the cropper's own methods fit them directly:
+Only the remaining callbacks are left, and they are trivial, because the cropper's own methods do the work:
 
-- `onMoveEnd` on the `DraggableElement`: `cropper.resizeCoordinatesEnd`.
-- `onMove` and `onMoveEnd` on the `DraggableArea`: `cropper.moveCoordinates` and `cropper.moveCoordinatesEnd`.
+- `onMoveEnd` on the `DraggableElement`: `cropper.resizeCoordinatesEnd`, passed as is.
+- `onMoveEnd` on the `DraggableArea`: `cropper.moveCoordinatesEnd`, passed as is.
+- `onMove` on the `DraggableArea`: a one-line arrow that forwards the directions to `cropper.moveCoordinates`. Don't pass the method itself here: `onMove` also receives the native event as its second argument, and `moveCoordinates` would read that as its options.
 
 The `…End` methods matter. They tell the cropper that the interaction is over, so it can, for example, hide the grid and fire `onInteractionEnd`.
 
@@ -330,30 +331,26 @@ The `…End` methods matter. They tell the cropper that the interaction is over,
 
 	export const aspectRatio = 1;
 
-	function onResize(shift: MoveDirections) {
+	function resize(shift: MoveDirections) {
 		// Only the horizontal shift is used, on both axes: the square stencil grows evenly.
 		cropper.resizeCoordinates('center', {
 			left: shift.left,
 			top: shift.left
 		});
 	}
-
-	function onMove(directions: MoveDirections) {
-		cropper.moveCoordinates(directions);
-	}
 </script>
 
 <StencilWrapper class="circle-stencil" {transitions} {...coordinates}>
 	<DraggableElement
 		class="circle-stencil__handler"
-		onMove={onResize}
+		onMove={resize}
 		onMoveEnd={cropper.resizeCoordinatesEnd}
 	>
 		<MoveDiagonal color="white" size={22} />
 	</DraggableElement>
 	<DraggableArea
 		class="circle-stencil__draggable-area"
-		{onMove}
+		onMove={(directions) => cropper.moveCoordinates(directions)}
 		onMoveEnd={cropper.moveCoordinatesEnd}
 	>
 		<StencilOverlay class="circle-stencil__overlay" />

@@ -12,44 +12,40 @@
 	import VerticalButtons from '#site/demos/shared/VerticalButtons.svelte';
 	import { image } from '#site/paths.ts';
 
+	const src = image('photo-1600353068867-5b4de71e3afb.jpg');
+
 	let cropper: CropperRef | undefined = $state();
 
-	function flip(horizontal: boolean, vertical: boolean) {
-		cropper?.flipImage(horizontal, vertical);
-	}
-
-	function rotate(angle: number) {
-		cropper?.rotateImage(angle);
-	}
-
 	// Open the cropped result in a new tab.
-	function download() {
-		const result = cropper?.getCanvas()?.toDataURL();
+	function openResultInNewTab() {
+		const canvas = cropper?.getCanvas();
+		if (!canvas) {
+			return;
+		}
+
 		const newTab = window.open();
-		if (newTab && result) {
-			newTab.document.body.innerHTML = `<img src="${result}">`;
+		if (newTab) {
+			newTab.document.body.innerHTML = `<img src="${canvas.toDataURL()}">`;
 		}
 	}
 </script>
 
 <div class="rotate-image-example">
-	<Cropper
-		bind:this={cropper}
-		class="rotate-image-example__cropper"
-		src={image('photo-1600353068867-5b4de71e3afb.jpg')}
-	/>
+	<Cropper bind:this={cropper} class="rotate-image-example__cropper" {src} />
 	<VerticalButtons>
-		<SquareButton title="Flip Horizontal" onclick={() => flip(true, false)}>
+		<SquareButton title="Flip Horizontal" onclick={() => cropper?.flipImage(true, false)}>
 			<FlipHorizontalIcon />
 		</SquareButton>
-		<SquareButton title="Flip Vertical" onclick={() => flip(false, true)}>
+		<SquareButton title="Flip Vertical" onclick={() => cropper?.flipImage(false, true)}>
 			<FlipVerticalIcon />
 		</SquareButton>
-		<SquareButton title="Rotate Clockwise" onclick={() => rotate(90)}><RotateCw /></SquareButton>
-		<SquareButton title="Rotate Counter-Clockwise" onclick={() => rotate(-90)}>
+		<SquareButton title="Rotate Clockwise" onclick={() => cropper?.rotateImage(90)}
+			><RotateCw /></SquareButton
+		>
+		<SquareButton title="Rotate Counter-Clockwise" onclick={() => cropper?.rotateImage(-90)}>
 			<RotateCcw />
 		</SquareButton>
-		<SquareButton title="Download" onclick={download}><Save /></SquareButton>
+		<SquareButton title="Download" onclick={openResultInNewTab}><Save /></SquareButton>
 	</VerticalButtons>
 </div>
 

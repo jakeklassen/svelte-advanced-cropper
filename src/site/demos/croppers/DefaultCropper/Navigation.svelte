@@ -2,32 +2,20 @@
 	import {
 		RotateCcw,
 		RotateCw,
-		TrianglesCenterlineDashedHorizontal,
-		TrianglesCenterlineDashedVertical,
+		// Named by the mirror axis that is drawn: a vertical axis means a horizontal flip.
+		TrianglesCenterlineDashedHorizontal as FlipVerticalIcon,
+		TrianglesCenterlineDashedVertical as FlipHorizontalIcon,
 		Undo2
 	} from '@lucide/svelte';
 
 	interface Props {
 		changed?: boolean;
-		disabled?: boolean;
 		onRotate?: (angle: number) => void;
 		onFlip?: (horizontal: boolean, vertical: boolean) => void;
 		onReset?: () => void;
 	}
 
-	let { changed = false, disabled = false, onRotate, onFlip, onReset }: Props = $props();
-
-	function rotate(angle: number) {
-		if (!disabled) {
-			onRotate?.(angle);
-		}
-	}
-
-	function flip(horizontal: boolean, vertical: boolean) {
-		if (!disabled) {
-			onFlip?.(horizontal, vertical);
-		}
-	}
+	let { changed = false, onRotate, onFlip, onReset }: Props = $props();
 </script>
 
 <div class="navigation">
@@ -35,11 +23,11 @@
 		type="button"
 		class="button"
 		aria-label="Flip horizontally"
-		onclick={() => flip(true, false)}
+		onclick={() => onFlip?.(true, false)}
 	>
-		<TrianglesCenterlineDashedVertical size={22} />
+		<FlipHorizontalIcon size={22} />
 	</button>
-	<button type="button" class="button" aria-label="Rotate right" onclick={() => rotate(90)}>
+	<button type="button" class="button" aria-label="Rotate right" onclick={() => onRotate?.(90)}>
 		<RotateCw size={22} />
 	</button>
 	<div class="delimiter">
@@ -54,16 +42,16 @@
 			<Undo2 size={22} />
 		</button>
 	</div>
-	<button type="button" class="button" aria-label="Rotate left" onclick={() => rotate(-90)}>
+	<button type="button" class="button" aria-label="Rotate left" onclick={() => onRotate?.(-90)}>
 		<RotateCcw size={22} />
 	</button>
 	<button
 		type="button"
 		class="button"
 		aria-label="Flip vertically"
-		onclick={() => flip(false, true)}
+		onclick={() => onFlip?.(false, true)}
 	>
-		<TrianglesCenterlineDashedHorizontal size={22} />
+		<FlipVerticalIcon size={22} />
 	</button>
 </div>
 

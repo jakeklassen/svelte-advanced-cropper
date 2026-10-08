@@ -9,13 +9,15 @@
 	let coordinates: Coordinates | null = $state(null);
 	let preview: string | undefined = $state();
 
-	function onCrop() {
-		if (cropper) {
-			coordinates = cropper.getCoordinates();
-			// The canvas can be processed in any way you like. Here it is turned
-			// into a data URL so that an <img> can show the result.
-			preview = cropper.getCanvas()?.toDataURL();
+	function crop() {
+		if (!cropper) {
+			return;
 		}
+
+		coordinates = cropper.getCoordinates();
+		// The canvas can be processed in any way you like. Here it is turned
+		// into a data URL so that an <img> can show the result.
+		preview = cropper.getCanvas()?.toDataURL();
 	}
 </script>
 
@@ -26,7 +28,7 @@
 		stencilProps={{ aspectRatio: 1 }}
 		{src}
 	/>
-	<button type="button" class="getting-result-manual-example__crop-button" onclick={onCrop}>
+	<button type="button" class="getting-result-manual-example__crop-button" onclick={crop}>
 		Crop Image
 	</button>
 	{#if coordinates && preview}

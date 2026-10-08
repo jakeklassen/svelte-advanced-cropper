@@ -414,7 +414,7 @@ In short:
 cropper?.refresh();
 ```
 
-In the demo, drag the blue handles to resize the cropper's container. In Svelte the new size reaches the DOM only after the current update, so the demo waits for `tick()` before calling `refresh()`.
+In the demo, drag the blue handles to resize the cropper's container. The box's size is derived from the outer element's size, measured with `bind:clientWidth` and `bind:clientHeight`, and an `$effect` calls `refresh()` whenever the box changes. An effect runs once Svelte has written its changes to the DOM, so the cropper measures the box at its new size.
 
 <Example source={refreshSource} title="RefreshExample">
 	<RefreshExample />

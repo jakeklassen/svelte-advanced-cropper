@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onDestroy } from 'svelte';
 	import {
 		TransformableImage,
 		isTouchEvent,
@@ -22,19 +23,27 @@
 	const scaleImageOptions = $derived(useScaleImageOptions(scaleImage));
 	const transitions = $derived(cropper.getTransitions());
 
-	let notificationType: 'touch' | 'wheel' = $state('wheel');
+	type NotificationType = 'touch' | 'wheel';
+
+	const messages: Record<NotificationType, string> = {
+		touch: 'Use two fingers to move the cropper',
+		wheel: 'Use ctrl + scroll to zoom the cropper'
+	};
+
+	let notificationType: NotificationType = $state('wheel');
 	let notificationVisible = $state(false);
 
 	// A tiny debounce: hide the notification 1.5s after the last event that showed it.
 	let hideTimer: ReturnType<typeof setTimeout> | undefined;
+
+	onDestroy(() => clearTimeout(hideTimer));
+
 	function hideNotificationLater() {
 		clearTimeout(hideTimer);
 		hideTimer = setTimeout(() => (notificationVisible = false), 1500);
 	}
 
-	$effect(() => () => clearTimeout(hideTimer));
-
-	function showNotification(type: 'touch' | 'wheel') {
+	function showNotification(type: NotificationType) {
 		notificationVisible = true;
 		notificationType = type;
 		hideNotificationLater();
@@ -86,9 +95,7 @@
 			notificationVisible && 'cropper-event-notification--visible'
 		]}
 	>
-		{notificationType === 'wheel'
-			? 'Use ctrl + scroll to zoom the cropper'
-			: 'Use two fingers to move the cropper'}
+		{messages[notificationType]}
 	</div>
 </TransformableImage>
 

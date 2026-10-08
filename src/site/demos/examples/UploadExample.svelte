@@ -6,24 +6,25 @@
 
 	let cropper: CropperRef | undefined = $state();
 
-	function onUpload() {
-		const canvas = cropper?.getCanvas();
-		if (canvas) {
-			canvas.toBlob((blob) => {
-				if (blob) {
-					const form = new FormData();
-					form.append('file', blob);
-					// Replace the URL with your own endpoint. This one doesn't accept
-					// uploads, so the request is expected to fail.
-					fetch('http://example.com/upload/', {
-						method: 'POST',
-						body: form
-					}).catch((error: unknown) => {
-						console.warn('Upload failed:', error);
-					});
-				}
-			}, 'image/jpeg');
+	function uploadResult() {
+		cropper?.getCanvas()?.toBlob(sendToServer, 'image/jpeg');
+	}
+
+	function sendToServer(blob: Blob | null) {
+		if (!blob) {
+			return;
 		}
+
+		const form = new FormData();
+		form.append('file', blob);
+		// Replace the URL with your own endpoint. This one doesn't accept uploads, so the
+		// request is expected to fail.
+		fetch('http://example.com/upload/', {
+			method: 'POST',
+			body: form
+		}).catch((error: unknown) => {
+			console.warn('Upload failed:', error);
+		});
 	}
 </script>
 
@@ -34,7 +35,7 @@
 		backgroundClassName="upload-example__cropper-background"
 		{src}
 	/>
-	<button type="button" class="upload-example__button" onclick={onUpload}>Crop Image</button>
+	<button type="button" class="upload-example__button" onclick={uploadResult}>Crop Image</button>
 </div>
 
 <style>

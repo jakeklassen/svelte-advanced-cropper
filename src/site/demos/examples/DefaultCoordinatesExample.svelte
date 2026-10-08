@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { Cropper } from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
+
+	const src = image('photo-1527199372136-dff50c10ea34.jpg');
 </script>
 
 <Cropper
 	class="default-coordinates-example"
-	src={image('photo-1527199372136-dff50c10ea34.jpg')}
+	{src}
 	defaultCoordinates={{
 		width: 400,
 		height: 400,

@@ -32,26 +32,39 @@
 		};
 	}
 
-	function onDownloadResult() {
-		const result = cropper?.getCanvas()?.toDataURL();
+	// Open the cropped result in a new tab.
+	function openResultInNewTab() {
+		const canvas = cropper?.getCanvas();
+		if (!canvas) {
+			return;
+		}
+
 		const newTab = window.open();
-		if (newTab && result) {
-			newTab.document.body.innerHTML = `<img src="${result}">`;
+		if (newTab) {
+			newTab.document.body.innerHTML = `<img src="${canvas.toDataURL()}">`;
 		}
 	}
 
-	function onLoadImage(event: Event & { currentTarget: HTMLInputElement }) {
+	function loadImage(event: Event & { currentTarget: HTMLInputElement }) {
 		const file = event.currentTarget.files?.[0];
 		if (file) {
-			const reader = new FileReader();
-			reader.addEventListener('load', () => {
-				if (typeof reader.result === 'string') {
-					src = reader.result;
-				}
-			});
-			reader.readAsDataURL(file);
+			src = URL.createObjectURL(file);
 		}
+
+		// Reset the input so that picking the same file again still fires `change`.
+		event.currentTarget.value = '';
 	}
+
+	// Free the previous object URL once it is replaced (a no-op for regular URLs).
+	$effect(() => {
+		const current = src;
+
+		return () => {
+			if (current.startsWith('blob:')) {
+				URL.revokeObjectURL(current);
+			}
+		};
+	});
 </script>
 
 <div class="custom-restrictions-example">
@@ -97,9 +110,13 @@
 				class="custom-restrictions-example__file-input"
 				type="file"
 				accept="image/*"
-				onchange={onLoadImage}
+				onchange={loadImage}
 			/>
-			<button type="button" class="custom-restrictions-example__button" onclick={onDownloadResult}>
+			<button
+				type="button"
+				class="custom-restrictions-example__button"
+				onclick={openResultInNewTab}
+			>
 				Download result
 			</button>
 		</div>

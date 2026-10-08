@@ -15,16 +15,16 @@
 		zoomStencil
 	} from 'advanced-cropper/showcase/mobile';
 	import CropperWrapper from './CropperWrapper.svelte';
-	import type { PublicNavigationProps } from './types';
+	import type { NavigationClassNames } from './types.ts';
 
-	type Props = Omit<
+	interface Props extends Omit<
 		CropperProps,
 		'transitions' | 'priority' | 'imageRestriction' | 'stencilConstraints' | 'transformImage'
-	> & {
+	> {
 		spinnerClassName?: ClassValue;
 		navigation?: boolean;
-		navigationProps?: PublicNavigationProps;
-	};
+		navigationProps?: NavigationClassNames;
+	}
 
 	let {
 		class: className,
@@ -53,7 +53,7 @@
 	{defaultSize}
 	transformImageAlgorithm={transformImage}
 	resizeCoordinatesAlgorithm={resizeAlgorithm}
-	transitions={true}
+	transitions
 />
 
 <style lang="scss">
