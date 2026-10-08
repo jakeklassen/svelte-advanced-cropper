@@ -61,6 +61,8 @@
 		padding: 1rem;
 		border: 0;
 		border-radius: 8px;
+		color: var(--color-text);
+		background: var(--color-surface-raised);
 		box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
 	}
 	.dialog-example::backdrop {

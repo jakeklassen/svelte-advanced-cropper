@@ -41,7 +41,7 @@
 		font-family: var(--font-mono);
 		font-size: 0.8rem;
 		padding: 0.4rem 1rem;
-		background: #eef0f3;
+		background: var(--color-code);
 		border: 1px solid var(--color-border);
 		border-bottom: none;
 		border-radius: 6px 6px 0 0;
@@ -60,7 +60,7 @@
 		padding: 0.2rem 0.5rem;
 		border: 1px solid var(--color-border);
 		border-radius: 4px;
-		background: white;
+		background: var(--color-surface-raised);
 		color: var(--color-muted);
 		cursor: pointer;
 		opacity: 0;

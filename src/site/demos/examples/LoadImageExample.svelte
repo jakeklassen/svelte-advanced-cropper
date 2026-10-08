@@ -134,7 +134,7 @@
 		border: solid 1px #36393f;
 		min-height: 400px;
 		max-height: 500px;
-		background: white;
+		background: var(--color-surface);
 	}
 	:global(.load-image-example__cropper-background) {
 		background: black;

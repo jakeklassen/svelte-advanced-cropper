@@ -55,7 +55,7 @@
 	}
 	.example__demo {
 		padding: 1rem;
-		background: #fafbfc;
+		background: var(--color-surface-subtle);
 	}
 	.example__toggle {
 		display: block;
@@ -65,7 +65,7 @@
 		font-size: 0.85rem;
 		font-weight: 600;
 		color: var(--color-primary);
-		background: white;
+		background: var(--color-surface-raised);
 		border: none;
 		border-top: 1px solid var(--color-border);
 		cursor: pointer;

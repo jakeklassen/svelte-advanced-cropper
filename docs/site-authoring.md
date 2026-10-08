@@ -74,6 +74,15 @@ is added at build time.
 - Styles: users `import 'svelte-advanced-cropper/style.css'`, and themes via `svelte-advanced-cropper/themes/<name>.css`. The docs site already loads the default theme globally.
 - To scope a theme to one demo (ThemeExample, Telegram), use a `<style lang="scss">` block with `.your-wrapper :global { @import 'advanced-cropper/themes/<name>.scss'; }` (see `src/site/demos/examples/ThemeExample.svelte`). Do not use `:global(.your-wrapper) { @import … }`: Svelte scopes the nested selectors, drops them as unused, and the theme has no effect. Sass is installed.
 
+## Light and dark themes
+
+The site defaults to dark, with a toggle in the navbar (`data-theme` on `<html>`, set before the first paint by `src/app.html`, stored in `localStorage.theme`). Every demo must read well in both:
+
+- Page surfaces use the tokens from `src/site/styles/site.css`: `--color-surface`, `--color-surface-subtle`, `--color-surface-raised`, `--color-border`, `--color-text`, `--color-muted`, `--color-code`. Never hard-code white backgrounds, light-grey borders or dark body text.
+- Deliberate demo visuals keep their own colours: the cropper's black backdrop, stencil and overlay colours, the showcase brand palettes, `--color-accent` (#61dafb). Give any such element a complete colour pair (background and text) so it doesn't inherit a colour that vanishes in one theme.
+- Code fences are highlighted for both themes automatically.
+- Check new demos in both themes before finishing.
+
 ## Quality bar
 
 - Every upstream demo on your pages exists and works: the same behaviour, controls and photo.

@@ -72,7 +72,7 @@
 		position: relative;
 		width: 100%;
 		height: 400px;
-		border: 1px solid #eee;
+		border: 1px solid var(--color-border);
 	}
 	:global(.refresh-example__wrapper) {
 		position: absolute;

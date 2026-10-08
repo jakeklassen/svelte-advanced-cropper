@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Menu } from '@lucide/svelte';
 	import Logo from './Logo.svelte';
+	import ThemeToggle from './ThemeToggle.svelte';
 	import { href } from '#site/paths.ts';
 
 	interface Props {
@@ -24,6 +25,7 @@
 	<div class="navbar__links">
 		<a href={href('/docs/intro')}>Documentation</a>
 		<a href="https://github.com/jakeklassen/svelte-advanced-cropper">GitHub</a>
+		<ThemeToggle />
 	</div>
 </nav>
 
@@ -34,24 +36,26 @@
 		gap: 1rem;
 		height: var(--navbar-height);
 		padding: 0 24px;
-		color: white;
+		color: var(--color-navbar-text);
 		background: var(--color-navbar);
 	}
 	.navbar--default {
 		position: sticky;
 		top: 0;
 		z-index: 20;
-		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+		border-bottom: 1px solid var(--color-navbar-border);
 	}
+	/* The home page hero is dark in both themes. */
 	.navbar--hero {
 		background: transparent;
 		padding: 0;
-	}
-	.navbar a {
 		color: white;
 	}
+	.navbar a {
+		color: inherit;
+	}
 	.navbar a:hover {
-		color: var(--color-navbar-link-hover);
+		color: var(--color-primary);
 		text-decoration: none;
 	}
 	.navbar__brand {
@@ -64,6 +68,7 @@
 	.navbar__links {
 		margin-left: auto;
 		display: flex;
+		align-items: center;
 		gap: 1.5rem;
 		font-weight: 500;
 	}

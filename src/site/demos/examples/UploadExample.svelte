@@ -42,7 +42,7 @@
 	:global(.upload-example__cropper) {
 		border: solid 1px #36393f;
 		max-height: 450px;
-		background: white;
+		background: var(--color-surface);
 	}
 	:global(.upload-example__cropper-background) {
 		background: black;

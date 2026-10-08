@@ -31,8 +31,8 @@
 
 <style>
 	.footer {
-		background: #303846;
-		color: #ebedf0;
+		background: var(--color-footer);
+		color: var(--color-footer-text);
 		padding: 2.5rem 24px 2rem;
 	}
 	.footer__columns {
@@ -52,15 +52,15 @@
 		margin-bottom: 0.25rem;
 	}
 	.footer a {
-		color: #ebedf0;
+		color: var(--color-footer-text);
 	}
 	.footer a:hover {
-		color: var(--color-navbar-link-hover);
+		color: var(--color-primary);
 	}
 	.footer__copyright {
 		text-align: center;
 		margin: 2rem 0 0;
 		font-size: 0.9rem;
-		color: #b0b6c0;
+		color: var(--color-footer-muted);
 	}
 </style>

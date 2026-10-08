@@ -78,7 +78,7 @@
 	}
 	.settings-diagram__title {
 		padding: 0.45rem;
-		background: #f3f5f7;
+		background: var(--color-surface-subtle);
 		font-weight: 700;
 		font-size: 0.9rem;
 		border-bottom: 2px solid var(--color-text);

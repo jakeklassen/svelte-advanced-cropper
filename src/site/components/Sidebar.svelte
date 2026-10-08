@@ -96,11 +96,11 @@
 	}
 	a:hover,
 	summary:hover {
-		background: #f2f3f5;
+		background: var(--color-surface-subtle);
 		text-decoration: none;
 	}
 	a.active {
 		color: var(--color-primary);
-		background: #eaf6fe;
+		background: var(--color-selected);
 	}
 </style>

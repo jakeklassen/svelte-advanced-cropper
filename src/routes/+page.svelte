@@ -152,7 +152,7 @@
 		color: #777677;
 	}
 	a.family-item:hover {
-		color: var(--color-navbar-link-hover);
+		color: var(--color-accent);
 		text-decoration: none;
 	}
 	.family-item--active {
@@ -175,11 +175,11 @@
 		line-height: 1.2;
 		font-weight: bold;
 		text-align: center;
-		border-bottom: solid 2px var(--color-navbar-link-hover);
+		border-bottom: solid 2px var(--color-accent);
 	}
 	.features-wrapper {
-		background: white;
-		color: #212121;
+		background: var(--color-surface);
+		color: var(--color-text);
 	}
 	.features {
 		max-width: 800px;
@@ -200,8 +200,8 @@
 		margin: 0;
 	}
 	.example {
-		background: #f6f6f8;
-		color: #212121;
+		background: var(--color-surface-subtle);
+		color: var(--color-text);
 		padding: 20px 0 50px;
 	}
 	.installation {
@@ -209,7 +209,7 @@
 		margin: 0 auto 40px;
 	}
 	.code-wrapper {
-		background: #f6f8fa;
+		background: var(--color-code);
 		padding: 10px 24px;
 		margin-bottom: 40px;
 		box-shadow: inset 0 0 10px 0 rgb(0 0 0 / 10%);

@@ -66,7 +66,7 @@
 		top: var(--navbar-height);
 		height: calc(100vh - var(--navbar-height));
 		overflow-y: auto;
-		background: white;
+		background: var(--color-surface);
 	}
 	.docs__main {
 		padding: 2rem 2.5rem 3rem;
@@ -114,7 +114,7 @@
 		}
 		.docs__sidebar--open {
 			transform: none;
-			box-shadow: 0 0 24px rgba(0, 0, 0, 0.2);
+			box-shadow: var(--shadow-overlay);
 		}
 		.docs__backdrop {
 			display: block;

@@ -29,6 +29,6 @@
 	.cropper-preview-demo :global(.cropper-preview-demo__preview) {
 		width: 160px;
 		height: 160px;
-		background: #eee;
+		background: var(--color-surface-subtle);
 	}
 </style>

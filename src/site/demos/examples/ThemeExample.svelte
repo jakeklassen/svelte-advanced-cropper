@@ -65,7 +65,7 @@
 	.theme-example {
 		position: relative;
 		min-height: 200px;
-		border: solid 1px #eee;
+		border: solid 1px var(--color-border);
 		user-select: none;
 
 		:global(.theme-example__cropper) {

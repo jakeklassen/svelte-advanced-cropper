@@ -71,8 +71,8 @@
 <style>
 	.rotate-coordinates-example {
 		display: flex;
-		border: solid 1px #eee;
-		background: white;
+		border: solid 1px var(--color-border);
+		background: var(--color-surface-raised);
 		border-radius: 8px;
 	}
 	.rotate-coordinates-example__example {
@@ -109,7 +109,7 @@
 	}
 	.rotate-coordinates-example__left,
 	.rotate-coordinates-example__top {
-		border: solid 1px rgba(0, 0, 0, 0.1);
+		border: solid 1px var(--color-border);
 		position: absolute;
 		z-index: 1;
 	}

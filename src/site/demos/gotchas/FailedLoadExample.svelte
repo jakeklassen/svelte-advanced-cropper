@@ -116,6 +116,6 @@
 		font-size: 0.9rem;
 	}
 	.failed-load-example__status--error {
-		color: #b42318;
+		color: light-dark(#b42318, #f97066);
 	}
 </style>

@@ -71,7 +71,8 @@
 		width: 100%;
 		padding: 8px;
 		border: none;
-		color: black;
+		color: var(--color-text);
+		background: var(--color-surface-raised);
 		font: inherit;
 		font-size: 15px;
 	}

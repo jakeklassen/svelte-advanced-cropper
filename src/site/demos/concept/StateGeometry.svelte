@@ -31,7 +31,7 @@
 		height: auto;
 	}
 	.state-geometry__image {
-		fill: #e9edf1;
+		fill: var(--color-surface-subtle);
 		stroke: var(--color-muted);
 		stroke-width: 1;
 	}

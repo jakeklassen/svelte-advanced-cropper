@@ -28,6 +28,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - SvelteKit with `adapter-static`, fully prerendered. Pages are mdsvex `.svx` files at `src/routes/docs/**/+page.svx`, with URLs matching upstream's, including casing. `src/site/nav.ts` drives the sidebar, the prev/next links and the e2e page sweep.
 - Demos live in `src/site/demos/**` and import the library by package name (`'svelte-advanced-cropper'`, a Vite alias plus a tsconfig path to `src/lib`), so the source we display is what users write. `import x from './Demo.svelte?highlight'` returns `{ code, html }`, highlighted by Shiki at build time (a plugin in `vite.config.ts`). `Example.svelte` shows the demo plus its source.
 - **Before adding or editing docs content, read `docs/site-authoring.md`.** It covers the rules (original prose only, because upstream's text belongs to Norserium), mdsvex gotchas and theme scoping.
+- Light/dark: dark by default with a navbar toggle. Page surfaces use the colour tokens in `src/site/styles/site.css`; see "Light and dark themes" in `docs/site-authoring.md`.
 - Links in markdown are root-relative. A rehype plugin adds `BASE_PATH`. In Svelte, use `href()` / `image()` from `#site/paths.ts`.
 
 ## Commands

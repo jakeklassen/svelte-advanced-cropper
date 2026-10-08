@@ -67,16 +67,16 @@
 <style>
 	:global(.resize-result-example__cropper) {
 		max-height: 450px;
-		border: solid 1px #eee;
+		border: solid 1px var(--color-border);
 		background: #354146;
 	}
 	.resize-result-example__panel {
 		display: flex;
 		gap: 30px;
 		padding: 20px;
-		border: solid 1px #ddd;
-		background: rgb(250, 250, 250);
-		color: black;
+		border: solid 1px var(--color-border);
+		background: var(--color-surface-subtle);
+		color: var(--color-text);
 	}
 	.resize-result-example__inputs {
 		flex: 1;
@@ -97,8 +97,9 @@
 		padding: 4px;
 		font: inherit;
 		font-size: 15px;
-		color: black;
-		border: solid 1px #aaa;
+		color: var(--color-text);
+		border: solid 1px var(--color-border);
+		background: var(--color-surface-raised);
 	}
 	.resize-result-example__button {
 		width: 120px;
