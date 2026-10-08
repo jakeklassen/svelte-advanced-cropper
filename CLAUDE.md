@@ -37,7 +37,7 @@ Tool versions are pinned in `mise.toml`. If `node` or `pnpm` on PATH don't match
 - `pnpm dev`: docs site
 - `pnpm build`: site build, then `svelte-package` → `dist/` + `build-styles` + `publint`
 - `BASE_PATH=/svelte-advanced-cropper STRICT_LINKS=1 pnpm exec vite build`: the Pages build. `STRICT_LINKS` fails the build on broken internal links or anchors. CI and deploys use it.
-- `pnpm check`: `svelte-check`, the only source of Svelte template, compiler and a11y diagnostics
+- `pnpm check`: `svelte-check`, the only source of Svelte template, compiler and a11y diagnostics. `--config ./vite.config.ts` stops it crawling the whole tree (including `tmp/` clones) for Svelte configs
 - `pnpm lint`: oxlint, type-aware via `oxlint-tsgolint` (`.oxlintrc.json`). It lints only `<script>` blocks in `.svelte` files.
 - `pnpm format` / `pnpm format:check`: oxfmt (`.oxfmtrc.json`)
 - `pnpm test`: unit tests once, then e2e
