@@ -38,13 +38,14 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      # Uses the workflow's token by default; the pull request and commit are titled
+      # "Version Packages".
       - uses: changesets/action@v2
         with:
-          version: pnpm version-packages
-          publish: pnpm release
-          title: Version Packages
-          commit: Version Packages
+          version-script: pnpm version-packages
+          publish-script: pnpm release
         env:
+          # @changesets/changelog-github reads it to link changelog entries to pull requests.
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Trusted publishing from a public repository; attach a provenance attestation.
           NPM_CONFIG_PROVENANCE: 'true'
