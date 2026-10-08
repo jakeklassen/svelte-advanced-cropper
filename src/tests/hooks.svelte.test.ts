@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { render } from 'vitest-browser-svelte';
+import { flushSync } from 'svelte';
 import ImageHarness from './ImageHarness.svelte';
+import UpdateEffectHarness from './UpdateEffectHarness.svelte';
 import { createTestImage, waitFor } from './fixtures';
 
 describe('useCropperImage', () => {
@@ -46,5 +48,51 @@ describe('useCropperImage', () => {
 		expect(hook().isLoading()).toBe(false);
 		await new Promise((resolve) => setTimeout(resolve, 50));
 		expect(hook().getImage()).toBeNull();
+	});
+});
+
+describe('useUpdateEffect', () => {
+	it('skips the mount run and runs only when a dependency changes', async () => {
+		const log: string[] = [];
+		const screen = render(UpdateEffectHarness, { log });
+		flushSync();
+		expect(log).toEqual([]);
+
+		// A tracked object changes, but the dependency value does not.
+		screen.component.setOther(2);
+		flushSync();
+		expect(log).toEqual([]);
+
+		screen.component.setValue(2);
+		flushSync();
+		expect(log).toEqual(['run:2']);
+
+		screen.component.setValue(3);
+		flushSync();
+		expect(log).toEqual(['run:2', 'cleanup', 'run:3']);
+	});
+});
+
+describe('useCropperImage setImage', () => {
+	it('fires onLoad once for the latest of several images', async () => {
+		const log: string[] = [];
+		const screen = render(ImageHarness, { src: createTestImage(), log });
+		const hook = () => screen.component.getHook();
+		await waitFor(() => log.some((entry) => entry.startsWith('load')));
+		const image = hook().getImage();
+		if (!image) throw new Error('no image');
+		log.length = 0;
+
+		hook().setImage({ ...image, width: 1 });
+		hook().setImage({ ...image, width: 2 });
+		await new Promise((resolve) => setTimeout(resolve, 20));
+		expect(log).toEqual(['load:false']);
+		expect(hook().getImage()?.width).toBe(2);
+
+		// Setting the same image again does not fire onLoad.
+		const current = hook().getImage();
+		hook().setImage(current);
+		await new Promise((resolve) => setTimeout(resolve, 20));
+		expect(log).toEqual(['load:false']);
 	});
 });

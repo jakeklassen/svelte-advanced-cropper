@@ -1,27 +1,38 @@
 import { untrack } from 'svelte';
-import { deepCompare } from 'advanced-cropper';
+
+function sameDeps(a: unknown, b: unknown): boolean {
+	if (Array.isArray(a) && Array.isArray(b)) {
+		return a.length === b.length && a.every((value, index) => Object.is(value, b[index]));
+	}
+	return Object.is(a, b);
+}
 
 /**
- * Svelte version of upstream's `useUpdateEffect`: runs `effect` whenever the values
- * read by `deps` change, but not on mount.
+ * Svelte version of upstream's `useUpdateEffect`: runs `effect` whenever the
+ * dependencies returned by `deps` change, but not on mount.
  *
- * Upstream takes a React dependency array. Here `deps` is a function, and whatever
- * reactive state it reads becomes a dependency. `effect` runs untracked.
+ * As with React, dependencies are compared with `Object.is` (element-wise for arrays).
+ * The effect's cleanup runs only before the next run or on destroy, not every time a
+ * tracked value changes without changing the dependencies. `effect` runs untracked.
  *
- * Svelte runs all of a component's mount effects in one batch, so a value can change
- * before this effect first runs (for example, an image that starts loading in an
- * earlier effect). To still catch that change, the first run compares against the
- * value seen when the hook was created instead of skipping unconditionally.
+ * Svelte runs all of a component's mount effects in one batch, so a dependency can
+ * change before this effect first runs (for example, an image that starts loading in
+ * an earlier effect). The comparison starts from the values seen when the hook was
+ * created, so such a change still counts.
  */
 export function useUpdateEffect(effect: () => void | (() => void), deps: () => unknown): void {
-	const initial = untrack(deps);
-	let firstRun = true;
+	let previous = untrack(deps);
+	let cleanup: void | (() => void);
+
 	$effect(() => {
 		const current = deps();
-		if (firstRun) {
-			firstRun = false;
-			if (deepCompare(initial, current)) return;
-		}
-		return untrack(effect);
+		if (sameDeps(previous, current)) return;
+		previous = current;
+		untrack(() => {
+			cleanup?.();
+			cleanup = effect();
+		});
 	});
+
+	$effect(() => () => cleanup?.());
 }

@@ -100,15 +100,32 @@
 		isLoading: () => loading
 	};
 
-	const instance = $derived(cropper || internalInstance || propsInstance);
+	// Bumped by refresh()/update(). Upstream force-renders there, so that a cropper
+	// object whose getters are not reactive is still re-read. A new wrapper object per
+	// revision does the same: everything that reads `instance` re-evaluates.
+	let revision = $state(0);
+
+	const instance: CropperPreviewDesiredCropperRef = $derived.by(() => {
+		void revision;
+		const source = cropper || internalInstance || propsInstance;
+		return {
+			getState: () => source.getState(),
+			getTransitions: () => source.getTransitions(),
+			getImage: () => source.getImage(),
+			isLoaded: () => source.isLoaded(),
+			isLoading: () => source.isLoading()
+		};
+	});
 
 	let size: Size | null = $state.raw(null);
 
-	const coordinates = $derived(instance.getState()?.coordinates);
+	// Scalars, so that moving the crop (same size, new object) does not re-stretch.
+	const width = $derived(instance.getState()?.coordinates?.width);
+	const height = $derived(instance.getState()?.coordinates?.height);
 
 	const src = $derived(instance.getImage()?.src);
 
-	export function refresh() {
+	function stretch() {
 		const current = instance.getState()?.coordinates;
 		if (boundary && current) {
 			void boundary.stretchTo(current).then((stretched) => {
@@ -131,19 +148,24 @@
 		}
 	}
 
+	export function refresh() {
+		revision++;
+		stretch();
+	}
+
 	export function update(next?: CropperPreviewDesiredCropperRef | null) {
 		internalInstance = next || null;
 		refresh();
 	}
 
-	useWindowResize(refresh);
+	useWindowResize(() => refresh());
 
 	$effect(() => {
 		// Upstream: useLayoutEffect(refresh, [coordinates?.height, coordinates?.width]).
-		void coordinates?.height;
-		void coordinates?.width;
+		void width;
+		void height;
 		void boundary;
-		untrack(refresh);
+		untrack(stretch);
 	});
 
 	const WrapperComponent = $derived(wrapperComponent);

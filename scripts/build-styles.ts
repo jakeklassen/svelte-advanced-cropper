@@ -6,6 +6,8 @@
 import { copyFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
+import autoprefixer from 'autoprefixer';
+import postcss from 'postcss';
 import { compile, type Options } from 'sass';
 
 const require = createRequire(import.meta.url);
@@ -17,7 +19,9 @@ const themes = ['compact', 'classic', 'bubble', 'corners', 'default'];
 const options: Options<'sync'> = {
 	silenceDeprecations: ['import', 'global-builtin', 'color-functions']
 };
-const build = (file: string) => compile(file, options).css;
+// Upstream runs Autoprefixer over the compiled CSS (browserslist defaults).
+const prefixer = postcss([autoprefixer]);
+const build = (file: string) => prefixer.process(compile(file, options).css, { from: file }).css;
 
 writeFileSync(
 	join(out, 'style.css'),

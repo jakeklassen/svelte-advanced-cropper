@@ -17,11 +17,13 @@ export function useCropperAutoReconcile(
 	enabled: boolean,
 	isConsistent: () => boolean
 ) {
-	let active = $state(true);
+	// A counter rather than a flag: reset and refresh can overlap, and reconciling must
+	// stay paused until every one of them has resumed.
+	let paused = $state(0);
 
 	$effect(() => {
 		const consistent = isConsistent();
-		if (enabled && active && !consistent) {
+		if (enabled && paused === 0 && !consistent) {
 			untrack(() => {
 				if (!cropper.hasInteractions()) {
 					cropper.reconcileState();
@@ -32,10 +34,10 @@ export function useCropperAutoReconcile(
 
 	return {
 		pause() {
-			active = false;
+			paused++;
 		},
 		resume() {
-			active = true;
+			paused = Math.max(0, paused - 1);
 		}
 	};
 }

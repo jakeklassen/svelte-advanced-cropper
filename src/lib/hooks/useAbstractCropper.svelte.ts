@@ -121,36 +121,54 @@ export function useAbstractCropper<Extension extends SettingsExtension = {}>(
 		}
 	);
 
+	// Reset and refresh await the boundary (a custom boundary's stretchTo may be async).
+	// Each call takes a token; a call superseded by a newer one, or finishing after
+	// unmount, stops before touching the state. A reset supersedes pending refreshes,
+	// but a refresh (e.g. on window resize) never cancels a reset. Auto-reconcile
+	// always resumes.
+	let resetOperation = 0;
+	let refreshOperation = 0;
+
 	const resetCropper = async () => {
 		const boundaryRef = refs.boundary;
-		if (boundaryRef) {
-			autoReconcile.pause();
+		if (!boundaryRef) return;
+		const id = ++resetOperation;
+		refreshOperation++;
+		const current = () => id === resetOperation && mounted;
+		autoReconcile.pause();
+		try {
 			const image = cropperImage.getImage();
 			const boundary = await boundaryRef.stretchTo(image);
+			if (!current()) return;
 			const previousImage = currentImage;
 			currentImage = image;
 			// Let the new image render before resetting, like upstream's state callback.
 			await tick();
+			if (!current()) return;
 			if (boundary && image) {
 				cropper.reset(boundary, image);
 			} else {
 				cropper.clear();
 			}
-			autoReconcile.resume();
 			if (image && image !== previousImage) {
 				// Wait for the reset state to render, so getCanvas() works inside onReady.
 				await tick();
-				if (mounted) untrack(props).onReady?.(cropperInterface);
+				if (current()) untrack(props).onReady?.(cropperInterface);
 			}
+		} finally {
+			autoReconcile.resume();
 		}
 	};
 
 	const refreshCropper = async () => {
 		const boundaryRef = refs.boundary;
-		if (boundaryRef) {
-			autoReconcile.pause();
+		if (!boundaryRef) return;
+		const id = ++refreshOperation;
+		autoReconcile.pause();
+		try {
 			const image = cropperImage.getImage();
 			const boundary = await boundaryRef.stretchTo(image);
+			if (id !== refreshOperation || !mounted) return;
 			if (boundary && image) {
 				const state = cropper.getState();
 				if (state) {
@@ -168,6 +186,7 @@ export function useAbstractCropper<Extension extends SettingsExtension = {}>(
 			} else {
 				cropper.clear();
 			}
+		} finally {
 			autoReconcile.resume();
 		}
 	};

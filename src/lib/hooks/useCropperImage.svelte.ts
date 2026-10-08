@@ -48,16 +48,24 @@ export function useCropperImage(
 	// Incremented for every new src and on destroy; async work checks it is still current.
 	let request = 0;
 
-	const applyImage = (value: CropperImage | null, current: () => boolean) => {
+	const applyImage = (value: CropperImage | null) => {
 		image = value;
-		if (value) {
-			loaded = true;
-			// Upstream fires onLoad from an effect, i.e. after the image has rendered.
-			void tick().then(() => {
-				if (current()) untrack(options).onLoad?.(value);
-			});
-		}
 	};
+
+	// Upstream reacts to the committed image: when it changes to a new image, mark it
+	// loaded and fire onLoad after it renders. Several setImage calls in a row, or
+	// setting the same image again, produce one onLoad (for the latest image) or none.
+	$effect(() => {
+		const value = image;
+		if (!value) return;
+		untrack(() => {
+			loaded = true;
+			const id = request;
+			void tick().then(() => {
+				if (id === request && image === value) untrack(options).onLoad?.(value);
+			});
+		});
+	});
 
 	$effect(() => {
 		return () => {
@@ -106,7 +114,7 @@ export function useCropperImage(
 						if (!current()) return;
 						onLoadingEnd?.();
 						loading = false;
-						applyImage((responses as [CropperImage])[0], current);
+						applyImage((responses as [CropperImage])[0]);
 					},
 					() => {
 						if (!current()) return;
@@ -140,9 +148,7 @@ export function useCropperImage(
 			return image;
 		},
 		setImage(update) {
-			const value = typeof update === 'function' ? update(image) : update;
-			const id = request;
-			applyImage(value, () => id === request);
+			applyImage(typeof update === 'function' ? update(image) : update);
 		}
 	};
 }
