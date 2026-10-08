@@ -18,6 +18,8 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
+    # A normal run takes about 2 minutes; fail fast if a download stalls.
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
 

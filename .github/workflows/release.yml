@@ -24,6 +24,7 @@ jobs:
   release:
     needs: checks
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: write # push the version branch, the git tag and the GitHub release
       pull-requests: write # open the "Version Packages" pull request
