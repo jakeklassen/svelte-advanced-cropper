@@ -8,6 +8,9 @@ export function useTransition(getTransitions: () => CropperTransitions | null | 
 	const animation = new Animation();
 	let active = $state(false);
 
+	// Upstream leaves the animation running after unmount; stop it with the component.
+	$effect(() => () => animation.stop());
+
 	return {
 		run(callback: (progress: number) => void) {
 			const transitions = getTransitions();

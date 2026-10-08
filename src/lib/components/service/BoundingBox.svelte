@@ -205,11 +205,14 @@
 			}
 
 			if (!disabled) {
+				// Read the reference before resizing: unlike a React render's props, Svelte props
+				// are live, so after onResize this would already be the new coordinates.
+				const currentReference = reference;
 				if (onResize) {
 					const anchor = getDirectionNames(horizontalPosition, verticalPosition).camelCase;
 					if (anchor) {
 						onResize(anchor, directions, {
-							reference: lastReference || reference,
+							reference: lastReference || currentReference,
 							preserveAspectRatio: nativeEvent && nativeEvent.shiftKey,
 							respectDirection,
 							compensate: true
@@ -217,7 +220,7 @@
 					}
 				}
 				if (!lastReference) {
-					lastReference = reference;
+					lastReference = currentReference;
 				}
 			}
 		};

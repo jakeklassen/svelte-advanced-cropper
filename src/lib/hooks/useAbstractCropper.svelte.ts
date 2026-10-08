@@ -175,7 +175,14 @@ export function useAbstractCropper<Extension extends SettingsExtension = {}>(
 		reset: () => resetCropper(),
 		refresh: () => refreshCropper(),
 		setImage: (image: CropperImage) => {
+			const previousImage = currentImage;
 			currentImage = image;
+			// Upstream fires onReady whenever the current image changes, after it renders.
+			if (image && image !== previousImage) {
+				void tick().then(() => {
+					if (mounted && currentImage === image) untrack(props).onReady?.(cropperInterface);
+				});
+			}
 		},
 		reconcileState: cropper.reconcileState,
 		moveCoordinates: cropper.moveCoordinates,

@@ -22,7 +22,8 @@
 	"svelte": "./dist/index.js",
 	"imports": {
 		"#lib": "./src/lib/index.js",
-		"#lib/*": "./src/lib/*"
+		"#lib/*": "./src/lib/*",
+		"#site/*": "./src/site/*"
 	},
 	"exports": {
 		".": {
@@ -55,18 +56,20 @@
 	},
 	"devDependencies": {
 		"@playwright/test": "^1.60.0",
-		"@sveltejs/adapter-auto": "^8.0.0",
+		"@sveltejs/adapter-static": "^4.0.0",
 		"@sveltejs/kit": "^3.0.0",
 		"@sveltejs/package": "^2.5.8",
 		"@sveltejs/vite-plugin-svelte": "^7.2.0",
 		"@types/node": "^26.6.4",
 		"@vitest/browser-playwright": "^4.1.8",
+		"mdsvex": "^0.12.8",
 		"oxfmt": "^0.72.0",
 		"oxlint": "^1.87.0",
 		"oxlint-tsgolint": "^7.0.2003",
 		"playwright": "^1.60.0",
 		"publint": "^0.3.21",
 		"sass": "^1.105.1",
+		"shiki": "^4.5.0",
 		"svelte": "^5.57.1",
 		"svelte-check": "^4.6.0",
 		"typescript": "^6.0.3",

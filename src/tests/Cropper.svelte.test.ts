@@ -75,6 +75,15 @@ describe('Cropper', () => {
 		expect(canvas).not.toBeNull();
 	});
 
+	it('fires onReady again when an image is set imperatively', async () => {
+		const { cropper, onReady } = await mountCropper();
+		const image = cropper().getImage();
+		if (!image) throw new Error('no image');
+		cropper().setImage({ ...image });
+		await waitFor(() => onReady.mock.calls.length === 2);
+		expect(onReady).toHaveBeenCalledTimes(2);
+	});
+
 	it('draws the crop with getCanvas', async () => {
 		const { cropper } = await mountCropper();
 		const coordinates = cropper().getCoordinates();

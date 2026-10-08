@@ -2,7 +2,10 @@
 	"extends": "$app/tsconfig",
 	"compilerOptions": {
 		"strict": true,
-		"types": ["$app/types", "node"]
+		"types": ["$app/types", "node"],
+		"paths": {
+			"svelte-advanced-cropper": ["./src/lib/index.ts"]
+		}
 	},
 	"include": ["src", "vite.config.ts", "playwright.config.ts", "e2e"]
 }

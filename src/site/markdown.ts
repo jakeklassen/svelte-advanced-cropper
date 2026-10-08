@@ -1,0 +1,56 @@
+// Small rehype plugins for mdsvex. mdsvex 0.12 uses an older unified stack, so
+// these walk the HAST tree by hand rather than pulling in visitor dependencies.
+
+interface HastNode {
+	type: string;
+	tagName?: string;
+	properties?: Record<string, unknown>;
+	children?: HastNode[];
+	value?: string;
+}
+
+function walk(node: HastNode, visit: (node: HastNode) => void) {
+	visit(node);
+	for (const child of node.children ?? []) walk(child, visit);
+}
+
+function textOf(node: HastNode): string {
+	if (node.type === 'text') return node.value ?? '';
+	return (node.children ?? []).map(textOf).join('');
+}
+
+export function slugify(text: string): string {
+	return text
+		.toLowerCase()
+		.trim()
+		.replace(/[^\w\s-]/g, '')
+		.replace(/\s+/g, '-');
+}
+
+/** Prefixes root-relative links and images with the deploy base path (e.g. GitHub Pages). */
+export function rehypeBasePath(base: string) {
+	return () => (tree: HastNode) => {
+		if (!base) return;
+		walk(tree, (node) => {
+			if (node.type !== 'element' || !node.properties) return;
+			for (const attribute of ['href', 'src']) {
+				const value = node.properties[attribute];
+				if (typeof value === 'string' && value.startsWith('/') && !value.startsWith('//')) {
+					node.properties[attribute] = base + value;
+				}
+			}
+		});
+	};
+}
+
+/** Gives h2/h3 headings an id and a self-link, for anchors and the table of contents. */
+export function rehypeHeadingIds() {
+	return (tree: HastNode) => {
+		walk(tree, (node) => {
+			if (node.type === 'element' && (node.tagName === 'h2' || node.tagName === 'h3')) {
+				node.properties ??= {};
+				if (!node.properties.id) node.properties.id = slugify(textOf(node));
+			}
+		});
+	};
+}

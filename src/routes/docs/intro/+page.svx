@@ -1,0 +1,40 @@
+<script>
+	import Example from '#site/components/Example.svelte';
+	import GettingStartedExample from '#site/demos/examples/GettingStartedExample.svelte';
+	import source from '#site/demos/examples/GettingStartedExample.svelte?highlight';
+</script>
+
+# Getting started
+
+## Introduction
+
+`svelte-advanced-cropper` is a Svelte 5 image cropper built on [`advanced-cropper`](https://github.com/advanced-cropper/advanced-cropper), the framework-agnostic core of the Advanced Cropper family. It is a port of [react-advanced-cropper](https://github.com/advanced-cropper/react-advanced-cropper): the components, props, settings and methods match the React library one-to-one, while the implementation uses Svelte's own tools (runes, snippets and attachments).
+
+### Why this cropper
+
+Most croppers give you a fixed widget with a handful of options. This one is built the other way around. It is a set of small components and a state core that you can assemble, restyle and extend, from swapping the stencil to replacing the image gesture layer. The defaults are polished and work out of the box (mobile gestures, transitions, themes), but nothing is locked in.
+
+If you are coming from the React version, read [Coming from React](/docs/guides/coming-from-react) for the handful of places where the Svelte API differs.
+
+## Installation
+
+```shell
+npm install svelte-advanced-cropper
+```
+
+Then import the `Cropper` component, and the styles once somewhere in your app (for example in your root layout):
+
+```ts
+import { Cropper } from 'svelte-advanced-cropper';
+import 'svelte-advanced-cropper/style.css';
+```
+
+## Minimal working example
+
+The cropper fills its container, so give it (or its parent) a size.
+
+<Example {source} title="GettingStartedExample">
+	<GettingStartedExample />
+</Example>
+
+To build a different kind of cropper, for example a fixed-stencil one for mobile devices, read about [the cropper types](/docs/guides/cropper-types).
