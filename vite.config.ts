@@ -118,7 +118,25 @@ export default defineConfig({
 					name: 'server',
 					environment: 'node',
 					include: ['src/**/*.{test,spec}.{js,ts}'],
-					exclude: ['src/**/*.svelte.{test,spec}.{js,ts}']
+					exclude: ['src/**/*.svelte.{test,spec}.{js,ts}', 'src/**/*.leak.test.ts']
+				}
+			},
+
+			// Memory checks read browser-wide counters (heap, DOM nodes, listeners), so they run
+			// alone, after the other projects have finished.
+			{
+				extends: './vite.config.ts',
+				test: {
+					name: 'leak',
+					browser: {
+						enabled: true,
+						provider: playwright(),
+						instances: [{ browser: 'chromium', headless: true }]
+					},
+					include: ['src/**/*.leak.test.ts'],
+					fileParallelism: false,
+					sequence: { groupOrder: 1 },
+					testTimeout: 120_000
 				}
 			}
 		]
