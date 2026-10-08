@@ -298,7 +298,7 @@ const defaultPosition = ({ imageSize, coordinates }: CropperState) => ({
 });
 ```
 
-See [Position / Size](/docs/guides/advanced-recipes#position--size).
+See [Position / Size](/docs/guides/advanced-recipes#position-size).
 
 ### `defaultSize`
 
@@ -803,7 +803,7 @@ interface Rotate {
 }
 ```
 
-Rotates the image by an angle in **degrees**, relative to the current rotation. See [Rotate / flip image](/docs/guides/advanced-recipes#rotate--flip-image).
+Rotates the image by an angle in **degrees**, relative to the current rotation. See [Rotate / flip image](/docs/guides/advanced-recipes#rotate-flip-image).
 
 ### `flipImage(horizontal, vertical, options)`
 

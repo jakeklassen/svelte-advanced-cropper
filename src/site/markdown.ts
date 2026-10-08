@@ -44,14 +44,14 @@ export function rehypeBasePath(base: string) {
 }
 
 /**
- * Gives h2/h3 headings a unique id, for anchors and the table of contents. Repeated
+ * Gives h2-h4 headings a unique id, for anchors (h2/h3 also feed the table of contents). Repeated
  * headings get GitHub-style suffixes: `implementation`, `implementation-1`, ...
  */
 export function rehypeHeadingIds() {
 	return (tree: HastNode) => {
 		const seen = new Map<string, number>();
 		walk(tree, (node) => {
-			if (node.type === 'element' && (node.tagName === 'h2' || node.tagName === 'h3')) {
+			if (node.type === 'element' && ['h2', 'h3', 'h4'].includes(node.tagName ?? '')) {
 				node.properties ??= {};
 				if (node.properties.id) return;
 				const slug = slugify(textOf(node));

@@ -1,0 +1,111 @@
+<script>
+	import StateDiagram from '#site/demos/concept/StateDiagram.svelte';
+	import SettingsDiagram from '#site/demos/concept/SettingsDiagram.svelte';
+</script>
+
+# Introduction
+
+These pages describe [`advanced-cropper`](https://github.com/advanced-cropper/advanced-cropper), the framework-agnostic core that `svelte-advanced-cropper` is built on. It is plain TypeScript with no Svelte in it. `svelte-advanced-cropper` re-exports the core's main entry point, so you can import the types and functions described here from the same place as the components.
+
+## State
+
+<StateDiagram float />
+
+The whole library revolves around one object: **[the cropper state](/docs/concept/state)**. It records how big the cropper is on screen, which image it shows, which part of the image is visible, where the crop is, and how the image is rotated or flipped.
+
+The components and hooks don't hold any other cropping data. They exist to draw the state and to turn user gestures into new states. The state by itself does nothing: it is a plain object you can read, store, compare or render however you like.
+
+In Svelte you get the current state from the cropper instance with `cropper.getState()`. The call is reactive, so a template or `$derived` that uses it updates whenever the state changes.
+
+## State modifiers
+
+A **[state modifier](/docs/concept/modifiers)** is any function that takes a state and returns the next one. The core's modifiers are pure: they copy the state instead of changing it. They share a common shape:
+
+```ts
+function stateModifier(state: CropperState, settings: CoreSettings, ...args: unknown[]): CropperState;
+```
+
+The first argument is the current state, the second is the settings, and anything after that is specific to the operation (a move delta, a new boundary size, and so on).
+
+### Settings
+
+**[Settings](/docs/concept/settings)** are the shared context that modifiers and helpers read: the rules the state has to obey. The core keeps that context as small as it can. Its minimum is the `CoreSettings` interface, which restricts the crop and the visible area:
+
+- size restrictions
+- position restrictions
+- area size restrictions
+- area position restrictions
+- aspect ratio
+
+Creating a state needs two more fields, which `InitializeSettings` adds:
+
+- default coordinates
+- default visible area
+
+If your own settings type extends these interfaces, every modifier and helper in the core accepts it. You could design your own settings and modifiers from nothing, but then most of the library would be of no use to you.
+
+<SettingsDiagram />
+
+A modifier may require more than `CoreSettings`. `transformImage`, for example, also reads the `transformImage.adjustStencil` flag from `ModifierSettings`:
+
+```ts
+function transformImage(
+	state: CropperState,
+	settings: CoreSettings & ModifierSettings,
+	transform: ImageTransform
+): CropperState;
+```
+
+Your own modifiers can do the same: ask for `CoreSettings & YourSettings`, and they still work with the built-in helpers.
+
+How do you decide whether a value belongs in the settings or in an extra argument? Treat settings like global configuration. If several modifiers need the value, or the code that calls the modifier has no way to pass it along, put it in the settings. If only one call needs it, pass it as an argument.
+
+### Default settings
+
+Filling in every field by hand is tedious, so the core ships `createDefaultSettings`. Give it whatever you want to override and it returns a complete settings object, with every `CoreSettings` and `InitializeSettings` field filled in. It also understands a few friendlier inputs, described by the `DefaultSettings` interface:
+
+- `minWidth`, `minHeight`, `maxWidth`, `maxHeight`
+- `defaultSize`
+- `defaultPosition`
+- `imageRestriction`
+
+The defaults use these to compute the core fields, and you can read them in your own code too. See [Defaults](/docs/concept/defaults).
+
+The `Cropper` component already does this for you: its settings props go through `createDefaultSettings` before they reach the core.
+
+## Image
+
+The other basic building block is the image, described by `CropperImage`:
+
+```ts
+interface CropperImage {
+	src: string;
+	revoke: boolean;
+	transforms: Transforms;
+	arrayBuffer: ArrayBuffer | null;
+	width: number;
+	height: number;
+}
+```
+
+- `src`: the URL to display. When the image needed its EXIF orientation fixed, this is a new object URL or data URL, not the one you passed in.
+- `width`, `height`: the natural size of the image.
+- `transforms`: the rotation and flip taken from the EXIF orientation.
+- `revoke`: `true` when `src` is an object URL created by the loader, which you can free with `URL.revokeObjectURL` once you are done with it.
+- `arrayBuffer`: the raw bytes of the image, when they were read.
+
+You normally get one from [`loadImage`](/docs/concept/utils#loadimage). The cropper components and [`useCropperImage`](/docs/hooks/useCropperImage) call it for you.
+
+## Transitions
+
+The core doesn't animate anything. It only keeps a flag saying that the latest change should be animated, plus the timing to use. `cropper.getTransitions()` returns it as `CropperTransitions`:
+
+```ts
+interface CropperTransitions {
+	timingFunction: string;
+	duration: number;
+	active: boolean;
+}
+```
+
+While `active` is `true`, the components animate towards the new state, and the core ignores stencil drags and resizes until the transition ends.

@@ -73,8 +73,11 @@ export default defineConfig({
 			],
 			// The docs site is fully prerendered for GitHub Pages.
 			adapter: adapter({ fallback: '404.html' }),
-			// Broken internal links fail the build once every docs page exists (STRICT_LINKS=1).
-			prerender: { handleHttpError: process.env.STRICT_LINKS ? 'fail' : 'warn' },
+			// STRICT_LINKS=1 (CI, deploys) fails the build on broken internal links and anchors.
+			prerender: {
+				handleHttpError: process.env.STRICT_LINKS ? 'fail' : 'warn',
+				handleMissingId: process.env.STRICT_LINKS ? 'fail' : 'warn'
+			},
 			paths: { base }
 		})
 	],

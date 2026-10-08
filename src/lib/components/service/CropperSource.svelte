@@ -4,7 +4,7 @@
 	export interface CropperSourceProps extends Omit<HTMLImgAttributes, 'src' | 'crossorigin'> {
 		src?: string | null;
 		crossOrigin?: 'anonymous' | 'use-credentials' | boolean;
-		ref?: HTMLImageElement | null;
+		ref?: HTMLImageElement | HTMLCanvasElement | null;
 	}
 </script>
 

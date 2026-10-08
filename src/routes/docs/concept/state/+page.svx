@@ -1,0 +1,127 @@
+<script>
+	import StateGeometry from '#site/demos/concept/StateGeometry.svelte';
+</script>
+
+# State
+
+## The cropper state
+
+All cropping data lives in a single object, the **cropper state**. Components draw it, gestures and methods replace it, and nothing else carries information about the crop.
+
+It has five parts: the boundary, the image size, the transforms, the visible area and the coordinates.
+
+```ts
+interface CropperState {
+	boundary: Boundary;
+	imageSize: ImageSize;
+	transforms: Transforms;
+	visibleArea: VisibleArea | null;
+	coordinates: Coordinates | null;
+}
+```
+
+By convention the state itself is `null` until the cropper has an image and a measured boundary. A state whose `visibleArea` and `coordinates` are both set is called _initialized_. Modifiers return an uninitialized state unchanged, and `isInitializedState(state)` tells the two apart.
+
+<StateGeometry />
+
+`visibleArea` and `coordinates` are both rectangles measured in **image pixels**, in the frame of the rotated image. Only `boundary` is measured in screen pixels.
+
+### Boundary
+
+The boundary is the size of the cropper's drawing area on screen, in CSS pixels.
+
+```ts
+interface Boundary {
+	width: number;
+	height: number;
+}
+```
+
+### Image size
+
+The natural size of the image, before any rotation is applied.
+
+```ts
+interface ImageSize {
+	width: number;
+	height: number;
+}
+```
+
+The relation between image pixels and screen pixels matters a lot. If the visible area is twice as wide as the boundary, dragging the stencil one screen pixel moves the coordinates by two image pixels. The core calls this ratio the _coefficient_ (`getCoefficient(state)`, which is `visibleArea.width / boundary.width`) and uses it to convert every pointer delta before applying it.
+
+### Visible area
+
+The part of the image that is currently displayed inside the boundary.
+
+```ts
+interface VisibleArea {
+	top: number;
+	left: number;
+	width: number;
+	height: number;
+}
+```
+
+Because the visible area is stretched to fill the boundary, its aspect ratio always matches the boundary's. Zooming the image in makes the visible area smaller, and panning moves it.
+
+### Coordinates
+
+The crop itself: the part of the image the stencil covers, and the region `getCanvas()` draws.
+
+```ts
+interface Coordinates {
+	top: number;
+	left: number;
+	width: number;
+	height: number;
+}
+```
+
+### Transforms
+
+The rotation and flips applied to the image.
+
+```ts
+interface Transforms {
+	rotate: number;
+	flip: {
+		horizontal: boolean;
+		vertical: boolean;
+	};
+}
+```
+
+`rotate` is in degrees and accumulates: rotating by 90° four times gives `360`, not `0`. See the [FAQ](/docs/faq#how-to-get-the-default-state) for why that matters when you reset the cropper.
+
+## Reading the state in Svelte
+
+The cropper instance (from `bind:this`, or the argument of any callback) exposes the state and its parts:
+
+| Method                    | Returns                                                            |
+| ------------------------- | ------------------------------------------------------------------ |
+| `getState()`              | A deep copy of the whole state, or `null`                          |
+| `getCoordinates()`        | The coordinates, rounded to whole pixels by default                |
+| `getVisibleArea()`        | A copy of the visible area                                         |
+| `getTransforms()`         | A copy of the transforms (no rotation and no flips when empty)     |
+| `getStencilCoordinates()` | The stencil's box in boundary (screen) pixels                      |
+
+All of them are reactive, so you can use them directly in markup:
+
+```svelte
+<script lang="ts">
+	import { Cropper, type CropperRef } from 'svelte-advanced-cropper';
+
+	let { src }: { src: string } = $props();
+	let cropper: CropperRef | undefined = $state();
+
+	const coordinates = $derived(cropper?.getCoordinates());
+</script>
+
+<Cropper bind:this={cropper} {src} />
+{#if coordinates}
+	<p>{coordinates.width} × {coordinates.height} at ({coordinates.left}, {coordinates.top})</p>
+{/if}
+```
+
+To replace the state, pass a new state, a partial state, or a function of the current state to `cropper.setState()`. See [Modifiers](/docs/concept/modifiers).

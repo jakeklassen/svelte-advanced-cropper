@@ -1,0 +1,89 @@
+# useMoveImageOptions
+
+Turns the `moveImage` option of a background wrapper (`true`, `false` or a partial object) into explicit flags for each input: dragging with the mouse and dragging with one finger. `CropperBackgroundWrapper` uses it to configure `TransformableImage`.
+
+## Signature
+
+```ts
+function useMoveImageOptions(moveImage: MoveImageOptions | boolean): DefinedMoveImageOptions;
+
+interface MoveImageOptions {
+	touch?: boolean;
+	mouse?: boolean;
+}
+
+interface DefinedMoveImageOptions {
+	touch: boolean;
+	mouse: boolean;
+}
+```
+
+## Parameters
+
+| Input                | Result                           |
+| -------------------- | -------------------------------- |
+| `true`               | `{ touch: true, mouse: true }`   |
+| `false` or undefined | `{ touch: false, mouse: false }` |
+| `{ mouse: false }`   | `{ touch: true, mouse: false }`  |
+| `{}`                 | `{ touch: true, mouse: true }`   |
+
+In an object, a missing key is enabled.
+
+## Return value
+
+A new `DefinedMoveImageOptions` object with both flags set.
+
+## When to call it
+
+Anywhere. It is a pure function with no effects. When its input is a prop, wrap the call in `$derived` so the result follows the prop.
+
+## Example
+
+A custom background wrapper that maps the options onto `TransformableImage`, as `CropperBackgroundWrapper` does:
+
+```svelte
+<script lang="ts">
+	import {
+		TransformableImage,
+		useMoveImageOptions,
+		useRotateImageOptions,
+		useScaleImageOptions,
+		type CropperBackgroundWrapperProps
+	} from 'svelte-advanced-cropper';
+
+	let {
+		cropper,
+		moveImage = true,
+		scaleImage = true,
+		rotateImage = false,
+		children,
+		class: className,
+		style
+	}: CropperBackgroundWrapperProps = $props();
+
+	const moveOptions = $derived(useMoveImageOptions(moveImage));
+	const scaleOptions = $derived(useScaleImageOptions(scaleImage));
+	const rotateOptions = $derived(useRotateImageOptions(rotateImage));
+</script>
+
+<TransformableImage
+	class={className}
+	{style}
+	onTransform={cropper.transformImage}
+	onTransformEnd={cropper.transformImageEnd}
+	touchMove={moveOptions.touch}
+	mouseMove={moveOptions.mouse}
+	touchScale={scaleOptions.touch}
+	wheelScale={scaleOptions.wheel}
+	touchRotate={rotateOptions.touch}
+	disabled={cropper.getTransitions().active}
+>
+	{@render children?.()}
+</TransformableImage>
+```
+
+Pass it to a cropper with `backgroundWrapperComponent={MyBackgroundWrapper}`.
+
+## Differences from React
+
+React memoizes the result with `useMemo`, which makes it a hook. Here it is a plain function, and `$derived` provides the memoization when you need it. The name is kept for parity with react-advanced-cropper.

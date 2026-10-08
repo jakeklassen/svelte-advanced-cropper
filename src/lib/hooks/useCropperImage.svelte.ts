@@ -26,16 +26,19 @@ export interface CropperImageHook {
 /**
  * Loads `src` into a `CropperImage`, with EXIF orientation handling and CORS options.
  *
- * Upstream takes the options object directly. Svelte passes a getter so the hook
- * can track `src`. Call it during component initialisation. The returned getters
- * are reactive.
+ * Pass a getter (`() => ({ src })`) so the hook follows `src` as it changes. A plain
+ * object, as upstream takes, also works but is read once. Call it during component
+ * initialisation. The returned getters are reactive.
  *
  * Callback order matches upstream: `onLoadingStart`, then `onLoadingEnd`, then
  * `onLoad` once the new image has rendered. Two fixes over upstream: each load is
  * identified by a request token, so a stale response can't win when `src` goes
  * A → B → A, and pending work is dropped when the component is destroyed.
  */
-export function useCropperImage(options: () => CropperImageHookSettings): CropperImageHook {
+export function useCropperImage(
+	settings: CropperImageHookSettings | (() => CropperImageHookSettings)
+): CropperImageHook {
+	const options = typeof settings === 'function' ? settings : () => settings;
 	let image = $state.raw<CropperImage | null>(null);
 	let loading = $state(false);
 	let loaded = $state(false);

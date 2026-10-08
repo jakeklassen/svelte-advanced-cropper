@@ -1,0 +1,61 @@
+# useScaleImageOptions
+
+Turns the `scaleImage` option of a background wrapper (`true`, `false` or a partial object) into explicit settings for each zoom input: pinching with two fingers and turning the mouse wheel. `CropperBackgroundWrapper` uses it to configure `TransformableImage`.
+
+## Signature
+
+```ts
+function useScaleImageOptions(scaleImage: ScaleImageOptions | boolean): DefinedScaleImageOptions;
+
+interface ScaleImageOptions {
+	touch?: boolean;
+	wheel?: boolean | { ratio?: number };
+	adjustStencil?: boolean;
+}
+
+interface DefinedScaleImageOptions {
+	touch: boolean;
+	wheel: boolean | { ratio: number };
+}
+```
+
+## Parameters
+
+| Input                       | Result                                     |
+| --------------------------- | ------------------------------------------ |
+| `true`                      | `{ touch: true, wheel: { ratio: 0.1 } }`   |
+| `false` or undefined        | `{ touch: false, wheel: false }`           |
+| `{ wheel: false }`          | `{ touch: true, wheel: false }`            |
+| `{ wheel: true }`           | `{ touch: true, wheel: { ratio: 0.1 } }`   |
+| `{ wheel: { ratio: 0.2 } }` | `{ touch: true, wheel: { ratio: 0.2 } }`   |
+| `{ touch: false }`          | `{ touch: false, wheel: { ratio: 0.1 } }`  |
+
+In an object, a missing key is enabled, and `wheel: true` gets the default `ratio` of `0.1`, the zoom step per wheel tick. `adjustStencil` is accepted by the type but dropped from the result. To control whether zooming resizes the stencil, use the cropper's `transformImage` setting instead.
+
+## Return value
+
+A new `DefinedScaleImageOptions` object. Pass `touch` to `TransformableImage`'s `touchScale` and `wheel` to its `wheelScale`.
+
+## When to call it
+
+Anywhere. It is a pure function with no effects. When its input is a prop, wrap the call in `$derived`:
+
+```ts
+let { scaleImage = true }: CropperBackgroundWrapperProps = $props();
+
+const scaleOptions = $derived(useScaleImageOptions(scaleImage));
+```
+
+## Example
+
+See the custom background wrapper on the [useMoveImageOptions](/docs/hooks/useMoveImageOptions#example) page, which uses all three option helpers.
+
+From the user's side, the same values are what `backgroundWrapperProps` accepts:
+
+```svelte
+<Cropper {src} backgroundWrapperProps={{ scaleImage: { wheel: { ratio: 0.2 } } }} />
+```
+
+## Differences from React
+
+React memoizes the result with `useMemo`. Here it is a plain function, so wrap it in `$derived` when the input can change.

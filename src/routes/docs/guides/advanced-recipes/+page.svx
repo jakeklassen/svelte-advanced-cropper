@@ -277,7 +277,7 @@ Toggle the checkbox below and zoom the image each way to compare.
 
 ## Set coordinates
 
-The user normally moves the stencil, but you can also set it from code with [`setCoordinates`](/docs/components/Cropper#setcoordinatestransform). It still honours every restriction (aspect ratio, minimum and maximum size, image bounds), so the result may differ from what you asked for.
+The user normally moves the stencil, but you can also set it from code with [`setCoordinates`](/docs/components/Cropper#setcoordinatestransforms-options). It still honours every restriction (aspect ratio, minimum and maximum size, image bounds), so the result may differ from what you asked for.
 
 It accepts coordinates, a function of the state that returns them, or an array of either. An array is applied step by step, each step seeing the result of the previous one. The demo uses that to resize the stencil and then re-centre it.
 

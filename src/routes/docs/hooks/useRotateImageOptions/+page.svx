@@ -1,0 +1,56 @@
+# useRotateImageOptions
+
+Turns the `rotateImage` option of a background wrapper (`true`, `false` or a partial object) into an explicit flag for rotating the image with a two-finger twist. `CropperBackgroundWrapper` uses it to configure `TransformableImage`.
+
+## Signature
+
+```ts
+function useRotateImageOptions(rotateImage: RotateImageOptions | boolean): DefinedRotateImageOptions;
+
+interface RotateImageOptions {
+	touch?: boolean;
+}
+
+interface DefinedRotateImageOptions {
+	touch: boolean;
+}
+```
+
+## Parameters
+
+| Input                | Result              |
+| -------------------- | ------------------- |
+| `true`               | `{ touch: true }`   |
+| `false` or undefined | `{ touch: false }`  |
+| `{}`                 | `{ touch: true }`   |
+| `{ touch: false }`   | `{ touch: false }`  |
+
+`CropperBackgroundWrapper` defaults `rotateImage` to `false`, so touch rotation is off unless you enable it.
+
+## Return value
+
+A new `DefinedRotateImageOptions` object. Pass `touch` to `TransformableImage`'s `touchRotate`.
+
+## When to call it
+
+Anywhere. It is a pure function with no effects. When its input is a prop, wrap the call in `$derived`:
+
+```ts
+let { rotateImage = false }: CropperBackgroundWrapperProps = $props();
+
+const rotateOptions = $derived(useRotateImageOptions(rotateImage));
+```
+
+## Example
+
+See the custom background wrapper on the [useMoveImageOptions](/docs/hooks/useMoveImageOptions#example) page, which uses all three option helpers.
+
+To enable touch rotation on a cropper:
+
+```svelte
+<Cropper {src} backgroundWrapperProps={{ rotateImage: true }} />
+```
+
+## Differences from React
+
+React memoizes the result with `useMemo`. Here it is a plain function, so wrap it in `$derived` when the input can change. Upstream exports this function but has no page for it.

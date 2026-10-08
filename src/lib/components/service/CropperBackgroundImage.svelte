@@ -14,7 +14,7 @@
 		crossOrigin?: 'anonymous' | 'use-credentials' | boolean;
 		style?: string;
 		/** The rendered `<img>` element (upstream's forwarded ref). */
-		ref?: HTMLImageElement | null;
+		ref?: HTMLImageElement | HTMLCanvasElement | null;
 	}
 </script>
 

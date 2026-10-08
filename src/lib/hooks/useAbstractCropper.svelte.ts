@@ -43,14 +43,15 @@ export interface AbstractCropperHookProps<Settings extends AbstractCropperSettin
  * component's `bind:ref={refs.image}`.
  */
 export interface AbstractCropperRefs {
-	image: HTMLElement | null;
+	/** The drawn background: an `<img>`, or a `<canvas>` for custom backgrounds. */
+	image: HTMLImageElement | HTMLCanvasElement | null;
 	boundary: StretchableBoundaryMethods | null;
 	canvas: CropperCanvasMethods | null;
 }
 
 // `$state.raw` fields: bindable, but component instances are never wrapped in a proxy.
 class CropperRefs implements AbstractCropperRefs {
-	image: HTMLElement | null = $state.raw(null);
+	image: HTMLImageElement | HTMLCanvasElement | null = $state.raw(null);
 	boundary: StretchableBoundaryMethods | null = $state.raw(null);
 	canvas: CropperCanvasMethods | null = $state.raw(null);
 }

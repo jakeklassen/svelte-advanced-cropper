@@ -1,0 +1,34 @@
+<script>
+	import Example from '#site/components/Example.svelte';
+	import ResizeAlgorithm from '#site/demos/algorithms/ResizeAlgorithm.svelte';
+	import source from '#site/demos/algorithms/ResizeAlgorithm.svelte?highlight';
+	import utilsSource from '#site/demos/algorithms/utils.ts?highlight';
+</script>
+
+# Resize Algorithm
+
+## Resize Algorithm
+
+Drag the handles or the edges of the box below. Each drag runs `anchoredResizeCoordinatesAlgorithm` from the core, the same function the stencils use, with a fixed `1:1` aspect ratio and the demo area as its size and position limits. While you drag, a thin outline shows the box as it was when the gesture started: the algorithm uses it as the reference that keeps the opposite corner or edge in place.
+
+Things to try:
+
+- Drag a corner past the edge of the area: the box stops at the edge and stays square.
+- Drag a side handle: the box keeps its ratio by growing evenly in the other direction.
+- Make the window narrower: the box shrinks to fit and moves back inside.
+
+<Example {source} title="ResizeAlgorithm" files={{ 'utils.ts': utilsSource }}>
+	<ResizeAlgorithm />
+</Example>
+
+`BoundingBox` emits the drag as an anchor (which handle moved), the pointer delta, and resize options (`reference`, `preserveAspectRatio`, `respectDirection`, `compensate`). The demo passes these straight to the algorithm together with its limits:
+
+```ts
+anchoredResizeCoordinatesAlgorithm(coordinates, anchor, directions, options, {
+	aspectRatio: createAspectRatio(1),
+	sizeRestrictions: { minWidth: 0, minHeight: 0, maxWidth: boundary.width, maxHeight: boundary.height },
+	positionRestrictions: { left: 0, top: 0, right: boundary.width, bottom: boundary.height }
+});
+```
+
+See [Utils](/docs/concept/utils#anchoredresizecoordinatesalgorithm) for the signature, and [`resizeCoordinates`](/docs/concept/modifiers#resizecoordinates) for the modifier that applies it to a cropper state.

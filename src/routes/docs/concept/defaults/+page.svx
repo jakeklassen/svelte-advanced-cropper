@@ -1,0 +1,189 @@
+<script>
+	import Admonition from '#site/components/Admonition.svelte';
+</script>
+
+# Defaults
+
+## Basic
+
+Calling the core's modifiers requires a complete settings object:
+
+```ts
+const settings = {
+	defaultCoordinates,
+	defaultVisibleArea,
+	areaPositionRestrictions,
+	areaSizeRestrictions,
+	sizeRestrictions,
+	positionRestrictions,
+	aspectRatio
+};
+```
+
+Writing all of these yourself gives you fine control over how the modifiers behave, but you rarely need that much. The core ships a default for each field. Every default function is exported, but the easiest way to use them is `createDefaultSettings`.
+
+## createDefaultSettings
+
+```ts
+function createDefaultSettings<Settings extends CoreSettings & DefaultSettings>(
+	params: DefaultSettingsParams<Settings>
+); // returns `params` plus every CoreSettings and InitializeSettings field
+```
+
+It takes one object. Any of the fields above that you include replace the matching default, and the rest are filled in. It also accepts a few simpler inputs that the defaults read:
+
+```ts
+interface DefaultSettings {
+	minWidth?: number;
+	minHeight?: number;
+	maxWidth?: number;
+	maxHeight?: number;
+	defaultSize?: DefaultSize;
+	defaultPosition?: DefaultPosition;
+	imageRestriction?: ImageRestriction;
+}
+```
+
+With it you never have to write the settings by hand:
+
+```ts
+import {
+	createDefaultSettings,
+	createState,
+	type CropperInstanceSettings
+} from 'svelte-advanced-cropper';
+
+const settings = createDefaultSettings<CropperInstanceSettings>({ aspectRatio: 1, minWidth: 100 });
+
+const initialState = createState(
+	{
+		boundary: { width: 400, height: 300 },
+		image: { width: 1200, height: 800 }
+	},
+	settings
+);
+```
+
+`aspectRatio` may be given as a plain number here, and it is normalized to `{ minimum, maximum }`. The explicit `CropperInstanceSettings` type argument (the full settings type the cropper itself uses) lets TypeScript see that the result also satisfies `InitializeSettings`.
+
+<Admonition type="tip" title="In Svelte">
+
+`Cropper` and the other croppers call `createDefaultSettings` with their settings props, so all the options on this page work as props: `<Cropper minWidth={100} imageRestriction={ImageRestriction.fillArea} />`. One difference from calling the function yourself: the croppers default `imageRestriction` to `ImageRestriction.fitArea` and `transformImage.adjustStencil` to `true`.
+
+</Admonition>
+
+#### minWidth, minHeight, maxWidth, maxHeight
+
+Unless you pass your own `sizeRestrictions`, these become the size restrictions of the crop, in image pixels. Missing minimums are `0` and missing maximums are `Infinity`.
+
+#### defaultSize
+
+The initial size of the crop, as a `{ width, height }` object or a function of `(state, settings)` that returns one. Unless you pass your own `defaultCoordinates`, the default coordinates are built from `defaultSize` followed by `defaultPosition`. Without it the [`defaultSize`](#defaultsize) function below is used.
+
+#### defaultPosition
+
+The initial position of the crop, as a `{ left, top }` object or a function of `(state, settings)` that returns one. It is applied after the size, so a function can use `state.coordinates` to centre the crop. Without it the [`defaultPosition`](#defaultposition) function below is used.
+
+#### imageRestriction
+
+How strictly the image has to cover the cropper. It changes the default position restrictions, area position restrictions and area size restrictions.
+
+| Value                         | Crop must stay inside the image | Visible area                                                                     |
+| ----------------------------- | ------------------------------- | -------------------------------------------------------------------------------- |
+| `ImageRestriction.fillArea`   | yes                             | Must stay inside the image, so the image always fills the boundary.              |
+| `ImageRestriction.fitArea`    | yes                             | Can't be larger than the image fitted to the boundary, or move beyond its edges. |
+| `ImageRestriction.stencil`    | yes                             | Unrestricted.                                                                    |
+| `ImageRestriction.none`       | no                              | Unrestricted.                                                                    |
+
+When `imageRestriction` is left out, `createDefaultSettings` restricts nothing, as with `none`.
+
+## Functions
+
+These are the defaults `createDefaultSettings` falls back to. Each takes `(state, settings)` and can be reused inside your own settings, for example to adjust the default rather than replace it.
+
+### defaultSize
+
+```ts
+function defaultSize(state: CropperState, settings: CoreSettings): Size;
+```
+
+Makes the crop 80% of the visible area (or of the image, before there is a visible area) along its shorter side, at the closest ratio the aspect ratio setting allows, then fits it to the size restrictions.
+
+### defaultPosition
+
+```ts
+function defaultPosition(state: CropperState): Position;
+```
+
+Centres the crop in the visible area, or in the image when there is no visible area yet.
+
+### defaultVisibleArea
+
+```ts
+function defaultVisibleArea(state: CropperState, settings: CoreSettings): VisibleArea;
+```
+
+Shows the whole image, or the whole crop if it is larger, at the boundary's aspect ratio. The result is fitted to the area size restrictions, centred on the crop and, where possible, kept inside the image.
+
+### defaultSizeRestrictions
+
+The default size restrictions come from `pixelsRestrictions`, which turns `minWidth`, `minHeight`, `maxWidth` and `maxHeight` into a `SizeRestrictions` object:
+
+```ts
+function pixelsRestrictions(state: CropperState, settings: DefaultSettings): SizeRestrictions;
+function retrieveSizeRestrictions(settings: DefaultSettings): SizeRestrictions;
+```
+
+### defaultPositionRestrictions
+
+```ts
+function defaultPositionRestrictions(state: CropperState, settings: CoreSettings & DefaultSettings): PositionRestrictions;
+```
+
+The image bounds, unless `imageRestriction` is missing or `none`, in which case there are no restrictions.
+
+### defaultAreaPositionRestrictions
+
+```ts
+function defaultAreaPositionRestrictions(state: CropperState, settings: CoreSettings & DefaultSettings): AreaPositionRestrictions;
+```
+
+With `fillArea`, the image bounds. With `fitArea`, the image bounds too, except that when the visible area is larger than the image along one axis, it may overhang the image by the same amount on both sides, which keeps the image centred. Otherwise there are no restrictions.
+
+### defaultAreaSizeRestrictions
+
+```ts
+function defaultAreaSizeRestrictions(state: CropperState, settings: CoreSettings & DefaultSettings): AreaSizeRestrictions;
+```
+
+With `fillArea`, the visible area can't be larger than the image. With `fitArea`, it can't be larger than the image fitted to the boundary's aspect ratio. Otherwise there are no restrictions.
+
+### Combining with a default
+
+To narrow a default instead of replacing it, wrap your value with one of these. Each returns a settings function that merges your restrictions with the default ones:
+
+```ts
+// Each accepts a value or a (state, settings) => value function.
+function withDefaultSizeRestrictions(sizeRestrictions);
+function withDefaultPositionRestrictions(positionRestrictions);
+function withDefaultAreaSizeRestrictions(areaSizeRestrictions);
+function withDefaultAreaPositionRestrictions(areaPositionRestrictions);
+```
+
+For example, to keep the crop inside the image and also out of its top 100 pixels:
+
+```svelte
+<Cropper
+	{src}
+	positionRestrictions={withDefaultPositionRestrictions({ top: 100 })}
+/>
+```
+
+### Boundary sizes
+
+`StretchableBoundary` measures the cropper with one of these. `fillBoundary` is the default for croppers, and `fitBoundary` fits the image's ratio inside the element:
+
+```ts
+function fillBoundary(boundary: HTMLElement): Boundary;
+function fitBoundary(boundary: HTMLElement, size: Size): Boundary;
+```
