@@ -1,11 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { pages } from '../nav';
-	import { href } from '../paths';
+	import { isCurrentPage, pages } from '#site/nav.ts';
+	import { href } from '#site/paths.ts';
 
-	const index = $derived(
-		pages.findIndex((entry) => page.url.pathname.replace(/\/$/, '').endsWith(entry.href))
-	);
+	const index = $derived(pages.findIndex((entry) => isCurrentPage(page.url.pathname, entry.href)));
 	const previous = $derived(index > 0 ? pages[index - 1] : undefined);
 	const next = $derived(index >= 0 && index < pages.length - 1 ? pages[index + 1] : undefined);
 </script>

@@ -48,6 +48,8 @@ Measure a container whenever the window size changes:
 
 The [Resize Algorithm](/docs/algorithms/resize-algorithm) demo uses it the same way.
 
+In your own components, Svelte already covers this particular case: `<div bind:clientWidth={width}>` keeps `width` current without any listener, and it also notices size changes that have nothing to do with the window. Likewise, `innerWidth` and `innerHeight` from `svelte/reactivity/window` give you the window size as reactive values. `useWindowResize` is there for parity with react-advanced-cropper, and for imperative work that should run on each resize.
+
 Only window resizes are observed. If the cropper's container changes size for another reason, for example a sidebar opens, call `cropper.refresh()` yourself, or watch the element with a `ResizeObserver`.
 
 ## Differences from React

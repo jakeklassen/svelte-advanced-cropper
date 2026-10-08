@@ -46,23 +46,42 @@ A custom background component must declare a bindable `ref` prop and bind it to 
 
 </Admonition>
 
+The component below shows the image in black and white. It positions the `<img>` exactly like the default background and adds a CSS filter. A CSS filter changes only how the element looks, so `getCanvas()` still returns the original colours; to bake an effect into the result, draw it on a `<canvas>` instead.
+
 ```svelte
 <script lang="ts">
-	import { getBackgroundStyle, styleToString } from 'svelte-advanced-cropper';
+	import {
+		getBackgroundStyle,
+		styleToString,
+		type CropperBackgroundImageProps
+	} from 'svelte-advanced-cropper';
 
-	let { cropper, class: className, ref = $bindable(null) } = $props();
+	let {
+		cropper,
+		class: className,
+		crossOrigin = true,
+		ref = $bindable(null)
+	}: CropperBackgroundImageProps = $props();
 
 	const image = $derived(cropper.getImage());
 	const state = $derived(cropper.getState());
 	const transitions = $derived(cropper.getTransitions());
+
+	// The core returns the position as a camelCase style object; styleToString makes it a string.
+	const style = $derived(
+		image && state ? styleToString(getBackgroundStyle(image, state, transitions)) : ''
+	);
 </script>
 
 {#if image && state}
-	<canvas
+	<img
 		bind:this={ref}
 		class={['advanced-cropper-background-image', className]}
-		style={styleToString(getBackgroundStyle(image, state, transitions))}
-	></canvas>
+		src={image.src}
+		alt=""
+		crossorigin={crossOrigin === true ? 'anonymous' : crossOrigin || undefined}
+		style="{style} filter: grayscale(1);"
+	/>
 {/if}
 ```
 

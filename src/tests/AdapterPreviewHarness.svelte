@@ -1,5 +1,9 @@
 <script lang="ts">
-	import { CropperPreview, type CropperPreviewDesiredCropperRef } from '#lib';
+	import {
+		CropperPreview,
+		type CropperPreviewDesiredCropperRef,
+		type CropperPreviewRef
+	} from '#lib';
 
 	interface Props {
 		adapter: CropperPreviewDesiredCropperRef;
@@ -7,7 +11,8 @@
 
 	let { adapter }: Props = $props();
 
-	let preview: { refresh: () => void } | undefined = $state();
+	let preview: CropperPreviewRef | undefined = $state();
+
 	export function refresh() {
 		preview?.refresh();
 	}

@@ -121,12 +121,7 @@ A circle stencil only makes sense if the crop area stays square, so the stencil 
 The value is either a number or a range:
 
 ```ts
-type StencilAspectRatio =
-	| number
-	| {
-			minimum?: number;
-			maximum?: number;
-	  };
+type StencilAspectRatio = number | { minimum?: number; maximum?: number };
 ```
 
 So one line is enough:
@@ -285,6 +280,7 @@ The first one is what matters. It says how many pixels the pointer moved horizon
 
 ```ts
 function onResize(shift: MoveDirections) {
+	// Only the horizontal shift is used, on both axes: the square stencil grows evenly.
 	cropper.resizeCoordinates('center', {
 		left: shift.left,
 		top: shift.left
@@ -335,6 +331,7 @@ The `…End` methods matter. They tell the cropper that the interaction is over,
 	export const aspectRatio = 1;
 
 	function onResize(shift: MoveDirections) {
+		// Only the horizontal shift is used, on both axes: the square stencil grows evenly.
 		cropper.resizeCoordinates('center', {
 			left: shift.left,
 			top: shift.left

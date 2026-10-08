@@ -28,30 +28,32 @@ describe('CropperPreview', () => {
 
 	it('re-reads a non-reactive cropper object on refresh()', async () => {
 		const onReady = vi.fn<(cropper: CropperRef) => void>();
-		const source = await render(PreviewHarness, { src: createTestImage(), onReady });
+		const cropperScreen = await render(PreviewHarness, { src: createTestImage(), onReady });
 		await waitFor(() => onReady.mock.calls.length > 0);
-		const real = source.component.getCropper();
-		if (!real) {
+		const cropper = cropperScreen.component.getCropper();
+		if (!cropper) {
 			throw new Error('no cropper');
 		}
 
-		// A plain object whose getters Svelte cannot track.
+		// A plain object wrapping the cropper, whose getters Svelte cannot track.
 		let ready = false;
 		const adapter = {
-			getState: () => (ready ? real.getState() : null),
-			getImage: () => (ready ? real.getImage() : null),
+			getState: () => (ready ? cropper.getState() : null),
+			getImage: () => (ready ? cropper.getImage() : null),
 			getTransitions: () => null,
 			isLoaded: () => ready,
 			isLoading: () => false
 		};
-		const screen = await render(AdapterPreviewHarness, { adapter });
+		const previewScreen = await render(AdapterPreviewHarness, { adapter });
 		const visible = () =>
-			screen.container.querySelector('.adapter-preview .advanced-cropper-preview__image--visible');
+			previewScreen.container.querySelector(
+				'.adapter-preview .advanced-cropper-preview__image--visible'
+			);
 		await nextFrame();
 		expect(visible()).toBeNull();
 
 		ready = true;
-		screen.component.refresh();
+		previewScreen.component.refresh();
 		await waitFor(() => visible());
 		expect(visible()).not.toBeNull();
 	});

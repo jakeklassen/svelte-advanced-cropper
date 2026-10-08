@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/state';
+	import { afterNavigate } from '$app/navigation';
 
 	interface Heading {
 		id: string;
@@ -16,9 +16,9 @@
 
 	let headings: Heading[] = $state([]);
 
-	// Collect headings after each navigation (the content element stays the same).
-	$effect(() => {
-		void page.url.pathname;
+	// Collect the headings on first load and after each navigation (the content element stays the
+	// same, only its children change).
+	afterNavigate(() => {
 		if (!content) {
 			return;
 		}
@@ -37,6 +37,7 @@
 	<nav class="toc" aria-label="On this page">
 		<div class="toc__title">On this page</div>
 		<ul>
+			<!-- Keyed by position, not id: a page with a repeated id would crash a keyed each. -->
 			{#each headings as heading, index (index)}
 				<li class="toc__level-{heading.level}"><a href="#{heading.id}">{heading.text}</a></li>
 			{/each}

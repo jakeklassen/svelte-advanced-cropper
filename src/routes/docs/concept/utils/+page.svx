@@ -171,13 +171,19 @@ The cropper's gestures arrive in screen pixels, while the state is in image pixe
 ### normalizeMoveDirections
 
 ```ts
-function normalizeMoveDirections(state: CropperState, directions: Partial<MoveDirections>): MoveDirections;
+function normalizeMoveDirections(
+	state: CropperState,
+	directions: Partial<MoveDirections>
+): MoveDirections;
 ```
 
 ### normalizeResizeDirections
 
 ```ts
-function normalizeResizeDirections(state: CropperState, directions: Partial<ResizeDirections>): ResizeDirections;
+function normalizeResizeDirections(
+	state: CropperState,
+	directions: Partial<ResizeDirections>
+): ResizeDirections;
 ```
 
 ### normalizeImageTransform
@@ -231,7 +237,10 @@ function getAreaSizeRestrictions(state: CropperState, settings: CoreSettings): A
 ### getAreaPositionRestrictions
 
 ```ts
-function getAreaPositionRestrictions(state: CropperState, settings: CoreSettings): AreaPositionRestrictions;
+function getAreaPositionRestrictions(
+	state: CropperState,
+	settings: CoreSettings
+): AreaPositionRestrictions;
 ```
 
 ### getAspectRatio
@@ -245,13 +254,19 @@ Always returns `{ minimum, maximum }`, with `0` and `Infinity` for missing bound
 ### getDefaultCoordinates
 
 ```ts
-function getDefaultCoordinates(state: CropperState, settings: CoreSettings & InitializeSettings): CoordinatesTransform | CoordinatesTransform[];
+function getDefaultCoordinates(
+	state: CropperState,
+	settings: CoreSettings & InitializeSettings
+): CoordinatesTransform | CoordinatesTransform[];
 ```
 
 ### getDefaultVisibleArea
 
 ```ts
-function getDefaultVisibleArea(state: CropperState, settings: CoreSettings & InitializeSettings): VisibleArea;
+function getDefaultVisibleArea(
+	state: CropperState,
+	settings: CoreSettings & InitializeSettings
+): VisibleArea;
 ```
 
 ### getCoefficient
@@ -352,8 +367,13 @@ These styles are objects with camelCase keys (`willChange`), as React expects. I
 
 ```ts
 import { getMimeType } from 'advanced-cropper/extensions/mimes';
+```
 
-function getMimeType(data: ArrayBuffer | string | null | undefined, fallback?: string | null): string | undefined;
+```ts
+function getMimeType(
+	data: ArrayBuffer | string | null | undefined,
+	fallback?: string | null
+): string | undefined;
 ```
 
 Detects an image's MIME type from its first bytes, for example from `CropperImage.arrayBuffer`. This one lives in a separate core entry point and is not re-exported, so install `advanced-cropper` as a direct dependency to import it.
@@ -412,7 +432,10 @@ The scale factor that brings `size` within the restrictions while keeping its ra
 ### resizeToSizeRestrictions
 
 ```ts
-function resizeToSizeRestrictions(coordinates: Coordinates, sizeRestrictions: SizeRestrictions): Coordinates;
+function resizeToSizeRestrictions(
+	coordinates: Coordinates,
+	sizeRestrictions: SizeRestrictions
+): Coordinates;
 ```
 
 Applies that scale factor.
@@ -436,7 +459,10 @@ The largest size that fits between the position restrictions.
 ### mergePositionRestrictions
 
 ```ts
-function mergePositionRestrictions(a: PositionRestrictions, b: PositionRestrictions): PositionRestrictions;
+function mergePositionRestrictions(
+	a: PositionRestrictions,
+	b: PositionRestrictions
+): PositionRestrictions;
 ```
 
 The intersection of two position restrictions: the tighter value for each side.
@@ -444,7 +470,10 @@ The intersection of two position restrictions: the tighter value for each side.
 ### fitToPositionRestrictions
 
 ```ts
-function fitToPositionRestrictions(coordinates: Coordinates, positionRestrictions: PositionRestrictions): MoveDirections;
+function fitToPositionRestrictions(
+	coordinates: Coordinates,
+	positionRestrictions: PositionRestrictions
+): MoveDirections;
 ```
 
 The move that brings the coordinates inside the restrictions.
@@ -452,7 +481,10 @@ The move that brings the coordinates inside the restrictions.
 ### moveToPositionRestrictions
 
 ```ts
-function moveToPositionRestrictions(coordinates: Coordinates, positionRestrictions: PositionRestrictions): Coordinates;
+function moveToPositionRestrictions(
+	coordinates: Coordinates,
+	positionRestrictions: PositionRestrictions
+): Coordinates;
 ```
 
 Applies that move.
@@ -508,7 +540,10 @@ function getCenter(object: Coordinates): Point;
 ### getIntersections
 
 ```ts
-function getIntersections(object: Coordinates, positionRestrictions: PositionRestrictions): Intersections;
+function getIntersections(
+	object: Coordinates,
+	positionRestrictions: PositionRestrictions
+): Intersections;
 ```
 
 How far each side of `object` crosses the restrictions (`0` when it doesn't).
@@ -536,7 +571,12 @@ function inverseMove(directions: MoveDirections): MoveDirections;
 ### applyScale
 
 ```ts
-function applyScale(object: Coordinates, factor: number, center?: Point, progress?: number): Coordinates;
+function applyScale(
+	object: Coordinates,
+	factor: number,
+	center?: Point,
+	progress?: number
+): Coordinates;
 ```
 
 Scales a rectangle by `factor` around `center` (its own centre by default).

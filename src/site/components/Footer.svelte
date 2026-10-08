@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { href } from '../paths';
+	import { href } from '#site/paths.ts';
 </script>
 
 <footer class="footer">

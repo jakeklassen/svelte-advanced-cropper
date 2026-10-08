@@ -8,19 +8,27 @@
 
 	let { html, code, title }: Props = $props();
 
-	let copied = $state(false);
+	let label: 'Copy' | 'Copied' | 'Copy failed' = $state('Copy');
+	let resetTimer: ReturnType<typeof setTimeout> | undefined;
 
 	async function copy() {
-		await navigator.clipboard.writeText(code);
-		copied = true;
-		setTimeout(() => (copied = false), 1500);
+		try {
+			await navigator.clipboard.writeText(code);
+			label = 'Copied';
+		} catch {
+			// No clipboard access (insecure context, denied permission).
+			label = 'Copy failed';
+		}
+
+		// Restart the countdown, so repeated clicks keep the label for the full time.
+		clearTimeout(resetTimer);
+		resetTimer = setTimeout(() => (label = 'Copy'), 1500);
 	}
 </script>
 
 <div class="code-block">
 	{#if title}<div class="code-block__title">{title}</div>{/if}
-	<button type="button" class="code-block__copy" onclick={copy}>{copied ? 'Copied' : 'Copy'}</button
-	>
+	<button type="button" class="code-block__copy" onclick={copy}>{label}</button>
 	{@html html}
 </div>
 

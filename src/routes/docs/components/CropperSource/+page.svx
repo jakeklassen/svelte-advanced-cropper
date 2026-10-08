@@ -13,12 +13,13 @@
 
 	let { src }: { src: string } = $props();
 
-	let source: HTMLImageElement | null = $state(null);
+	// Typed like CropperSource's `ref` prop. It always renders an `<img>`, which `draw` checks.
+	let source: HTMLImageElement | HTMLCanvasElement | null = $state(null);
 	let canvas: HTMLCanvasElement | undefined = $state();
 
 	function draw() {
 		const context = canvas?.getContext('2d');
-		if (canvas && context && source) {
+		if (canvas && context && source instanceof HTMLImageElement) {
 			canvas.width = source.naturalWidth;
 			canvas.height = source.naturalHeight;
 			context.filter = 'grayscale(1)';
@@ -37,7 +38,7 @@
 | ------------- | --------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------- |
 | `src`         | `string` \| `null`                                   | —       | The image URL. Nothing is rendered without it, and the `<img>` is recreated whenever it changes.                    |
 | `crossOrigin` | `'anonymous'` \| `'use-credentials'` \| `boolean`    | `true`  | The `crossorigin` attribute. `true` means `'anonymous'` and `false` leaves it off. Needed to draw cross-origin images onto a canvas. |
-| `ref`         | `HTMLImageElement` \| `null`                         | `null`  | **Bindable.** The rendered `<img>`, or `null` while there is none.                                                  |
+| `ref`         | `HTMLImageElement` \| `HTMLCanvasElement` \| `null`  | `null`  | **Bindable.** The rendered `<img>`, or `null` while there is none. The type also allows a canvas, as upstream's does. |
 | ...rest       | `HTMLImgAttributes`                                 | —       | Any other `<img>` attribute or event handler, such as `alt`, `class` or `onload`.                                   |
 
 The rest props are applied last, so a `class` you pass **replaces** the default `advanced-cropper-source` class instead of adding to it. That matches react-advanced-cropper. If you want the default styles too, include the class yourself: `class="advanced-cropper-source my-source"`.

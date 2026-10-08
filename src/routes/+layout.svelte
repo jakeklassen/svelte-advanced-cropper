@@ -4,8 +4,9 @@
 	import 'advanced-cropper/themes/default.scss';
 	import '#site/styles/site.css';
 	import { asset } from '$app/paths';
+	import type { LayoutProps } from './$types';
 
-	let { children } = $props();
+	let { children }: LayoutProps = $props();
 </script>
 
 <svelte:head>

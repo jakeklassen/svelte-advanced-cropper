@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { isGroup, nav } from '../nav';
-	import { href } from '../paths';
+	import { isCurrentPage, isGroup, nav } from '#site/nav.ts';
+	import { href } from '#site/paths.ts';
 
 	interface Props {
 		onNavigate?: () => void;
@@ -9,8 +9,7 @@
 
 	let { onNavigate }: Props = $props();
 
-	const current = $derived(page.url.pathname.replace(/\/$/, ''));
-	const isActive = (path: string) => current.endsWith(path);
+	const isActive = (path: string) => isCurrentPage(page.url.pathname, path);
 </script>
 
 <nav class="sidebar" aria-label="Documentation">

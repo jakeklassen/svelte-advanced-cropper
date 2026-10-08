@@ -19,10 +19,11 @@
 	let { source, files = {}, title = 'Example', children }: Props = $props();
 
 	let open = $state(false);
-	const entries = $derived([
-		...(source ? ([[`${title}.svelte`, source]] as [string, Source][]) : []),
-		...Object.entries(files)
-	]);
+	// The demo's own source first, then any extra files.
+	const allFiles: Record<string, Source> = $derived(
+		source ? { [`${title}.svelte`]: source, ...files } : files
+	);
+	const entries = $derived(Object.entries(allFiles));
 </script>
 
 <figure class="example">

@@ -60,7 +60,12 @@ Usually once in a component's `<script>`, where the getter can read the componen
 		type CropperInstanceSettings
 	} from 'svelte-advanced-cropper';
 
-	let { image, aspectRatio = 1 }: { image: CropperImage; aspectRatio?: number } = $props();
+	interface Props {
+		image: CropperImage;
+		aspectRatio?: number;
+	}
+
+	let { image, aspectRatio = 1 }: Props = $props();
 
 	const instance = useCropperInstance<CropperInstanceSettings, { id: string }>(() => ({
 		settings: { aspectRatio: { minimum: aspectRatio, maximum: aspectRatio } },

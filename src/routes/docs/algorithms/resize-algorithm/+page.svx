@@ -26,7 +26,12 @@ Things to try:
 ```ts
 anchoredResizeCoordinatesAlgorithm(coordinates, anchor, directions, options, {
 	aspectRatio: createAspectRatio(1),
-	sizeRestrictions: { minWidth: 0, minHeight: 0, maxWidth: boundary.width, maxHeight: boundary.height },
+	sizeRestrictions: {
+		minWidth: 0,
+		minHeight: 0,
+		maxWidth: boundary.width,
+		maxHeight: boundary.height
+	},
 	positionRestrictions: { left: 0, top: 0, right: boundary.width, bottom: boundary.height }
 });
 ```

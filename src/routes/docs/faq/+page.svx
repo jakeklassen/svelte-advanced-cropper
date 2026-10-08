@@ -43,15 +43,19 @@ import { getCloserAngle, type CropperState } from 'svelte-advanced-cropper';
 function getDefaultState(): CropperState | null {
 	const currentState = cropper?.getState();
 	const defaultState = cropper?.getDefaultState();
-	return currentState && defaultState
-		? {
-				...defaultState,
-				transforms: {
-					...defaultState.transforms,
-					rotate: getCloserAngle(currentState.transforms.rotate, defaultState.transforms.rotate)
-				}
-			}
-		: null;
+	if (!currentState || !defaultState) {
+		return null;
+	}
+
+	const { rotate } = defaultState.transforms;
+
+	return {
+		...defaultState,
+		transforms: {
+			...defaultState.transforms,
+			rotate: getCloserAngle(currentState.transforms.rotate, rotate)
+		}
+	};
 }
 ```
 
@@ -156,8 +160,12 @@ If the value has to travel inside the settings object itself, for example becaus
 		stencilType: 'circle' | 'rectangle';
 	}
 
-	let { src, stencilType = 'circle' }: { src: string; stencilType?: 'circle' | 'rectangle' } =
-		$props();
+	interface Props {
+		src: string;
+		stencilType?: StencilTypeSettings['stencilType'];
+	}
+
+	let { src, stencilType = 'circle' }: Props = $props();
 
 	const { cropper, refs } = useAbstractCropper<StencilTypeSettings>(() => ({
 		src,

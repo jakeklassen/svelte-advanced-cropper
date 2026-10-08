@@ -18,7 +18,12 @@ In a [custom stencil](/docs/tutorials/custom-stencil), forward its moves to the 
 <script lang="ts">
 	import { DraggableArea, type CropperRef } from 'svelte-advanced-cropper';
 
-	let { cropper, movable = true }: { cropper: CropperRef; movable?: boolean } = $props();
+	interface Props {
+		cropper: CropperRef;
+		movable?: boolean;
+	}
+
+	let { cropper, movable = true }: Props = $props();
 </script>
 
 <DraggableArea

@@ -1,7 +1,9 @@
 import { createHighlighter } from 'shiki';
 
+const theme = 'github-light';
+
 const shiki = await createHighlighter({
-	themes: ['github-light'],
+	themes: [theme],
 	langs: ['svelte', 'ts', 'js', 'html', 'css', 'scss', 'shell', 'json']
 });
 
@@ -10,10 +12,10 @@ function escapeSvelte(html: string) {
 }
 
 /** Highlights a code string to HTML. */
-export function highlight(code: string, lang = 'svelte'): string {
+export function highlight(code: string, lang: string): string {
 	const language = shiki.getLoadedLanguages().includes(lang) ? lang : 'text';
 
-	return shiki.codeToHtml(code.trimEnd(), { lang: language, theme: 'github-light' });
+	return shiki.codeToHtml(code.trimEnd(), { lang: language, theme });
 }
 
 /** mdsvex highlighter: output is inserted into Svelte markup, so braces must be escaped. */

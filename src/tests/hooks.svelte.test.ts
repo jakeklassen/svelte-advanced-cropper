@@ -3,7 +3,7 @@ import { render } from 'vitest-browser-svelte';
 import { flushSync } from 'svelte';
 import ImageHarness from './ImageHarness.svelte';
 import UpdateEffectHarness from './UpdateEffectHarness.svelte';
-import { createTestImage, waitFor } from './fixtures';
+import { createTestImage, delay, waitFor } from './fixtures';
 
 describe('useCropperImage', () => {
 	it('fires loading callbacks in upstream order, onLoad after loading ends', async () => {
@@ -35,7 +35,8 @@ describe('useCropperImage', () => {
 		await screen.rerender({ src: a });
 		const hook = () => screen.component.getHook();
 		await waitFor(() => hook().isLoaded());
-		await new Promise((resolve) => setTimeout(resolve, 50));
+		// Give a stale load of B the chance to land and (wrongly) replace A.
+		await delay(50);
 		expect(hook().getImage()?.width).toBe(800);
 		expect(hook().isLoading()).toBe(false);
 	});
@@ -46,8 +47,36 @@ describe('useCropperImage', () => {
 		await screen.rerender({ src: null });
 		const hook = () => screen.component.getHook();
 		expect(hook().isLoading()).toBe(false);
-		await new Promise((resolve) => setTimeout(resolve, 50));
+		// Give the cancelled load the chance to finish and (wrongly) set an image.
+		await delay(50);
 		expect(hook().getImage()).toBeNull();
+	});
+
+	it('fires onLoad once for the latest of several images', async () => {
+		const log: string[] = [];
+		const screen = await render(ImageHarness, { src: createTestImage(), log });
+		const hook = () => screen.component.getHook();
+		await waitFor(() => log.some((entry) => entry.startsWith('load')));
+		const image = hook().getImage();
+		if (!image) {
+			throw new Error('no image');
+		}
+
+		log.length = 0;
+
+		hook().setImage({ ...image, width: 1 });
+		hook().setImage({ ...image, width: 2 });
+		// Let both setImage calls settle, so a stray onLoad for the first one would be logged.
+		await delay(20);
+		expect(log).toEqual(['load:false']);
+		expect(hook().getImage()?.width).toBe(2);
+
+		// Setting the same image again does not fire onLoad.
+		const current = hook().getImage();
+		hook().setImage(current);
+		// Leave time for an onLoad that should not come.
+		await delay(20);
+		expect(log).toEqual(['load:false']);
 	});
 });
 
@@ -70,32 +99,5 @@ describe('useUpdateEffect', () => {
 		screen.component.setValue(3);
 		flushSync();
 		expect(log).toEqual(['run:2', 'cleanup', 'run:3']);
-	});
-});
-
-describe('useCropperImage setImage', () => {
-	it('fires onLoad once for the latest of several images', async () => {
-		const log: string[] = [];
-		const screen = await render(ImageHarness, { src: createTestImage(), log });
-		const hook = () => screen.component.getHook();
-		await waitFor(() => log.some((entry) => entry.startsWith('load')));
-		const image = hook().getImage();
-		if (!image) {
-			throw new Error('no image');
-		}
-
-		log.length = 0;
-
-		hook().setImage({ ...image, width: 1 });
-		hook().setImage({ ...image, width: 2 });
-		await new Promise((resolve) => setTimeout(resolve, 20));
-		expect(log).toEqual(['load:false']);
-		expect(hook().getImage()?.width).toBe(2);
-
-		// Setting the same image again does not fire onLoad.
-		const current = hook().getImage();
-		hook().setImage(current);
-		await new Promise((resolve) => setTimeout(resolve, 20));
-		expect(log).toEqual(['load:false']);
 	});
 });

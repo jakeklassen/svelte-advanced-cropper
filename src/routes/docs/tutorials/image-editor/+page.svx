@@ -141,8 +141,9 @@ Adding the cropper is simple. The one detail is that the user should only be abl
 			stencilProps={{
 				movable: cropperEnabled,
 				resizable: cropperEnabled,
-				lines: cropperEnabled,
-				handlers: cropperEnabled,
+				// `{}` hides every line and handler; `undefined` keeps the default set.
+				lines: cropperEnabled ? undefined : {},
+				handlers: cropperEnabled ? undefined : {},
 				overlayClassName: [
 					'image-editor__cropper-overlay',
 					!cropperEnabled && 'image-editor__cropper-overlay--faded'

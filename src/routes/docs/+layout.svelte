@@ -6,15 +6,16 @@
 	import Footer from '#site/components/Footer.svelte';
 	import Toc from '#site/components/Toc.svelte';
 	import DocPager from '#site/components/DocPager.svelte';
-	import { pages } from '#site/nav.ts';
+	import { isCurrentPage, pages } from '#site/nav.ts';
+	import type { LayoutProps } from './$types';
 
-	let { children } = $props();
+	let { children }: LayoutProps = $props();
 
 	let menuOpen = $state(false);
 	let content: HTMLElement | undefined = $state();
 
 	const title = $derived(
-		pages.find((entry) => page.url.pathname.replace(/\/$/, '').endsWith(entry.href))?.title
+		pages.find((entry) => isCurrentPage(page.url.pathname, entry.href))?.title
 	);
 
 	afterNavigate(() => {

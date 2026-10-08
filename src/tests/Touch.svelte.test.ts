@@ -1,22 +1,5 @@
-import { describe, expect, it, vi } from 'vitest';
-import { render } from 'vitest-browser-svelte';
-import Harness from './Harness.svelte';
-import { createTestImage, nextFrame, waitFor } from './fixtures';
-import type { CropperRef } from '#lib';
-
-async function mountCropper(props: Record<string, unknown> = {}) {
-	const onReady = vi.fn<(cropper: CropperRef) => void>();
-	const screen = await render(Harness, {
-		src: createTestImage(),
-		onReady,
-		transitions: false,
-		...props
-	});
-	const cropper = (): CropperRef => screen.component.getCropper();
-	await waitFor(() => onReady.mock.calls.length > 0);
-
-	return { cropper, container: screen.container };
-}
+import { describe, expect, it } from 'vitest';
+import { centerOf, getElement, mountCropper, nextFrame } from './fixtures';
 
 function touch(target: Element, identifier: number, x: number, y: number) {
 	return new Touch({ identifier, target, clientX: x, clientY: y });
@@ -35,18 +18,12 @@ function dispatchTouch(target: EventTarget, type: string, touches: Touch[]) {
 
 describe('touch', () => {
 	it('drags the stencil once past the activation distance', async () => {
-		const { cropper, container } = await mountCropper();
+		const { cropper, container } = await mountCropper({ transitions: false });
 		// No transition: the core ignores moves while one is running.
 		cropper().setCoordinates({ width: 150, height: 100 }, { transitions: false });
 		await nextFrame();
-		const area = container.querySelector('.advanced-cropper-rectangle-stencil__draggable-area');
-		if (!area) {
-			throw new Error('missing draggable area');
-		}
-
-		const box = area.getBoundingClientRect();
-		const x = box.left + box.width / 2;
-		const y = box.top + box.height / 2;
+		const area = getElement(container, '.advanced-cropper-rectangle-stencil__draggable-area');
+		const { x, y } = centerOf(area);
 		const start = cropper().getCoordinates();
 
 		dispatchTouch(area, 'touchstart', [touch(area, 1, x, y)]);
@@ -64,24 +41,19 @@ describe('touch', () => {
 	});
 
 	it('zooms the image with a two-finger pinch', async () => {
-		const { cropper, container } = await mountCropper();
-		const wrapper = container.querySelector('.advanced-cropper__background-wrapper');
-		if (!wrapper) {
-			throw new Error('missing background wrapper');
-		}
-
-		const box = wrapper.getBoundingClientRect();
-		const cx = box.left + box.width / 2;
-		const cy = box.top + box.height / 2;
+		const { cropper, container } = await mountCropper({ transitions: false });
+		const wrapper = getElement(container, '.advanced-cropper__background-wrapper');
+		const { x, y } = centerOf(wrapper);
 		const before = cropper().getVisibleArea()?.width ?? 0;
 
+		// Two fingers 80px apart spread to 160px.
 		dispatchTouch(wrapper, 'touchstart', [
-			touch(wrapper, 1, cx - 40, cy),
-			touch(wrapper, 2, cx + 40, cy)
+			touch(wrapper, 1, x - 40, y),
+			touch(wrapper, 2, x + 40, y)
 		]);
 		dispatchTouch(window, 'touchmove', [
-			touch(wrapper, 1, cx - 80, cy),
-			touch(wrapper, 2, cx + 80, cy)
+			touch(wrapper, 1, x - 80, y),
+			touch(wrapper, 2, x + 80, y)
 		]);
 		dispatchTouch(window, 'touchend', []);
 

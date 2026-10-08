@@ -33,7 +33,12 @@ Show a short notice when the aspect ratio changes, but not on the first render:
 <script lang="ts">
 	import { Cropper, useUpdateEffect } from 'svelte-advanced-cropper';
 
-	let { src, aspectRatio }: { src: string; aspectRatio: number } = $props();
+	interface Props {
+		src: string;
+		aspectRatio: number;
+	}
+
+	let { src, aspectRatio }: Props = $props();
 
 	let message = $state('');
 
@@ -41,6 +46,7 @@ Show a short notice when the aspect ratio changes, but not on the first render:
 		() => {
 			message = `Aspect ratio changed to ${aspectRatio}`;
 			const timer = setTimeout(() => (message = ''), 2000);
+
 			return () => clearTimeout(timer);
 		},
 		() => aspectRatio

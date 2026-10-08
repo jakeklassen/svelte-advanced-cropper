@@ -10,9 +10,17 @@ test('home page renders the hero and a working cropper', async ({ page }) => {
 });
 
 test('docs pages render with navigation', async ({ page }) => {
+	const toc = page.getByRole('navigation', { name: 'On this page' });
+
 	await page.goto('/docs/intro');
 	await expect(page.getByRole('heading', { level: 1 })).toHaveText('Getting started');
 	await expect(page.locator('.advanced-cropper-background-image').first()).toBeVisible();
+	// The table of contents is filled on the first load...
+	await expect(toc.getByRole('link', { name: 'Installation' })).toBeVisible();
+
 	await page.getByRole('link', { name: 'Recipes', exact: true }).first().click();
 	await expect(page.getByRole('heading', { level: 1 })).toHaveText('Recipes');
+	// ...and again after a client-side navigation.
+	await expect(toc.getByRole('link', { name: 'Stencil Tuning' })).toBeVisible();
+	await expect(toc.getByRole('link', { name: 'Installation' })).toHaveCount(0);
 });

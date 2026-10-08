@@ -9,8 +9,11 @@ import { fileURLToPath } from 'node:url';
 import type { Plugin } from 'vite';
 import { highlight, highlighter } from './src/site/highlight.ts';
 import { rehypeBasePath, rehypeHeadingIds } from './src/site/markdown.ts';
+import { coreScssDeprecations } from './scripts/sass.ts';
 
 const base = (process.env.BASE_PATH ?? '') as '' | `/${string}`;
+// STRICT_LINKS=1 (CI, deploys) fails the build on broken internal links and anchors.
+const brokenLinkHandling = process.env.STRICT_LINKS ? 'fail' : 'warn';
 
 /**
  * `import source from './Demo.svelte?highlight'` gives `{ code, html }`: the file's
@@ -44,9 +47,8 @@ function highlightImports(): Plugin {
 			const file = id.slice(prefix.length, -'.js'.length);
 			this.addWatchFile(file);
 			const code = await readFile(file, 'utf8');
-			const extension = file.split('.').pop() ?? 'text';
-			const lang =
-				{ svelte: 'svelte', ts: 'ts', js: 'js', css: 'css', scss: 'scss' }[extension] ?? 'text';
+			// The extension names the language; `highlight` falls back to plain text for unknown ones.
+			const lang = file.split('.').pop() ?? 'text';
 
 			return `export default ${JSON.stringify({ code, html: highlight(code, lang) })};`;
 		}
@@ -82,24 +84,20 @@ export default defineConfig({
 			],
 			// The docs site is fully prerendered for GitHub Pages.
 			adapter: adapter({ fallback: '404.html' }),
-			// STRICT_LINKS=1 (CI, deploys) fails the build on broken internal links and anchors.
 			prerender: {
-				handleHttpError: process.env.STRICT_LINKS ? 'fail' : 'warn',
-				handleMissingId: process.env.STRICT_LINKS ? 'fail' : 'warn'
+				handleHttpError: brokenLinkHandling,
+				handleMissingId: brokenLinkHandling
 			},
 			paths: { base }
 		})
 	],
 	css: {
 		preprocessorOptions: {
-			// The advanced-cropper core SCSS still uses `@import` and global color functions.
-			scss: { silenceDeprecations: ['import', 'global-builtin', 'color-functions'] }
+			scss: { silenceDeprecations: coreScssDeprecations }
 		}
 	},
 	test: {
 		expect: { requireAssertions: true },
-		// Remove once src/lib has tests; until then an empty run should not fail.
-		passWithNoTests: true,
 		projects: [
 			{
 				extends: './vite.config.ts',
@@ -110,8 +108,7 @@ export default defineConfig({
 						provider: playwright(),
 						instances: [{ browser: 'chromium', headless: true }]
 					},
-					include: ['src/**/*.svelte.{test,spec}.{js,ts}'],
-					exclude: ['src/lib/server/**']
+					include: ['src/**/*.svelte.{test,spec}.{js,ts}']
 				}
 			},
 

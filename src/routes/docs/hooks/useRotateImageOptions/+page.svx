@@ -5,7 +5,9 @@ Turns the `rotateImage` option of a background wrapper (`true`, `false` or a par
 ## Signature
 
 ```ts
-function useRotateImageOptions(rotateImage: RotateImageOptions | boolean): DefinedRotateImageOptions;
+function useRotateImageOptions(
+	rotateImage: RotateImageOptions | boolean
+): DefinedRotateImageOptions;
 
 interface RotateImageOptions {
 	touch?: boolean;

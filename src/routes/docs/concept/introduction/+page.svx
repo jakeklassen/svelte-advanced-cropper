@@ -22,7 +22,11 @@ In Svelte you get the current state from the cropper instance with `cropper.getS
 A **[state modifier](/docs/concept/modifiers)** is any function that takes a state and returns the next one. The core's modifiers are pure: they copy the state instead of changing it. They share a common shape:
 
 ```ts
-function stateModifier(state: CropperState, settings: CoreSettings, ...args: unknown[]): CropperState;
+function stateModifier(
+	state: CropperState,
+	settings: CoreSettings,
+	...args: unknown[]
+): CropperState;
 ```
 
 The first argument is the current state, the second is the settings, and anything after that is specific to the operation (a move delta, a new boundary size, and so on).

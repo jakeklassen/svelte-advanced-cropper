@@ -1,6 +1,7 @@
 <script lang="ts">
+	import { Menu } from '@lucide/svelte';
 	import Logo from './Logo.svelte';
-	import { href } from '../paths';
+	import { href } from '#site/paths.ts';
 
 	interface Props {
 		variant?: 'default' | 'hero';
@@ -13,14 +14,7 @@
 <nav class={['navbar', `navbar--${variant}`]}>
 	{#if onMenu}
 		<button type="button" class="navbar__menu" aria-label="Open navigation" onclick={onMenu}>
-			<svg
-				width="22"
-				height="22"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18" /></svg
-			>
+			<Menu size={22} aria-hidden="true" />
 		</button>
 	{/if}
 	<a class="navbar__brand" href={href('/')}>

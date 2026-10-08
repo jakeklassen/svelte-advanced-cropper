@@ -25,7 +25,9 @@ interface CropperImageHook {
 	isLoading(): boolean;
 	isLoaded(): boolean;
 	getImage(): CropperImage | null;
-	setImage(image: CropperImage | null | ((previous: CropperImage | null) => CropperImage | null)): void;
+	setImage(
+		image: CropperImage | null | ((previous: CropperImage | null) => CropperImage | null)
+	): void;
 }
 ```
 

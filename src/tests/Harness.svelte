@@ -2,7 +2,7 @@
 	import 'advanced-cropper/styles/index.scss';
 	import 'advanced-cropper/themes/default.scss';
 	import type { Component } from 'svelte';
-	import { Cropper } from '#lib';
+	import { Cropper, type CropperRef } from '#lib';
 
 	interface Props {
 		component?: Component<any, any, any>;
@@ -13,7 +13,8 @@
 
 	let { component = Cropper, width = 500, height = 400, ...rest }: Props = $props();
 
-	let cropper: any = $state();
+	let cropper: CropperRef | undefined = $state();
+
 	export function getCropper() {
 		return cropper;
 	}

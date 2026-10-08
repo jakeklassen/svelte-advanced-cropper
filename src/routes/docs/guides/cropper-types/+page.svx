@@ -47,8 +47,8 @@ A fixed cropper has a static stencil: no handles, no dragging, no resizing, and 
 		size="medium"
 		src={image('photo-1583172332547-c768b4e2f5ff.jpg')}
 		stencilProps={{
-			handlers: false,
-			lines: false,
+			handlers: {},
+			lines: {},
 			movable: false,
 			resizable: false
 		}}
@@ -67,15 +67,15 @@ Examples: [Twitter](https://www.twitter.com), [Instagram](https://www.instagram.
 Use the `FixedCropper` component:
 
 ```svelte
-<script>
+<script lang="ts">
 	import { FixedCropper, ImageRestriction } from 'svelte-advanced-cropper';
 </script>
 
 <FixedCropper
 	{src}
 	stencilProps={{
-		handlers: false,
-		lines: false,
+		handlers: {},
+		lines: {},
 		movable: false,
 		resizable: false
 	}}

@@ -35,7 +35,7 @@ The library ships two stencils: `RectangleStencil`, which is the default, and `C
 To swap the stencil, hand the component to the `stencilComponent` prop:
 
 ```svelte
-<script>
+<script lang="ts">
 	import { Cropper, CircleStencil } from 'svelte-advanced-cropper';
 </script>
 
@@ -342,27 +342,31 @@ This version takes the MIME type from `File.type`. That value is derived from th
 <script lang="ts">
 	import { Cropper } from 'svelte-advanced-cropper';
 
-	interface Image {
+	interface UploadedImage {
 		type?: string;
 		src: string;
 	}
 
 	let input: HTMLInputElement | undefined = $state();
-	let image: Image | null = $state(null);
+	let image: UploadedImage | null = $state(null);
 
 	function onLoadImage(event: Event & { currentTarget: HTMLInputElement }) {
 		const file = event.currentTarget.files?.[0];
 		if (file) {
 			image = { src: URL.createObjectURL(file), type: file.type };
 		}
+
 		// Allow the same file to be picked again.
 		event.currentTarget.value = '';
 	}
 
 	$effect(() => {
 		const src = image?.src;
+
 		return () => {
-			if (src) URL.revokeObjectURL(src);
+			if (src) {
+				URL.revokeObjectURL(src);
+			}
 		};
 	});
 </script>
@@ -382,13 +386,13 @@ This version reads the first bytes of the file and detects the real format with 
 	import { Cropper } from 'svelte-advanced-cropper';
 	import { getMimeType } from 'advanced-cropper/extensions/mimes';
 
-	interface Image {
+	interface UploadedImage {
 		type?: string;
 		src: string;
 	}
 
 	let input: HTMLInputElement | undefined = $state();
-	let image: Image | null = $state(null);
+	let image: UploadedImage | null = $state(null);
 
 	function onLoadImage(event: Event & { currentTarget: HTMLInputElement }) {
 		const file = event.currentTarget.files?.[0];
@@ -401,13 +405,18 @@ This version reads the first bytes of the file and detects the real format with 
 			});
 			reader.readAsArrayBuffer(file);
 		}
+
+		// Allow the same file to be picked again.
 		event.currentTarget.value = '';
 	}
 
 	$effect(() => {
 		const src = image?.src;
+
 		return () => {
-			if (src) URL.revokeObjectURL(src);
+			if (src) {
+				URL.revokeObjectURL(src);
+			}
 		};
 	});
 </script>

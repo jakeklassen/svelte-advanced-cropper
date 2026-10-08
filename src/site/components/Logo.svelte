@@ -2,6 +2,7 @@
 	interface Props {
 		size?: number;
 	}
+
 	let { size = 28 }: Props = $props();
 </script>
 

@@ -10,6 +10,7 @@
 
 	let labels: string[] = $state([]);
 	let selected: string | undefined = $state();
+	const active = $derived(selected ?? labels[0]);
 
 	setTabsContext({
 		register(label) {
@@ -18,7 +19,7 @@
 			}
 		},
 		get active() {
-			return selected ?? labels[0];
+			return active;
 		}
 	});
 </script>
@@ -32,8 +33,8 @@
 			<button
 				type="button"
 				role="tab"
-				class={['tabs__tab', (selected ?? labels[0]) === label && 'tabs__tab--active']}
-				aria-selected={(selected ?? labels[0]) === label}
+				class={['tabs__tab', active === label && 'tabs__tab--active']}
+				aria-selected={active === label}
 				onclick={() => (selected = label)}
 			>
 				{label}

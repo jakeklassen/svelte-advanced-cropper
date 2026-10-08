@@ -1,31 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
-import { render } from 'vitest-browser-svelte';
 import { flushSync } from 'svelte';
-import Harness from './Harness.svelte';
-import { createTestImage, nextFrame, waitFor } from './fixtures';
+import { centerOf, drag, getElement, mountCropper, nextFrame, waitFor } from './fixtures';
 import { CircleStencil, FixedCropper, type CropperRef } from '#lib';
-
-async function mountCropper(props: Record<string, unknown> = {}) {
-	const onReady = vi.fn<(cropper: CropperRef) => void>();
-	const screen = await render(Harness, { src: createTestImage(), onReady, ...props });
-	const cropper = (): CropperRef => screen.component.getCropper();
-	await waitFor(() => onReady.mock.calls.length > 0);
-
-	return { screen, cropper, onReady, container: screen.container };
-}
-
-function dispatchMouse(target: EventTarget, type: string, x: number, y: number) {
-	target.dispatchEvent(
-		new MouseEvent(type, {
-			bubbles: true,
-			cancelable: true,
-			clientX: x,
-			clientY: y,
-			button: 0,
-			buttons: 1
-		})
-	);
-}
 
 describe('Cropper', () => {
 	it('loads the image, creates a state and fires onReady after the reset', async () => {
@@ -69,11 +45,10 @@ describe('Cropper', () => {
 	it('getCanvas works inside onReady', async () => {
 		let canvas: HTMLCanvasElement | null = null;
 		await mountCropper({
-			onReady: (ref: CropperRef) => {
+			onReady: (ref) => {
 				canvas = ref.getCanvas();
 			}
-		}).catch(() => undefined);
-		await waitFor(() => canvas);
+		});
 		expect(canvas).not.toBeNull();
 	});
 
@@ -104,9 +79,9 @@ describe('Cropper', () => {
 
 		await screen.rerender({ stencilProps: { aspectRatio: 16 / 9 } });
 		await waitFor(() => {
-			const c = cropper().getCoordinates();
+			const coordinates = cropper().getCoordinates();
 
-			return c && Math.abs(c.width / c.height - 16 / 9) < 0.02;
+			return coordinates && Math.abs(coordinates.width / coordinates.height - 16 / 9) < 0.02;
 		});
 	});
 
@@ -155,31 +130,24 @@ describe('Cropper', () => {
 		const { cropper, container } = await mountCropper({ transitions: false });
 		const before = cropper().getCoordinates();
 		const visibleArea = cropper().getVisibleArea();
-		const area = container.querySelector(
+		const area = getElement(
+			container,
 			'.advanced-cropper-draggable-element.advanced-cropper-rectangle-stencil__draggable-area'
 		);
-		expect(area).not.toBeNull();
-		if (!area) {
-			return;
-		}
 
-		// No transition: the core ignores moves while one is running.
+		// Halve the stencil so it has room to move. No transition: the core ignores moves while
+		// one is running.
 		cropper().setCoordinates(
 			{ width: (before?.width ?? 0) / 2, height: (before?.height ?? 0) / 2 },
 			{ transitions: false }
 		);
 		flushSync();
 		await nextFrame();
-		const start = cropper().getCoordinates();
-		const box2 = area.getBoundingClientRect();
-		const sx = box2.left + box2.width / 2;
-		const sy = box2.top + box2.height / 2;
-		dispatchMouse(area, 'mousedown', sx, sy);
-		dispatchMouse(window, 'mousemove', sx + 20, sy + 10);
-		dispatchMouse(window, 'mouseup', sx + 20, sy + 10);
+		const halved = cropper().getCoordinates();
+		drag(area, centerOf(area), { x: 20, y: 10 });
 		const after = cropper().getCoordinates();
-		expect(after?.left).toBeGreaterThan(start?.left ?? 0);
-		expect(after?.top).toBeGreaterThan(start?.top ?? 0);
+		expect(after?.left).toBeGreaterThan(halved?.left ?? 0);
+		expect(after?.top).toBeGreaterThan(halved?.top ?? 0);
 		expect(cropper().getVisibleArea()).toEqual(visibleArea);
 	});
 
@@ -187,17 +155,10 @@ describe('Cropper', () => {
 		const { cropper, container } = await mountCropper({ transitions: false });
 		cropper().zoomImage(2, { transitions: false });
 		const before = cropper().getVisibleArea();
-		const wrapper = container.querySelector('.advanced-cropper__background-wrapper');
-		if (!wrapper) {
-			throw new Error('missing background wrapper');
-		}
-
+		const wrapper = getElement(container, '.advanced-cropper__background-wrapper');
+		// Press near the corner, outside the stencil, so the drag reaches the image.
 		const box = wrapper.getBoundingClientRect();
-		const x = box.left + 5;
-		const y = box.top + 5;
-		dispatchMouse(wrapper, 'mousedown', x, y);
-		dispatchMouse(window, 'mousemove', x + 30, y + 30);
-		dispatchMouse(window, 'mouseup', x + 30, y + 30);
+		drag(wrapper, { x: box.left + 5, y: box.top + 5 }, { x: 30, y: 30 });
 		const after = cropper().getVisibleArea();
 		expect(after?.left).not.toBe(before?.left);
 	});
@@ -205,19 +166,15 @@ describe('Cropper', () => {
 	it('zooms with the mouse wheel', async () => {
 		const { cropper, container } = await mountCropper({ transitions: false });
 		const before = cropper().getVisibleArea()?.width ?? 0;
-		const wrapper = container.querySelector('.advanced-cropper__background-wrapper');
-		if (!wrapper) {
-			throw new Error('missing background wrapper');
-		}
-
-		const box = wrapper.getBoundingClientRect();
+		const wrapper = getElement(container, '.advanced-cropper__background-wrapper');
+		const center = centerOf(wrapper);
 		wrapper.dispatchEvent(
 			new WheelEvent('wheel', {
 				bubbles: true,
 				cancelable: true,
 				deltaY: -100,
-				clientX: box.left + box.width / 2,
-				clientY: box.top + box.height / 2
+				clientX: center.x,
+				clientY: center.y
 			})
 		);
 		expect(cropper().getVisibleArea()?.width).toBeLessThan(before);
@@ -229,35 +186,21 @@ describe('Cropper', () => {
 		flushSync();
 		await nextFrame();
 		const before = cropper().getCoordinates();
-		const handler = container.querySelector(
+		const westHandler = getElement(
+			container,
 			'.advanced-cropper-bounding-box__handler-wrapper--west .advanced-cropper-draggable-element'
 		);
-		if (!handler) {
-			throw new Error('missing west handler');
-		}
-
-		const box = handler.getBoundingClientRect();
-		const x = box.left + box.width / 2;
-		const y = box.top + box.height / 2;
-		dispatchMouse(handler, 'mousedown', x, y);
-		dispatchMouse(window, 'mousemove', x - 30, y);
-		dispatchMouse(window, 'mouseup', x - 30, y);
+		drag(westHandler, centerOf(westHandler), { x: -30, y: 0 });
 		expect(cropper().getCoordinates()?.width).toBeGreaterThan(before?.width ?? 0);
 	});
 
-	it('respects disabled', async () => {
+	it('marks a disabled stencil and ignores drags on it', async () => {
 		const { cropper, container } = await mountCropper({ transitions: false, disabled: true });
 		expect(container.querySelector('.advanced-cropper-rectangle-stencil--disabled')).not.toBeNull();
 		const before = cropper().getCoordinates();
-		const area = container.querySelector('.advanced-cropper-rectangle-stencil__draggable-area');
-		if (!area) {
-			throw new Error('missing draggable area');
-		}
-
+		const area = getElement(container, '.advanced-cropper-rectangle-stencil__draggable-area');
 		const box = area.getBoundingClientRect();
-		dispatchMouse(area, 'mousedown', box.left + 10, box.top + 10);
-		dispatchMouse(window, 'mousemove', box.left + 40, box.top + 40);
-		dispatchMouse(window, 'mouseup', box.left + 40, box.top + 40);
+		drag(area, { x: box.left + 10, y: box.top + 10 }, { x: 30, y: 30 });
 		expect(cropper().getCoordinates()).toEqual(before);
 	});
 });
@@ -266,14 +209,10 @@ describe('transitions', () => {
 	it('animates the stencil to new coordinates and settles on them', async () => {
 		const onTransitionsEnd = vi.fn<(cropper: CropperRef) => void>();
 		const { cropper, container } = await mountCropper({ onTransitionsEnd });
-		const stencil = container.querySelector<HTMLElement>('.advanced-cropper-stencil-wrapper');
-		if (!stencil) {
-			throw new Error('missing stencil');
-		}
-
+		const stencil = getElement(container, '.advanced-cropper-stencil-wrapper', HTMLElement);
 		cropper().setCoordinates({ width: 100, height: 100, left: 0, top: 0 }, { transitions: true });
 		expect(cropper().getTransitions().active).toBe(true);
-		await waitFor(() => onTransitionsEnd.mock.calls.length > 0, { timeout: 2000 });
+		await waitFor(() => onTransitionsEnd.mock.calls.length > 0);
 		await nextFrame();
 		const coordinates = cropper().getStencilCoordinates();
 		expect(parseFloat(stencil.style.width)).toBeCloseTo(coordinates.width, 0);
@@ -288,11 +227,7 @@ describe('FixedCropper', () => {
 			stencilSize: { width: 200, height: 100 },
 			transitions: false
 		});
-		const stencil = container.querySelector<HTMLElement>('.advanced-cropper-stencil-wrapper');
-		if (!stencil) {
-			throw new Error('missing stencil');
-		}
-
+		const stencil = getElement(container, '.advanced-cropper-stencil-wrapper', HTMLElement);
 		expect(stencil.style.width).toBe('200px');
 		expect(stencil.style.height).toBe('100px');
 		const coordinates = cropper().getCoordinates();

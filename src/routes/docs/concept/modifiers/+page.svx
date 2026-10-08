@@ -179,9 +179,24 @@ Moving and scaling act on the visible area, so a scale `factor` above `1` zooms 
 The three steps are also exported on their own:
 
 ```ts
-function rotateImageAlgorithm(state: CropperState, settings: CoreSettings, rotate: number | Rotate): CropperState;
-function flipImageAlgorithm(state: CropperState, settings: CoreSettings, horizontal?: boolean, vertical?: boolean): CropperState;
-function transformImageAlgorithm(state: CropperState, settings: CoreSettings & ModifierSettings, transform: ImageTransform): CropperState;
+function rotateImageAlgorithm(
+	state: CropperState,
+	settings: CoreSettings,
+	rotate: number | Rotate
+): CropperState;
+
+function flipImageAlgorithm(
+	state: CropperState,
+	settings: CoreSettings,
+	horizontal?: boolean,
+	vertical?: boolean
+): CropperState;
+
+function transformImageAlgorithm(
+	state: CropperState,
+	settings: CoreSettings & ModifierSettings,
+	transform: ImageTransform
+): CropperState;
 ```
 
 ### reconcileState

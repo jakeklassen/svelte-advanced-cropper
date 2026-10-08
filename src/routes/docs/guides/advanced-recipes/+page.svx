@@ -52,8 +52,8 @@ import { FixedCropper, ImageRestriction } from 'svelte-advanced-cropper';
 	src="/images/photo.jpg"
 	stencilSize={{ width: 300, height: 300 }}
 	stencilProps={{
-		handlers: false,
-		lines: false,
+		handlers: {},
+		lines: {},
 		movable: false,
 		resizable: false
 	}}
@@ -95,14 +95,18 @@ The prop accepts either a plain object or a function. The function receives the 
 
 ```svelte
 <script lang="ts">
-	import { Cropper, type CoreSettings, type CropperState } from 'svelte-advanced-cropper';
+	import { Cropper, type CropperState } from 'svelte-advanced-cropper';
 
-	function defaultCoordinates(state: CropperState, settings: CoreSettings) {
+	// Called with the state and the settings; this one only needs the image size from the state.
+	// It centres a square half as wide as the image's shorter side.
+	function defaultCoordinates({ imageSize }: CropperState) {
+		const size = Math.min(imageSize.width, imageSize.height) / 2;
+
 		return {
-			left: 100,
-			top: 100,
-			width: 400,
-			height: 400
+			left: (imageSize.width - size) / 2,
+			top: (imageSize.height - size) / 2,
+			width: size,
+			height: size
 		};
 	}
 </script>
@@ -299,6 +303,7 @@ The smallest version:
 </script>
 
 <Cropper bind:this={cropper} src="/images/photo.jpg" />
+<button onclick={() => resize(300, 200, 0, 0)}>300 × 200 in the top-left corner</button>
 ```
 
 ## Different image restrictions

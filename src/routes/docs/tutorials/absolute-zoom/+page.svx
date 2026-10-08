@@ -56,8 +56,8 @@ The starting point is a minimal custom cropper built on `FixedCropper`. The sten
 <FixedCropper
 	bind:this={cropper}
 	stencilProps={{
-		handlers: false,
-		lines: false,
+		handlers: {},
+		lines: {},
 		movable: false,
 		resizable: false,
 		...stencilProps
@@ -159,17 +159,25 @@ Two functions are all you need.
 #### `getAbsoluteZoom`
 
 ```ts
-getAbsoluteZoom(state: CropperState | null, settings: CoreSettings, normalize = true): number
+function getAbsoluteZoom(
+	state: CropperState | null,
+	settings: CoreSettings,
+	normalize?: boolean
+): number;
 ```
 
 Returns the current zoom level as a number, taking every restriction into account. `0` is the minimum zoom (the largest visible area the settings allow) and `1` is the maximum zoom (the smallest allowed visible area).
 
-With `normalize` set to `true`, the result is clamped to the `[0, 1]` range.
+With `normalize` set to `true`, the default, the result is clamped to the `[0, 1]` range.
 
 #### `getZoomFactor`
 
 ```ts
-getZoomFactor(state: CropperState | null, settings: CoreSettings, absoluteZoom: number): number
+function getZoomFactor(
+	state: CropperState | null,
+	settings: CoreSettings,
+	absoluteZoom: number
+): number;
 ```
 
 Returns the relative scale that takes the image from the current zoom level to `absoluteZoom`. Put another way, it divides the current visible area size by the visible area size at the target level. A result above `1` means zooming in, below `1` zooming out, which is exactly the kind of value `cropper.zoomImage` accepts.

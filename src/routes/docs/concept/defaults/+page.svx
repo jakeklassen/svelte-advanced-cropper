@@ -137,7 +137,10 @@ function retrieveSizeRestrictions(settings: DefaultSettings): SizeRestrictions;
 ### defaultPositionRestrictions
 
 ```ts
-function defaultPositionRestrictions(state: CropperState, settings: CoreSettings & DefaultSettings): PositionRestrictions;
+function defaultPositionRestrictions(
+	state: CropperState,
+	settings: CoreSettings & DefaultSettings
+): PositionRestrictions;
 ```
 
 The image bounds, unless `imageRestriction` is missing or `none`, in which case there are no restrictions.
@@ -145,7 +148,10 @@ The image bounds, unless `imageRestriction` is missing or `none`, in which case 
 ### defaultAreaPositionRestrictions
 
 ```ts
-function defaultAreaPositionRestrictions(state: CropperState, settings: CoreSettings & DefaultSettings): AreaPositionRestrictions;
+function defaultAreaPositionRestrictions(
+	state: CropperState,
+	settings: CoreSettings & DefaultSettings
+): AreaPositionRestrictions;
 ```
 
 With `fillArea`, the image bounds. With `fitArea`, the image bounds too, except that when the visible area is larger than the image along one axis, it may overhang the image by the same amount on both sides, which keeps the image centred. Otherwise there are no restrictions.
@@ -153,7 +159,10 @@ With `fillArea`, the image bounds. With `fitArea`, the image bounds too, except 
 ### defaultAreaSizeRestrictions
 
 ```ts
-function defaultAreaSizeRestrictions(state: CropperState, settings: CoreSettings & DefaultSettings): AreaSizeRestrictions;
+function defaultAreaSizeRestrictions(
+	state: CropperState,
+	settings: CoreSettings & DefaultSettings
+): AreaSizeRestrictions;
 ```
 
 With `fillArea`, the visible area can't be larger than the image. With `fitArea`, it can't be larger than the image fitted to the boundary's aspect ratio. Otherwise there are no restrictions.
@@ -163,11 +172,25 @@ With `fillArea`, the visible area can't be larger than the image. With `fitArea`
 To narrow a default instead of replacing it, wrap your value with one of these. Each returns a settings function that merges your restrictions with the default ones:
 
 ```ts
-// Each accepts a value or a (state, settings) => value function.
-function withDefaultSizeRestrictions(sizeRestrictions);
-function withDefaultPositionRestrictions(positionRestrictions);
-function withDefaultAreaSizeRestrictions(areaSizeRestrictions);
-function withDefaultAreaPositionRestrictions(areaPositionRestrictions);
+// Shorthands for this page: a value, or a function that computes it.
+type ValueOrFunction<T> = T | ((state: CropperState, settings: CoreSettings) => T);
+type SettingsFunction<T> = (state: CropperState, settings: CoreSettings & DefaultSettings) => T;
+
+function withDefaultSizeRestrictions(
+	sizeRestrictions: ValueOrFunction<SizeRestrictions>
+): SettingsFunction<SizeRestrictions>;
+
+function withDefaultPositionRestrictions(
+	positionRestrictions: ValueOrFunction<PositionRestrictions>
+): SettingsFunction<PositionRestrictions>;
+
+function withDefaultAreaSizeRestrictions(
+	areaSizeRestrictions: ValueOrFunction<AreaSizeRestrictions>
+): SettingsFunction<AreaSizeRestrictions>;
+
+function withDefaultAreaPositionRestrictions(
+	areaPositionRestrictions: ValueOrFunction<AreaPositionRestrictions>
+): SettingsFunction<AreaPositionRestrictions>;
 ```
 
 For example, to keep the crop inside the image and also out of its top 100 pixels:

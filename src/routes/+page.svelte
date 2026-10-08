@@ -25,6 +25,11 @@
 			text: 'Fix the aspect ratio or allow a range, set minimum and maximum sizes, and choose how the image is kept within the stencil or the visible area.'
 		}
 	];
+
+	const otherVersions = [
+		{ name: 'React', url: 'https://advanced-cropper.github.io/react-advanced-cropper/' },
+		{ name: 'Vue', url: 'https://advanced-cropper.github.io/vue-advanced-cropper/' }
+	];
 </script>
 
 <svelte:head>
@@ -45,12 +50,9 @@
 			</p>
 			<nav class="family" aria-label="Other versions">
 				<span class="family-item family-item--active" aria-current="page">Svelte</span>
-				<a class="family-item" href="https://advanced-cropper.github.io/react-advanced-cropper/"
-					>React</a
-				>
-				<a class="family-item" href="https://advanced-cropper.github.io/vue-advanced-cropper/"
-					>Vue</a
-				>
+				{#each otherVersions as version (version.name)}
+					<a class="family-item" href={version.url}>{version.name}</a>
+				{/each}
 			</nav>
 			<div class="showcase">
 				<CroppersWizard />
@@ -99,9 +101,8 @@
 		</div>
 		<div class="container">
 			<p class="section-text">
-				The documentation has many more examples for everyday tasks and unusual ones alike, from the <a
-					href={href('/docs/guides/recipes')}>recipes</a
-				>
+				The documentation has many more examples for everyday tasks and unusual ones alike, from the
+				<a href={href('/docs/guides/recipes')}>recipes</a>
 				to the
 				<a href={href('/docs/guides/advanced-recipes')}>advanced recipes</a>.
 			</p>

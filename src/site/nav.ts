@@ -96,3 +96,11 @@ export const nav: NavEntry[] = [
 
 /** Every docs page in reading order, for prev/next links. */
 export const pages: NavLink[] = nav.flatMap((entry) => (isGroup(entry) ? entry.items : [entry]));
+
+/**
+ * Whether the browser's `pathname` is the docs page at `path`. The pathname may carry the deploy
+ * base path and a trailing slash, so only its end is compared.
+ */
+export function isCurrentPage(pathname: string, path: string): boolean {
+	return pathname.replace(/\/$/, '').endsWith(path);
+}
