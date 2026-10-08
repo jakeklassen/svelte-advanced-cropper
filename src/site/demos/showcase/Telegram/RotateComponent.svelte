@@ -110,6 +110,9 @@
 		dragging = false;
 		onBlur?.();
 	}
+
+	// If the dial is destroyed mid-drag, don't leave the grabbing cursor on the page.
+	$effect(() => () => document.body.classList.remove('telegram-rotate-dragging'));
 </script>
 
 <div class={['telegram-rotate-component', className]}>

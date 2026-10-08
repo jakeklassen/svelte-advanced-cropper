@@ -5,7 +5,9 @@ Loads an image for a cropper and tracks its loading status. It reads the EXIF or
 ## Signature
 
 ```ts
-function useCropperImage(options: () => CropperImageHookSettings): CropperImageHook;
+function useCropperImage(
+	options: CropperImageHookSettings | (() => CropperImageHookSettings)
+): CropperImageHook;
 
 interface CropperImageHookSettings {
 	src?: string | null;

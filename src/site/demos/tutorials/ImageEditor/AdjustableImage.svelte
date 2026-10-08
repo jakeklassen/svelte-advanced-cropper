@@ -28,16 +28,20 @@
 		ref = $bindable(null)
 	}: Props = $props();
 
-	let source: HTMLImageElement | null = $state(null);
+	let source: HTMLImageElement | HTMLCanvasElement | null = $state(null);
+	// Bumped when the source image finishes loading, so the effect redraws then too.
+	let loads = $state(0);
 
-	function draw() {
-		if (ref && source?.complete) {
-			drawAdjustedImage(ref, source, { brightness, contrast, saturation, hue });
+	// Redraw whenever the image loads or an adjustment changes. The adjustments are read
+	// before the readiness check so they are always tracked, even if the first run
+	// happens before the image has loaded.
+	$effect(() => {
+		const adjustments = { brightness, contrast, saturation, hue };
+		void loads;
+		if (ref && source instanceof HTMLImageElement && source.complete) {
+			drawAdjustedImage(ref, source, adjustments);
 		}
-	}
-
-	// Redraw when the image or an adjustment changes; `onload` covers the first draw.
-	$effect(draw);
+	});
 </script>
 
 {#key src}
@@ -47,7 +51,7 @@
 		{src}
 		{crossOrigin}
 		class="adjustable-image-source"
-		onload={draw}
+		onload={() => loads++}
 	/>
 {/key}
 

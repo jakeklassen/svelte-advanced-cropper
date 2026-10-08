@@ -44,10 +44,20 @@
 		};
 	}
 
+	// Object URLs for uploaded files: revoke each one when it is replaced or the editor
+	// is destroyed, so the file can be garbage-collected.
+	let uploadedUrl: string | undefined;
+
 	function onUpload(url: string) {
 		onReset();
+		if (uploadedUrl) URL.revokeObjectURL(uploadedUrl);
+		uploadedUrl = url;
 		src = url;
 	}
+
+	$effect(() => () => {
+		if (uploadedUrl) URL.revokeObjectURL(uploadedUrl);
+	});
 
 	function onDownload() {
 		const canvas = cropper?.getCanvas();

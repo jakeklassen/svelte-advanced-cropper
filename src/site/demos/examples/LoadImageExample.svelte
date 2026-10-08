@@ -12,20 +12,24 @@
 	let input: HTMLInputElement | undefined = $state();
 	let image: Image | null = $state(null);
 
+	// Each pick or clear starts a new request; a read that finishes after a newer one
+	// (or after the demo is destroyed) is ignored.
+	let request = 0;
+
 	function onLoadImage(event: Event & { currentTarget: HTMLInputElement }) {
 		const file = event.currentTarget.files?.[0];
 
 		if (file) {
-			// 1. An object URL points at the file without copying it into memory as a string.
-			const src = URL.createObjectURL(file);
-
-			// 2. Detect the real MIME type from the file's first bytes, so the result is
+			const id = ++request;
+			// Detect the real MIME type from the file's first bytes, so the result is
 			// exported in the same format. `file.type` alone comes from the extension and
 			// can be wrong, so it is only the fallback.
 			const reader = new FileReader();
 			reader.addEventListener('load', () => {
+				if (id !== request) return;
 				image = {
-					src,
+					// An object URL points at the file without copying it into memory as a string.
+					src: URL.createObjectURL(file),
 					type: getMimeType(reader.result, file.type)
 				};
 			});
@@ -34,6 +38,11 @@
 
 		// Reset the input so that picking the same file again still fires `change`.
 		event.currentTarget.value = '';
+	}
+
+	function clear() {
+		request++;
+		image = null;
 	}
 
 	function download(blob: Blob, name: string) {
@@ -58,6 +67,10 @@
 		}
 	}
 
+	$effect(() => () => {
+		request++;
+	});
+
 	$effect(() => {
 		const src = image?.src;
 		// Revoke the previous object URL when the image changes, so the browser can free the file.
@@ -79,7 +92,7 @@
 			type="button"
 			class="load-image-example__reset-button"
 			title="Reset Image"
-			onclick={() => (image = null)}
+			onclick={clear}
 		>
 			<X size={22} />
 		</button>

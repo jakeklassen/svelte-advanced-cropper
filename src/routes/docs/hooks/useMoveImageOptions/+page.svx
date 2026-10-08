@@ -58,7 +58,9 @@ A custom background wrapper that maps the options onto `TransformableImage`, as 
 		rotateImage = false,
 		children,
 		class: className,
-		style
+		style,
+		timeout,
+		disabled
 	}: CropperBackgroundWrapperProps = $props();
 
 	const moveOptions = $derived(useMoveImageOptions(moveImage));
@@ -76,7 +78,9 @@ A custom background wrapper that maps the options onto `TransformableImage`, as 
 	touchScale={scaleOptions.touch}
 	wheelScale={scaleOptions.wheel}
 	touchRotate={rotateOptions.touch}
-	disabled={cropper.getTransitions().active}
+	disabled={cropper.getTransitions().active || disabled}
+	preventDefault={!disabled}
+	{timeout}
 >
 	{@render children?.()}
 </TransformableImage>

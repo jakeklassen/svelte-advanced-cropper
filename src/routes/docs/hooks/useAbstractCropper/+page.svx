@@ -102,7 +102,7 @@ A minimal cropper assembled from the service components:
 
 <Admonition type="note">
 
-`refs.image` is typed as any `HTMLElement`, while `CropperBackgroundImage` and `CropperSource` bind an `HTMLImageElement`. The [function binding](https://svelte.dev/docs/svelte/bind#Function-bindings) above only writes the element into `refs.image`, which satisfies TypeScript.
+`refs.image` is typed `HTMLImageElement | HTMLCanvasElement | null`, the same as the `ref` prop of `CropperBackgroundImage` and `CropperSource`, so `bind:ref={refs.image}` type-checks. A custom background that draws into a canvas can bind its canvas the same way.
 
 </Admonition>
 
