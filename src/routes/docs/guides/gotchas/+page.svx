@@ -1,5 +1,6 @@
 <script>
 	import Admonition from '#site/components/Admonition.svelte';
+	import CodeBlock from '#site/components/CodeBlock.svelte';
 	import Example from '#site/components/Example.svelte';
 	import FailedLoadExample from '#site/demos/gotchas/FailedLoadExample.svelte';
 	import failedLoadSource from '#site/demos/gotchas/FailedLoadExample.svelte?highlight';
@@ -7,6 +8,9 @@
 	import refitSource from '#site/demos/gotchas/RefitExample.svelte?highlight';
 	import DialogExample from '#site/demos/gotchas/DialogExample.svelte';
 	import dialogSource from '#site/demos/gotchas/DialogExample.svelte?highlight';
+	import HeicUploadExample from '#site/demos/gotchas/HeicUploadExample.svelte';
+	import heicUploadSource from '#site/demos/gotchas/HeicUploadExample.svelte?highlight';
+	import croppablePhotoSource from '#site/demos/gotchas/croppablePhoto.ts?highlight';
 	import ScaledContainerExample from '#site/demos/gotchas/ScaledContainerExample.svelte';
 	import scaledContainerSource from '#site/demos/gotchas/ScaledContainerExample.svelte?highlight';
 </script>
@@ -38,6 +42,24 @@ The demos elsewhere in these docs run under ideal conditions: a known photo, a f
 <Example source={failedLoadSource} title="FailedLoadExample">
 	<FailedLoadExample />
 </Example>
+
+## iPhone photos (HEIC)
+
+**Symptom:** a photo from an iPhone uploads fine but never shows. On Chrome, Firefox and Edge the cropper stays empty, and only `onError` tells you anything happened.
+
+**Cause:** iPhones save photos as HEIC by default. Safari decodes HEIC, but Chrome, Firefox and Edge don't, mostly because of the patent licensing around the HEVC codec inside it. The cropper hands the file to the browser, the browser can't decode it, and the cropper reports `onError`.
+
+**Fix:** convert HEIC to JPEG in the browser before cropping, but only when the browser can't decode it itself. [heic-to](https://github.com/hoppergee/heic-to) does the conversion with a current build of libheif, in a web worker. The helper below checks the file's first bytes (picked files don't always carry a name or MIME type), tries the browser's own decoder first so Safari users download nothing extra, and only then loads heic-to:
+
+<CodeBlock html={croppablePhotoSource.html} code={croppablePhotoSource.code} />
+
+Use the URL it returns as the cropper's `src`, show a message while it works, and keep handling `onError` for photos that still can't be opened. Try it with an iPhone photo:
+
+<Example source={heicUploadSource} title="HeicUploadExample">
+	<HeicUploadExample />
+</Example>
+
+svelte-advanced-cropper doesn't convert HEIC itself. heic-to is about 780 KB compressed and LGPL-licensed, which would be a heavy cost for every app using the cropper; with the dynamic import above, only someone who uploads a HEIC photo in a browser that can't decode it downloads it. Avoid `heic2any`, which many guides still recommend: it hasn't been updated since 2023 and fails on the 24 MP photos recent iPhones take by default.
 
 ## Keeping your opening view after a resize
 

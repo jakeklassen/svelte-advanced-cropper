@@ -13,6 +13,7 @@
 	import DefaultCropper from '../croppers/DefaultCropper/DefaultCropper.svelte';
 	import FixedCropper from '../croppers/FixedCropper/FixedCropper.svelte';
 	import TelegramCropper from '../showcase/Telegram/TelegramCropper.svelte';
+	import { croppablePhotoUrl } from '../gotchas/croppablePhoto.ts';
 	import CroppersWizardInfo from './CroppersWizardInfo.svelte';
 	import CroppersWizardSettings from './CroppersWizardSettings.svelte';
 	import type { CropperDescription, CropperKey, CropperSettings } from './wizard';
@@ -91,6 +92,9 @@
 
 	let src = $state(images[0].src);
 	let fileInput: HTMLInputElement | undefined = $state();
+	// Shown over the cropper while an upload is prepared, or when a photo can't be opened.
+	let photoStatus: 'ok' | 'preparing' | 'error' = $state('ok');
+	let latestPick = 0;
 
 	// Free an uploaded image's object URL once it is replaced (a no-op for the photos).
 	$effect(() => {
@@ -126,15 +130,41 @@
 		void goto(`#${key}`, { shallow: true, replace: true });
 	}
 
-	function loadImage(event: Event & { currentTarget: HTMLInputElement }) {
-		const file = event.currentTarget.files?.[0];
-		if (file) {
-			src = URL.createObjectURL(file);
+	function showPhoto(next: string) {
+		src = next;
+		photoStatus = 'ok';
+	}
+
+	// HEIC photos (from iPhones) are converted where the browser can't decode them.
+	async function loadImage(event: Event & { currentTarget: HTMLInputElement }) {
+		const input = event.currentTarget;
+		const file = input.files?.[0];
+		// Reset the input so that picking the same file again still fires `change`.
+		input.value = '';
+		if (!file) {
+			return;
 		}
 
-		// Reset the input so that picking the same file again still fires `change`.
-		event.currentTarget.value = '';
+		// A newer pick wins if two uploads overlap.
+		const id = ++latestPick;
+		photoStatus = 'preparing';
+		try {
+			const url = await croppablePhotoUrl(file);
+			if (id !== latestPick) {
+				URL.revokeObjectURL(url);
+
+				return;
+			}
+
+			showPhoto(url);
+		} catch {
+			if (id === latestPick) {
+				photoStatus = 'error';
+			}
+		}
 	}
+
+	const onError = () => (photoStatus = 'error');
 
 	function openSettings() {
 		draft = { ...settings };
@@ -172,6 +202,7 @@
 			<TelegramCropper
 				class="croppers-wizard__cropper"
 				{src}
+				{onError}
 				minWidth={settings.minWidth}
 				minHeight={settings.minHeight}
 				maxWidth={settings.maxWidth}
@@ -183,6 +214,7 @@
 			<DefaultCropper
 				wrapperClassName="croppers-wizard__cropper"
 				{src}
+				{onError}
 				minWidth={settings.minWidth}
 				minHeight={settings.minHeight}
 				maxWidth={settings.maxWidth}
@@ -205,12 +237,20 @@
 			<FixedCropper
 				class="croppers-wizard__cropper"
 				{src}
+				{onError}
 				minWidth={settings.minWidth}
 				minHeight={settings.minHeight}
 				maxWidth={settings.maxWidth}
 				maxHeight={settings.maxHeight}
 				stencilType={settings.stencilType}
 			/>
+		{/if}
+		{#if photoStatus !== 'ok'}
+			<p class="photo-status" role="status">
+				{photoStatus === 'preparing'
+					? 'Preparing the photo…'
+					: "This photo can't be opened. Try another one."}
+			</p>
 		{/if}
 		<button
 			type="button"
@@ -255,7 +295,7 @@
 				style:background-image="url({item.preview})"
 				aria-label="Photo {index + 1}"
 				aria-pressed={item.src === src}
-				onclick={() => (src = item.src)}
+				onclick={() => showPhoto(item.src)}
 			></button>
 		{/each}
 		<button
@@ -270,7 +310,7 @@
 		<input
 			class="file-input"
 			type="file"
-			accept="image/*"
+			accept="image/*,.heic,.heif"
 			tabindex="-1"
 			bind:this={fileInput}
 			onchange={loadImage}
@@ -392,6 +432,21 @@
 	.settings-button,
 	.close-button {
 		right: 10px;
+	}
+	.photo-status {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		z-index: 1;
+		transform: translate(-50%, -50%);
+		max-width: 80%;
+		margin: 0;
+		padding: 10px 16px;
+		border-radius: 6px;
+		background: rgba(0, 0, 0, 0.75);
+		color: white;
+		font-size: 14px;
+		text-align: center;
 	}
 	.overlay {
 		position: absolute;
