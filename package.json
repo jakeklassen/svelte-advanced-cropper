@@ -49,7 +49,7 @@
 		"prepare": "svelte-kit sync || echo ''",
 		"prepack": "svelte-kit sync && svelte-package && node scripts/build-styles.ts && publint",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --config ./vite.config.ts",
-		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --config ./vite.config.ts --watch",
 		"lint": "oxlint",
 		"lint:fix": "oxlint --fix",
 		"format": "oxfmt",
@@ -57,12 +57,16 @@
 		"test": "pnpm test:unit --run && pnpm test:e2e",
 		"test:unit": "vitest",
 		"test:e2e": "playwright test",
-		"test:e2e:install": "playwright install chromium"
+		"test:e2e:install": "playwright install chromium",
+		"version-packages": "changeset version && oxfmt CHANGELOG.md package.json",
+		"release": "changeset publish"
 	},
 	"dependencies": {
 		"advanced-cropper": "~0.17.1"
 	},
 	"devDependencies": {
+		"@changesets/changelog-github": "^1.0.1",
+		"@changesets/cli": "^3.0.3",
 		"@lucide/svelte": "^1.52.0",
 		"@playwright/test": "^1.60.0",
 		"@stylistic/eslint-plugin": "^5.10.0",
