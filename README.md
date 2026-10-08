@@ -105,10 +105,10 @@ oxlint checks the `<script>` blocks of `.svelte` files. Svelte compiler and temp
 Releases use [Changesets](https://github.com/changesets/changesets) and publish to npm from CI.
 
 1. With every change users will notice, run `pnpm changeset`, pick the bump (patch, minor or major), write the changelog line, and commit the generated `.changeset/*.md` file.
-2. On `main`, the `release` job in `.github/workflows/ci.yml` runs after all checks pass. It keeps a "Version Packages" pull request open that bumps `package.json` and writes `CHANGELOG.md`.
+2. On every push to `main`, `.github/workflows/release.yml` runs the CI checks (it calls `ci.yml`) and then the release job. It keeps a "Version Packages" pull request open that bumps `package.json` and writes `CHANGELOG.md`.
 3. Merging that pull request publishes the new version to npm and creates the git tag and GitHub release.
 
-Publishing uses [npm trusted publishing](https://docs.npmjs.com/trusted-publishers): CI proves its identity to npm with a short-lived OIDC token, so no npm token is stored in the repository, and each release gets a provenance attestation. The trusted publisher is configured on npmjs.com for this repository and the `ci.yml` workflow.
+Publishing uses [npm trusted publishing](https://docs.npmjs.com/trusted-publishers): CI proves its identity to npm with a short-lived OIDC token, so no npm token is stored in the repository, and each release gets a provenance attestation. The trusted publisher is configured on npmjs.com for this repository and the `release.yml` workflow, so no other workflow can publish.
 
 Pull requests opened by CI don't trigger CI themselves (a GitHub rule for `GITHUB_TOKEN`), so the "Version Packages" pull request shows no checks. Its changes are only the version bump and changelog, and the release job runs the full checks again after the merge.
 

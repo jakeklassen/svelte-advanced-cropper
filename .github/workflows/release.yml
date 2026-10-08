@@ -1,0 +1,49 @@
+name: Release
+
+# The workflow npm trusts for publishing (npm trusted publishing is configured for
+# this file name). It runs the CI checks first and publishes only if they pass.
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  # Never cancel a run: it may be publishing.
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    uses: ./.github/workflows/ci.yml
+
+  # With pending changesets, opens or updates the "Version Packages" pull request. Once
+  # that pull request is merged (no changesets left), publishes the new version to npm
+  # and creates the git tag and GitHub release.
+  release:
+    needs: checks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # push the version branch, the git tag and the GitHub release
+      pull-requests: write # open the "Version Packages" pull request
+      id-token: write # npm trusted publishing (OIDC): no npm token is stored anywhere
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: jdx/mise-action@v5
+        with:
+          cache: true
+
+      - run: pnpm install --frozen-lockfile
+
+      - uses: changesets/action@v2
+        with:
+          version: pnpm version-packages
+          publish: pnpm release
+          title: Version Packages
+          commit: Version Packages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Trusted publishing from a public repository; attach a provenance attestation.
+          NPM_CONFIG_PROVENANCE: 'true'

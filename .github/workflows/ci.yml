@@ -1,14 +1,15 @@
 name: CI
 
+# Pull requests run this directly. Pushes to main run it through release.yml, which
+# calls it and publishes only after it passes.
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
+  workflow_call:
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
-  # Never cancel a run on main: its release job may be publishing.
+  group: ci-${{ github.ref }}
+  # A newer push to a pull request replaces the run; runs called by release.yml finish.
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
@@ -41,35 +42,3 @@ jobs:
           STRICT_LINKS: '1'
 
       - run: pnpm test:e2e
-
-  # Runs only on main, after every check above has passed. With pending changesets it
-  # opens or updates the "Version Packages" pull request; once that pull request is
-  # merged (no changesets left), it publishes the new version to npm and creates the
-  # GitHub release.
-  release:
-    needs: check
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write # push the version branch, the git tag and the GitHub release
-      pull-requests: write # open the "Version Packages" pull request
-      id-token: write # npm trusted publishing (OIDC): no npm token is stored anywhere
-    steps:
-      - uses: actions/checkout@v7
-
-      - uses: jdx/mise-action@v5
-        with:
-          cache: true
-
-      - run: pnpm install --frozen-lockfile
-
-      - uses: changesets/action@v2
-        with:
-          version: pnpm version-packages
-          publish: pnpm release
-          title: Version Packages
-          commit: Version Packages
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Trusted publishing from a public repository; attach a provenance attestation.
-          NPM_CONFIG_PROVENANCE: 'true'
