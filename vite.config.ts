@@ -2,7 +2,7 @@ import { defineConfig } from 'vitest/config';
 import { playwright } from '@vitest/browser-playwright';
 import adapter from '@sveltejs/adapter-static';
 import { sveltekit } from '@sveltejs/kit/vite';
-import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
+import { svelte, vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import { mdsvex } from 'mdsvex';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
@@ -55,6 +55,14 @@ function highlightImports(): Plugin {
 	};
 }
 
+// The library's tests need only Svelte, not the docs site. Without SvelteKit the test
+// server starts faster, and a request for a missing file gets a plain 404 instead of booting
+// the site's server renderer (about 10 seconds the first time).
+const libraryTestConfig = {
+	plugins: [svelte({ compilerOptions: { runes: true } })],
+	css: { preprocessorOptions: { scss: { silenceDeprecations: coreScssDeprecations } } }
+};
+
 export default defineConfig({
 	resolve: {
 		// Demos import the package by name, so the source shown in the docs is what users write.
@@ -100,7 +108,9 @@ export default defineConfig({
 		expect: { requireAssertions: true },
 		projects: [
 			{
-				extends: './vite.config.ts',
+				// Inline projects inherit this file (SvelteKit and all) unless told not to.
+				extends: false,
+				...libraryTestConfig,
 				test: {
 					name: 'client',
 					browser: {
@@ -113,7 +123,9 @@ export default defineConfig({
 			},
 
 			{
-				extends: './vite.config.ts',
+				// Inline projects inherit this file (SvelteKit and all) unless told not to.
+				extends: false,
+				...libraryTestConfig,
 				test: {
 					name: 'server',
 					environment: 'node',
@@ -125,7 +137,9 @@ export default defineConfig({
 			// Memory checks read browser-wide counters (heap, DOM nodes, listeners), so they run
 			// alone, after the other projects have finished.
 			{
-				extends: './vite.config.ts',
+				// Inline projects inherit this file (SvelteKit and all) unless told not to.
+				extends: false,
+				...libraryTestConfig,
 				test: {
 					name: 'leak',
 					browser: {

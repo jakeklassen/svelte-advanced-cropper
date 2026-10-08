@@ -43,7 +43,7 @@ Tool versions are pinned in `mise.toml`. If `node` or `pnpm` on PATH don't match
 - `pnpm format` / `pnpm format:check`: oxfmt (`.oxfmtrc.json`)
 - `pnpm test`: unit tests once, then e2e
 
-Vitest runs three projects (`vite.config.ts`). **client** runs `src/**/*.svelte.test.ts` in headless Chromium: library tests in `src/tests/` with `vitest-browser-svelte` and small harness components. **server** runs other `src/**/*.test.ts` in Node, including an SSR render test. **leak** runs `src/**/*.leak.test.ts` in Chromium after the other two have finished (`sequence.groupOrder`): it mounts and unmounts a cropper hundreds of times and checks heap, DOM node and listener counts through Chrome's DevTools protocol (`cdp()` from `vitest/browser`), which are browser-wide and would be skewed by tests running alongside. `expect.requireAssertions` is on.
+Vitest runs three projects (`vite.config.ts`). They use only the Svelte plugin (`extends: false`), not SvelteKit, so the test server is plain Vite: faster to start, and a missing file is an instant 404. **client** runs `src/**/*.svelte.test.ts` in headless Chromium: library tests in `src/tests/` with `vitest-browser-svelte` and small harness components. **server** runs other `src/**/*.test.ts` in Node, including an SSR render test. **leak** runs `src/**/*.leak.test.ts` in Chromium after the other two have finished (`sequence.groupOrder`): it mounts and unmounts a cropper hundreds of times and checks heap, DOM node and listener counts through Chrome's DevTools protocol (`cdp()` from `vitest/browser`), which are browser-wide and would be skewed by tests running alongside. `expect.requireAssertions` is on.
 
 ```sh
 pnpm test:unit --run src/tests/Cropper.svelte.test.ts

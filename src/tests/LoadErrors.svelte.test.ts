@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import type { CropperRef } from '#lib';
 import Harness from './Harness.svelte';
@@ -30,12 +30,6 @@ async function mountFailing(src: string, checkOrientation: boolean) {
 }
 
 describe('failed image loads', () => {
-	// The test server answers its first unknown path only after SvelteKit's dev renderer
-	// starts, about 10 seconds; later 404s take milliseconds. Pay that once, up front.
-	beforeAll(async () => {
-		await fetch('/does-not-exist.jpg');
-	}, 30_000);
-
 	for (const checkOrientation of [true, false]) {
 		describe(`checkOrientation=${checkOrientation}`, () => {
 			for (const [name, source] of Object.entries(failingSources)) {
