@@ -1,0 +1,110 @@
+<script lang="ts">
+	import { untrack } from 'svelte';
+	import {
+		CircleStencil,
+		Cropper,
+		RectangleStencil,
+		type StencilComponent
+	} from 'svelte-advanced-cropper';
+	import { Circle, Grid3x3, Square } from '@lucide/svelte';
+	import SquareButton from '#site/demos/shared/SquareButton.svelte';
+	import VerticalButtons from '#site/demos/shared/VerticalButtons.svelte';
+	import { image } from '#site/paths.ts';
+
+	interface Props {
+		theme: 'bubble' | 'classic' | 'compact' | 'corners' | 'default';
+		grid?: boolean;
+	}
+
+	let { theme, grid = true }: Props = $props();
+
+	const images = {
+		bubble: 'photo-1595435934249-5df7ed86e1c0.jpg',
+		classic: 'photo-1520927640400-f9e83b1bc43e.jpg',
+		compact: 'pexels-photo-573238.jpeg',
+		corners: 'adam-flockemann-9j4xyaSQhUQ-unsplash.jpg',
+		default: 'photo-1583149577728-9ab503747013.jpg'
+	};
+
+	const src = $derived(image(images[theme]));
+
+	let stencilComponent: StencilComponent = $state.raw(RectangleStencil);
+	// The `grid` prop only sets the initial state; the button toggles it afterwards.
+	let stencilGrid = $state(untrack(() => grid));
+</script>
+
+<div class={['theme-example', `theme-example--${theme}`]}>
+	<Cropper
+		class="theme-example__cropper"
+		{src}
+		{stencilComponent}
+		stencilProps={{ grid: stencilGrid }}
+	/>
+	<VerticalButtons>
+		<SquareButton
+			title="Set Rectangle Stencil"
+			onclick={() => (stencilComponent = RectangleStencil)}
+		>
+			<Square size={20} />
+		</SquareButton>
+		<SquareButton title="Set Circle Stencil" onclick={() => (stencilComponent = CircleStencil)}>
+			<Circle size={20} />
+		</SquareButton>
+		<SquareButton
+			title={stencilGrid ? 'Disable Grid' : 'Enable Grid'}
+			class={['theme-example__button', !stencilGrid && 'theme-example__button--inactive']}
+			onclick={() => (stencilGrid = !stencilGrid)}
+		>
+			<Grid3x3 size={20} />
+		</SquareButton>
+	</VerticalButtons>
+	<div class="theme-example__theme">Theme: {theme}</div>
+</div>
+
+<style lang="scss">
+	.theme-example {
+		position: relative;
+		min-height: 200px;
+		border: solid 1px #eee;
+		user-select: none;
+
+		:global(.theme-example__cropper) {
+			max-height: 500px;
+		}
+
+		:global(.theme-example__button) {
+			transition: color 0.5s;
+		}
+
+		:global(.theme-example__button--inactive) {
+			color: #888;
+		}
+	}
+
+	// Each theme is compiled under its own wrapper class, so several themes can live on one
+	// page. The default theme is already loaded globally by the site.
+	.theme-example--compact :global {
+		@import 'advanced-cropper/themes/compact.scss';
+	}
+
+	.theme-example--classic :global {
+		@import 'advanced-cropper/themes/classic.scss';
+	}
+
+	.theme-example--bubble :global {
+		@import 'advanced-cropper/themes/bubble.scss';
+	}
+
+	.theme-example--corners :global {
+		@import 'advanced-cropper/themes/corners.scss';
+	}
+
+	.theme-example__theme {
+		position: absolute;
+		right: 10px;
+		bottom: 10px;
+		font-size: 10px;
+		color: white;
+		opacity: 0.5;
+	}
+</style>

@@ -43,13 +43,21 @@ export function rehypeBasePath(base: string) {
 	};
 }
 
-/** Gives h2/h3 headings an id and a self-link, for anchors and the table of contents. */
+/**
+ * Gives h2/h3 headings a unique id, for anchors and the table of contents. Repeated
+ * headings get GitHub-style suffixes: `implementation`, `implementation-1`, ...
+ */
 export function rehypeHeadingIds() {
 	return (tree: HastNode) => {
+		const seen = new Map<string, number>();
 		walk(tree, (node) => {
 			if (node.type === 'element' && (node.tagName === 'h2' || node.tagName === 'h3')) {
 				node.properties ??= {};
-				if (!node.properties.id) node.properties.id = slugify(textOf(node));
+				if (node.properties.id) return;
+				const slug = slugify(textOf(node));
+				const count = seen.get(slug) ?? 0;
+				seen.set(slug, count + 1);
+				node.properties.id = count ? `${slug}-${count}` : slug;
 			}
 		});
 	};

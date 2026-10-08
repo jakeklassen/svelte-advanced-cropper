@@ -34,7 +34,7 @@
 	<nav class="toc" aria-label="On this page">
 		<div class="toc__title">On this page</div>
 		<ul>
-			{#each headings as heading (heading.id)}
+			{#each headings as heading, index (index)}
 				<li class="toc__level-{heading.level}"><a href="#{heading.id}">{heading.text}</a></li>
 			{/each}
 		</ul>

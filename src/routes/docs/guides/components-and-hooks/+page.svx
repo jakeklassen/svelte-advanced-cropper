@@ -1,0 +1,93 @@
+<script>
+	import Admonition from '#site/components/Admonition.svelte';
+	import ComponentsHierarchy from '#site/demos/schemes/ComponentsHierarchy.svelte';
+	import StencilHierarchy from '#site/demos/schemes/StencilHierarchy.svelte';
+</script>
+
+# Components / Hooks
+
+## Cropper
+
+For most apps the `Cropper` component, used as in the [recipes](/docs/guides/recipes), is all you need. This guide is for when you want to know what happens inside it: to replace one of its parts, or to assemble a cropper of your own from the same pieces.
+
+The cropper is a stack of small components and hooks around one piece of state and the functions (modifiers) that change it. Here is how the default `Cropper` is put together:
+
+<ComponentsHierarchy />
+
+`Cropper` itself only splits its props into settings and everything else, then renders the exported `AbstractCropper`, which calls the hooks and lays out the components above. Items marked as replaceable can be swapped through the prop shown next to them.
+
+Each piece has one job. They fall into four groups.
+
+### Work with the cropper state
+
+#### `useAbstractCropper`
+
+[`useAbstractCropper`](/docs/hooks/useAbstractCropper) ties everything together. It creates the cropper instance, loads the image, stretches the boundary to fit it, resets the state when the image changes, refreshes on window resize and fires `onReady`, `onUpdate` and `onError`.
+
+It returns `{ cropper, refs, image }`. `cropper` is the same object that `bind:this` gives you on a `Cropper` and that callbacks receive. The fields of `refs` (`boundary`, `canvas` and `image`) must be bound to the matching components, with `bind:this` or `bind:ref`. Call it during component initialisation and pass a getter, `useAbstractCropper(() => props)`, so it always reads the current props.
+
+#### `useCropperInstance`
+
+[`useCropperInstance`](/docs/hooks/useCropperInstance) is the heart of the cropper. It creates a `CropperInstance`, the class that holds the state and implements every operation on it (moving and resizing the stencil, transforming the image, transitions and so on). The instance keeps its data in Svelte state, so `getState()`, `getTransitions()` and the other getters are reactive.
+
+The hook also fills in the default settings for anything you didn't pass.
+
+### Work with the cropper image
+
+#### `useCropperImage`
+
+[`useCropperImage`](/docs/hooks/useCropperImage) loads an image from `src` and turns it into a `CropperImage`, including the rotation and flip stored in its EXIF orientation. It also tracks the loading state, so a cropper can show a spinner or fade an image out before the next one arrives. It takes a getter too: `useCropperImage(() => ({ src }))`.
+
+### Interact with or visualize the cropper state
+
+#### `CropperWrapper`
+
+[`CropperWrapper`](/docs/components/CropperWrapper) is the outermost element. It fades the content in once the image has loaded, and a custom wrapper is the place to add your own content around the cropper: loaders, buttons, navigation.
+
+#### `CropperBackgroundWrapper`
+
+[`CropperBackgroundWrapper`](/docs/components/CropperBackgroundWrapper) wraps the image and the stencil, and turns mouse, wheel and touch gestures into image moves, zooms and rotations (through [`TransformableImage`](/docs/components/TransformableImage)).
+
+#### `CropperBackgroundImage`
+
+[`CropperBackgroundImage`](/docs/components/CropperBackgroundImage) displays the image. It applies the current transforms and their transitions for you, so prefer it, or a component built the same way, over a plain `<img>`.
+
+#### Stencil
+
+The stencil shows the selected area and lets the user move and resize it. Any component that follows the contract described [below](#stencil) can be a stencil.
+
+### Service
+
+#### `StretchableBoundary`
+
+[`StretchableBoundary`](/docs/components/StretchableBoundary) is a helper that sizes itself to the image within the space available, which makes responsive croppers easy.
+
+#### `CropperCanvas`
+
+[`CropperCanvas`](/docs/components/CropperCanvas) draws the cropped area onto a canvas. It is what `getCanvas()` uses under the hood.
+
+#### Other hooks
+
+- [`useMoveImageOptions`](/docs/hooks/useMoveImageOptions), [`useScaleImageOptions`](/docs/hooks/useScaleImageOptions) and [`useRotateImageOptions`](/docs/hooks/useRotateImageOptions) turn the `moveImage`, `scaleImage` and `rotateImage` props (a boolean or an options object) into a complete options object. In Svelte they are plain functions, so wrap them in `$derived` to keep them in sync with props.
+- [`useUpdateEffect`](/docs/hooks/useUpdateEffect) is an effect that skips the first run. It takes a getter for its dependencies: `useUpdateEffect(effect, () => deps)`.
+- [`useWindowResize`](/docs/hooks/useWindowResize) calls back on window resize and orientation change.
+
+<Admonition type="info" title="Coming from React">
+
+The hooks keep their React names, but they are called during component initialisation and take getters where React took values. See [Coming from React](/docs/guides/coming-from-react#hooks) for the full list of differences.
+
+</Admonition>
+
+## Stencil
+
+A stencil can be any component you like, but to work with the cropper it has to:
+
+- receive the `cropper` instance (and the current `image`) as props, which the cropper passes in for you,
+- position itself over the box given by the state's coordinates (`width`, `height`, `left`, `top`),
+- report the user's actions by calling `cropper.moveCoordinates` / `moveCoordinatesEnd` and `cropper.resizeCoordinates` / `resizeCoordinatesEnd`,
+- export an `aspectRatio` (and, for non-rectangular shapes, a `boundingBox`) when it constrains the shape, so that the cropper's `stencilConstraints` can read it through `bind:this`,
+- show the selected part of the image and the overlay around it.
+
+The [Custom Stencil tutorial](/docs/tutorials/custom-stencil) builds one from scratch. The bundled stencils, `RectangleStencil` and `CircleStencil`, and most custom stencils are made of these parts:
+
+<StencilHierarchy />

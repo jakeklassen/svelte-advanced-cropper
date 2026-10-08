@@ -151,6 +151,10 @@ export {
 export { useUpdateEffect } from './hooks/useUpdateEffect.svelte';
 export { useWindowResize } from './hooks/useWindowResize.svelte';
 
+// Svelte-specific helper: the core returns camelCase style objects (React's format);
+// custom backgrounds use this to turn them into style strings.
+export { styleToString } from './service/style';
+
 // Instance
 export { CropperInstance, type CropperInstanceProps } from './instance/CropperInstance.svelte';
 

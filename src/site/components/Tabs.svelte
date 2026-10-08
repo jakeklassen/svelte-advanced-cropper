@@ -21,7 +21,10 @@
 	});
 </script>
 
+<!-- Panels render before the tab list so that, during server rendering, every TabItem
+     has registered its label by the time the list is rendered. CSS puts the list first. -->
 <div class="tabs">
+	<div class="tabs__panels">{@render children?.()}</div>
 	<div class="tabs__list" role="tablist">
 		{#each labels as label (label)}
 			<button
@@ -35,12 +38,17 @@
 			</button>
 		{/each}
 	</div>
-	{@render children?.()}
 </div>
 
 <style>
 	.tabs {
 		margin: 1.25rem 0;
+		display: flex;
+		flex-direction: column;
+	}
+	.tabs__panels {
+		order: 2;
+		min-width: 0;
 	}
 	.tabs__list {
 		display: flex;

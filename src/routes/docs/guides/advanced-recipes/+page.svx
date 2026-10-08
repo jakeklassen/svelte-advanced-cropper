@@ -1,0 +1,430 @@
+<script>
+	import Example from '#site/components/Example.svelte';
+	import Admonition from '#site/components/Admonition.svelte';
+	import Tabs from '#site/components/Tabs.svelte';
+	import TabItem from '#site/components/TabItem.svelte';
+
+	import FixedSizeExample from '#site/demos/examples/FixedSizeExample.svelte';
+	import fixedSizeSource from '#site/demos/examples/FixedSizeExample.svelte?highlight';
+	import DefaultCoordinatesExample from '#site/demos/examples/DefaultCoordinatesExample.svelte';
+	import defaultCoordinatesSource from '#site/demos/examples/DefaultCoordinatesExample.svelte?highlight';
+	import FillingCropperExample from '#site/demos/examples/FillingCropperExample.svelte';
+	import fillingCropperSource from '#site/demos/examples/FillingCropperExample.svelte?highlight';
+	import DefaultVisibleArea from '#site/demos/examples/DefaultVisibleArea.svelte';
+	import defaultVisibleAreaSource from '#site/demos/examples/DefaultVisibleArea.svelte?highlight';
+	import TransformImageExample from '#site/demos/examples/TransformImageExample.svelte';
+	import transformImageSource from '#site/demos/examples/TransformImageExample.svelte?highlight';
+	import RotateImageExample from '#site/demos/examples/RotateImageExample.svelte';
+	import rotateImageSource from '#site/demos/examples/RotateImageExample.svelte?highlight';
+	import AdjustStencilExample from '#site/demos/examples/AdjustStencilExample.svelte';
+	import adjustStencilSource from '#site/demos/examples/AdjustStencilExample.svelte?highlight';
+	import SetCoordinatesExample from '#site/demos/examples/SetCoordinatesExample.svelte';
+	import setCoordinatesSource from '#site/demos/examples/SetCoordinatesExample.svelte?highlight';
+	import ImageRestrictionExample from '#site/demos/examples/ImageRestrictionExample.svelte';
+	import imageRestrictionSource from '#site/demos/examples/ImageRestrictionExample.svelte?highlight';
+	import CustomRestrictionsExample from '#site/demos/examples/CustomRestrictionsExample.svelte';
+	import customRestrictionsSource from '#site/demos/examples/CustomRestrictionsExample.svelte?highlight';
+	import DefaultTransformsExample from '#site/demos/examples/DefaultTransformsExample.svelte';
+	import defaultTransformsSource from '#site/demos/examples/DefaultTransformsExample.svelte?highlight';
+	import RefreshExample from '#site/demos/examples/RefreshExample.svelte';
+	import refreshSource from '#site/demos/examples/RefreshExample.svelte?highlight';
+	import CropperScrollExample from '#site/demos/examples/CropperScrollExample.svelte';
+	import cropperScrollSource from '#site/demos/examples/CropperScrollExample.svelte?highlight';
+	import backgroundWrapperSource from '#site/demos/examples/BackgroundWrapperWithNotifications.svelte?highlight';
+</script>
+
+# Advanced Recipes
+
+## Fixed stencil
+
+A stencil that stays put while the user moves and zooms the image underneath it is often the most comfortable option on touch screens. `FixedCropper` takes a `stencilSize`, and turning off the stencil's handlers, lines, dragging and resizing leaves only the image to interact with. `ImageRestriction.stencil` keeps the image covering the stencil at all times.
+
+<Example source={fixedSizeSource} title="FixedSizeExample">
+	<FixedSizeExample />
+</Example>
+
+```ts
+import { FixedCropper, ImageRestriction } from 'svelte-advanced-cropper';
+```
+
+```svelte
+<FixedCropper
+	src="/images/photo.jpg"
+	stencilSize={{ width: 300, height: 300 }}
+	stencilProps={{
+		handlers: false,
+		lines: false,
+		movable: false,
+		resizable: false
+	}}
+	imageRestriction={ImageRestriction.stencil}
+/>
+```
+
+## Default Coordinates
+
+You don't always want the stencil to start in the middle of the image. If you already know which region matters, for instance a face found by a detector, pass it as `defaultCoordinates`. The cropper uses it whenever it resets: on the first load and on every new image.
+
+<Example source={defaultCoordinatesSource} title="DefaultCoordinatesExample">
+	<DefaultCoordinatesExample />
+</Example>
+
+The prop accepts either a plain object or a function. The function receives the current cropper state and settings, so it can compute the coordinates from the image size or the visible area.
+
+<Tabs>
+<TabItem label="Object">
+
+```svelte
+<script lang="ts">
+	import { Cropper } from 'svelte-advanced-cropper';
+</script>
+
+<Cropper
+	src="/images/photo.jpg"
+	defaultCoordinates={{
+		left: 100,
+		top: 100,
+		width: 400,
+		height: 400
+	}}
+/>
+```
+
+</TabItem>
+<TabItem label="Function">
+
+```svelte
+<script lang="ts">
+	import { Cropper, type CoreSettings, type CropperState } from 'svelte-advanced-cropper';
+
+	function defaultCoordinates(state: CropperState, settings: CoreSettings) {
+		return {
+			left: 100,
+			top: 100,
+			width: 400,
+			height: 400
+		};
+	}
+</script>
+
+<Cropper src="/images/photo.jpg" {defaultCoordinates} />
+```
+
+</TabItem>
+</Tabs>
+
+### Position / Size
+
+Sometimes you only care about one half of the coordinates: where the stencil sits, or how big it is. Use `defaultPosition` or `defaultSize` for that, and the cropper's default algorithm fills in the other half. Like `defaultCoordinates`, both accept an object or a function.
+
+<Tabs>
+<TabItem label="Default Position">
+
+```svelte
+<script lang="ts">
+	import { Cropper } from 'svelte-advanced-cropper';
+</script>
+
+<Cropper
+	src="/images/photo.jpg"
+	defaultPosition={{
+		left: 100,
+		top: 100
+	}}
+/>
+```
+
+</TabItem>
+<TabItem label="Default Size">
+
+```svelte
+<script lang="ts">
+	import { Cropper } from 'svelte-advanced-cropper';
+</script>
+
+<Cropper
+	src="/images/photo.jpg"
+	defaultSize={{
+		width: 100,
+		height: 100
+	}}
+/>
+```
+
+</TabItem>
+</Tabs>
+
+### Fill the image
+
+Because `defaultSize` can be a function of the state (see [its reference](/docs/components/Cropper#defaultsize)), it can size the stencil relative to what the user sees. Returning the size of the visible area (or of the whole image, before the visible area exists) makes the stencil cover everything by default:
+
+```svelte
+<script lang="ts">
+	import { Cropper, type CropperState } from 'svelte-advanced-cropper';
+
+	function defaultSize({ imageSize, visibleArea }: CropperState) {
+		return {
+			width: (visibleArea ?? imageSize).width,
+			height: (visibleArea ?? imageSize).height
+		};
+	}
+</script>
+
+<Cropper src="/images/photo.jpg" {defaultSize} />
+```
+
+<Example source={fillingCropperSource} title="FillingCropperExample">
+	<FillingCropperExample />
+</Example>
+
+## Default visible area
+
+The visible area is the part of the image currently shown in the cropper, so it captures the zoom level and the pan offset. To restore a view the user had before (say, when they come back to an edit), pass it as `defaultVisibleArea`.
+
+The cropper computes the default coordinates and the default visible area in a fixed order, and one depends on the other. The [`priority`](/docs/components/Cropper#priority) prop picks which comes first: `Priority.coordinates` (the default) computes the stencil first and fits the visible area around it, while `Priority.visibleArea` starts from the visible area and places the stencil inside it.
+
+<Admonition type="tip">
+
+If the visible area is the only thing you want to restore, set `priority` to `Priority.visibleArea`. You then don't need to supply default coordinates as well: the default algorithm places the stencil inside the area you gave.
+
+</Admonition>
+
+<Example source={defaultVisibleAreaSource} title="DefaultVisibleArea">
+	<DefaultVisibleArea />
+</Example>
+
+```svelte
+<script lang="ts">
+	import { Cropper, Priority } from 'svelte-advanced-cropper';
+
+	const defaultVisibleArea = {
+		width: 800,
+		height: 775,
+		left: 63,
+		top: 668
+	};
+</script>
+
+<Cropper src="/images/photo.jpg" {defaultVisibleArea} priority={Priority.visibleArea} />
+```
+
+## Move and scale image
+
+To pan or zoom the image from your own controls, call the instance methods [`moveImage`](/docs/components/Cropper#moveimageleft-top-options) and [`zoomImage`](/docs/components/Cropper#zoomimagescale-options). Get the instance with `bind:this`.
+
+<Example source={transformImageSource} title="TransformImageExample">
+	<TransformImageExample />
+</Example>
+
+The smallest version:
+
+```svelte
+<script lang="ts">
+	import { Cropper, type CropperRef } from 'svelte-advanced-cropper';
+
+	let cropper: CropperRef | undefined = $state();
+</script>
+
+<Cropper bind:this={cropper} src="/images/photo.jpg" />
+
+<!-- Zoom in 2x -->
+<button onclick={() => cropper?.zoomImage(2)}>Zoom</button>
+<!-- Move by 50px horizontally and 100px vertically -->
+<button onclick={() => cropper?.moveImage(50, 100)}>Move</button>
+```
+
+## Rotate / flip image
+
+[`rotateImage`](/docs/components/Cropper#rotateimagerotate-options) takes an angle in degrees, plus an optional options object described in its reference. For most uses the angle is all you need.
+
+<Admonition type="warning" title="Available Angles">
+
+Stick to multiples of 90 degrees. Other angles are accepted, but some restrictions (such as keeping the image inside the stencil) can no longer be guaranteed.
+
+</Admonition>
+
+[`flipImage`](/docs/components/Cropper#flipimagehorizontal-vertical-options) takes two booleans, `horizontal` and `vertical`, and an optional options object. Pass `true` for each axis you want mirrored.
+
+<Example source={rotateImageSource} title="RotateImageExample">
+	<RotateImageExample />
+</Example>
+
+The smallest version:
+
+```svelte
+<script lang="ts">
+	import { Cropper, type CropperRef } from 'svelte-advanced-cropper';
+
+	let cropper: CropperRef | undefined = $state();
+</script>
+
+<Cropper bind:this={cropper} src="/images/photo.jpg" />
+
+<button onclick={() => cropper?.flipImage(true, false)}>Flip horizontally</button>
+<button onclick={() => cropper?.flipImage(false, true)}>Flip vertically</button>
+<button onclick={() => cropper?.rotateImage(90)}>Rotate</button>
+```
+
+## Adjust Stencil
+
+`adjustStencil` is an option of the [`transformImage`](/docs/components/Cropper#transformimage) prop, and it is on by default. When the user zooms the image, it lets the stencil shrink or grow with it, which matters most when size restrictions would otherwise stop the zoom.
+
+Toggle the checkbox below and zoom the image each way to compare.
+
+<Example source={adjustStencilSource} title="AdjustStencilExample">
+	<AdjustStencilExample />
+</Example>
+
+## Set coordinates
+
+The user normally moves the stencil, but you can also set it from code with [`setCoordinates`](/docs/components/Cropper#setcoordinatestransform). It still honours every restriction (aspect ratio, minimum and maximum size, image bounds), so the result may differ from what you asked for.
+
+It accepts coordinates, a function of the state that returns them, or an array of either. An array is applied step by step, each step seeing the result of the previous one. The demo uses that to resize the stencil and then re-centre it.
+
+<Example source={setCoordinatesSource} title="SetCoordinatesExample">
+	<SetCoordinatesExample />
+</Example>
+
+The smallest version:
+
+```svelte
+<script lang="ts">
+	import { Cropper, type CropperRef } from 'svelte-advanced-cropper';
+
+	let cropper: CropperRef | undefined = $state();
+
+	function resize(width: number, height: number, left: number, top: number) {
+		cropper?.setCoordinates({ width, height, left, top });
+	}
+</script>
+
+<Cropper bind:this={cropper} src="/images/photo.jpg" />
+```
+
+## Different image restrictions
+
+The `imageRestriction` prop controls how far the image may be moved and zoomed:
+
+- `fillArea`: the image always fills the cropper area, and can't be moved or zoomed out past its edges.
+- `fitArea`: the whole image fits inside the area, and stays within it as far as possible.
+- `stencil`: the image always covers the stencil, and can't be moved or zoomed out past it.
+- `none`: no restriction at all.
+
+The plain strings work, but in TypeScript use the `ImageRestriction` enum:
+
+```ts
+import { ImageRestriction } from 'svelte-advanced-cropper';
+```
+
+```svelte
+<Cropper imageRestriction={ImageRestriction.fillArea} />
+```
+
+<Example source={imageRestrictionSource} title="ImageRestrictionExample">
+	<ImageRestrictionExample />
+</Example>
+
+## Custom size restrictions
+
+`minWidth`, `minHeight`, `maxWidth` and `maxHeight` are in image pixels by default. To express them in another unit, such as a percentage of the image, replace the [`sizeRestrictions`](/docs/components/Cropper#sizerestrictions) function. `retrieveSizeRestrictions` reads the four props from the settings (with sensible fallbacks for missing values), and `getTransformedImageSize` gives the image size after rotation. Both come from the core and are re-exported by `svelte-advanced-cropper`.
+
+<Example source={customRestrictionsSource} title="CustomRestrictionsExample">
+	<CustomRestrictionsExample />
+</Example>
+
+```svelte
+<script lang="ts">
+	import {
+		Cropper,
+		getTransformedImageSize,
+		retrieveSizeRestrictions,
+		type CropperState,
+		type DefaultSettings
+	} from 'svelte-advanced-cropper';
+
+	function percentsRestriction(state: CropperState, settings: DefaultSettings) {
+		const { minWidth, minHeight, maxWidth, maxHeight } = retrieveSizeRestrictions(settings);
+		const imageSize = getTransformedImageSize(state);
+
+		return {
+			minWidth: (minWidth / 100) * imageSize.width,
+			minHeight: (minHeight / 100) * imageSize.height,
+			maxWidth: (maxWidth / 100) * imageSize.width,
+			maxHeight: (maxHeight / 100) * imageSize.height
+		};
+	}
+</script>
+
+<Cropper src="/images/photo.jpg" sizeRestrictions={percentsRestriction} minWidth={50} />
+```
+
+## Default transforms
+
+`defaultTransforms` sets the rotation and flips the image starts with, for example to restore the transforms of a previous edit. Like the other `default*` props it is applied when the cropper resets, and it accepts an object or a function of the state.
+
+<Example source={defaultTransformsSource} title="DefaultTransformsExample">
+	<DefaultTransformsExample />
+</Example>
+
+```svelte
+<script lang="ts">
+	import { Cropper } from 'svelte-advanced-cropper';
+
+	const defaultTransforms = {
+		rotate: 90,
+		flip: {
+			horizontal: false,
+			vertical: false
+		}
+	};
+</script>
+
+<Cropper src="/images/photo.jpg" {defaultTransforms} />
+```
+
+<Admonition type="note">
+
+Changing `defaultTransforms` doesn't touch an image that is already loaded. The demo calls `reset()` after you pick a new option so the change shows straight away.
+
+</Admonition>
+
+## Dynamic cropper size
+
+The cropper listens for window resizes, but it has no way to know when only its own container changes size, for example when a sidebar collapses or a panel is dragged wider. When that happens, call the [`refresh`](/docs/components/Cropper#refresh) method so it measures itself again.
+
+<Admonition type="tip">
+
+The same applies to a cropper that was mounted inside a hidden element (`display: none`, a closed tab or dialog). It measured a size of zero, so call `refresh()` once it becomes visible.
+
+</Admonition>
+
+In short:
+
+```svelte
+<Cropper bind:this={cropper} />
+```
+
+```ts
+// After anything that changes the container's size
+cropper?.refresh();
+```
+
+In the demo, drag the blue handles to resize the cropper's container. In Svelte the new size reaches the DOM only after the current update, so the demo waits for `tick()` before calling `refresh()`.
+
+<Example source={refreshSource} title="RefreshExample">
+	<RefreshExample />
+</Example>
+
+## Scroll the cropper
+
+By default the cropper's background wrapper captures every wheel and touch event over the image, so it can pan and zoom. A visitor scrolling down the page gets stuck as soon as the cursor or a finger lands on the cropper.
+
+You can change that by passing your own `backgroundWrapperComponent`. The one below is built on the library's `TransformableImage`, and uses its `onEvent` callback to decide event by event: a plain wheel or a one-finger swipe is left to the page (and a hint is shown), while ctrl + wheel or two fingers still transform the image. Calling `preventDefault()` on the `TransformableImageEvent` tells the image to ignore that event, and the native event is left alone so the page scrolls.
+
+<Example
+	source={cropperScrollSource}
+	title="CropperScrollExample"
+	files={{ 'BackgroundWrapperWithNotifications.svelte': backgroundWrapperSource }}
+>
+	<CropperScrollExample />
+</Example>

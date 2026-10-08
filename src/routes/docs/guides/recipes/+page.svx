@@ -1,0 +1,464 @@
+<script>
+	import Example from '#site/components/Example.svelte';
+	import Admonition from '#site/components/Admonition.svelte';
+	import Tabs from '#site/components/Tabs.svelte';
+	import TabItem from '#site/components/TabItem.svelte';
+	import ChangingStencilExample from '#site/demos/examples/ChangingStencilExample.svelte';
+	import changingStencilSource from '#site/demos/examples/ChangingStencilExample.svelte?highlight';
+	import StencilGridExample from '#site/demos/examples/StencilGridExample.svelte';
+	import stencilGridSource from '#site/demos/examples/StencilGridExample.svelte?highlight';
+	import GettingResultManualExample from '#site/demos/examples/GettingResultManualExample.svelte';
+	import gettingResultManualSource from '#site/demos/examples/GettingResultManualExample.svelte?highlight';
+	import GettingResultExample from '#site/demos/examples/GettingResultExample.svelte';
+	import gettingResultSource from '#site/demos/examples/GettingResultExample.svelte?highlight';
+	import previewResultsSource from '#site/demos/examples/PreviewResults.svelte?highlight';
+	import ResizeResultExample from '#site/demos/examples/ResizeResultExample.svelte';
+	import resizeResultSource from '#site/demos/examples/ResizeResultExample.svelte?highlight';
+	import PreviewResultExample from '#site/demos/examples/PreviewResultExample.svelte';
+	import previewResultSource from '#site/demos/examples/PreviewResultExample.svelte?highlight';
+	import LoadImageExample from '#site/demos/examples/LoadImageExample.svelte';
+	import loadImageSource from '#site/demos/examples/LoadImageExample.svelte?highlight';
+	import UploadExample from '#site/demos/examples/UploadExample.svelte';
+	import uploadSource from '#site/demos/examples/UploadExample.svelte?highlight';
+</script>
+
+# Recipes
+
+Short, copyable solutions to the things almost every cropper needs: picking a stencil, reading the result, resizing it, previewing it, and moving images in and out of the browser.
+
+## Stencil Tuning
+
+### Change the stencil
+
+The library ships two stencils: `RectangleStencil`, which is the default, and `CircleStencil`. Writing your own is also possible; see the [custom stencil tutorial](/docs/tutorials/custom-stencil).
+
+To swap the stencil, hand the component to the `stencilComponent` prop:
+
+```svelte
+<script>
+	import { Cropper, CircleStencil } from 'svelte-advanced-cropper';
+</script>
+
+<Cropper {src} stencilComponent={CircleStencil} />
+```
+
+<Example source={changingStencilSource} title="ChangingStencilExample">
+	<ChangingStencilExample />
+</Example>
+
+### Pass props to the stencil
+
+The cropper renders the stencil for you, so stencil options travel through a single object prop, `stencilProps`. For example, this locks the stencil to a 6:9 frame that can be neither dragged nor resized:
+
+```svelte
+<Cropper
+	{src}
+	stencilProps={{
+		aspectRatio: 6 / 9,
+		movable: false,
+		resizable: false
+	}}
+/>
+```
+
+Each stencil accepts its own set of props. The built-in ones are listed on the [RectangleStencil](/docs/components/RectangleStencil) and [CircleStencil](/docs/components/CircleStencil) pages.
+
+### Set the aspect ratio
+
+You can pin the stencil to one exact aspect ratio, or let it move freely within a range.
+
+The aspect ratio belongs to the stencil rather than to the cropper, so what you can configure depends on the stencil you use. `CircleStencil` is always a circle and ignores the setting, while `RectangleStencil` accepts any ratio. The snippets below assume `RectangleStencil`.
+
+#### Fixed aspect ratio
+
+```svelte
+<Cropper
+	{src}
+	stencilProps={{
+		aspectRatio: 1 / 1
+	}}
+/>
+```
+
+#### Aspect ratio range
+
+Pass an object with `minimum` and `maximum` (width divided by height):
+
+```svelte
+<Cropper
+	{src}
+	stencilProps={{
+		aspectRatio: {
+			minimum: 4 / 8,
+			maximum: 16 / 8
+		}
+	}}
+/>
+```
+
+### Add the grid
+
+Both default stencils can draw a rule-of-thirds grid inside the selection, which helps when lining up a composition:
+
+```svelte
+<Cropper {src} stencilProps={{ grid: true }} />
+```
+
+<Example source={stencilGridSource} title="StencilGridExample">
+	<StencilGridExample />
+</Example>
+
+## Getting the result
+
+There are two ways to read what the user selected: ask the cropper when you need it, or listen to its callbacks.
+
+### First approach
+
+Bind the cropper instance with `bind:this` and call its methods. `getCoordinates()` returns the selected area in image pixels, and `getCanvas()` returns a canvas with the cropped image drawn on it.
+
+Press **Crop Image** to try it:
+
+<Example
+	source={gettingResultManualSource}
+	title="GettingResultManualExample"
+	files={{ 'PreviewResults.svelte': previewResultsSource }}
+>
+	<GettingResultManualExample />
+</Example>
+
+The essential part is just a few lines:
+
+```svelte
+<script lang="ts">
+	import { Cropper, type Coordinates, type CropperRef } from 'svelte-advanced-cropper';
+
+	let cropper: CropperRef | undefined = $state();
+	let coordinates: Coordinates | null = $state(null);
+	let result: string | undefined = $state();
+
+	function onCrop() {
+		coordinates = cropper?.getCoordinates() ?? null;
+		// The canvas can be post-processed however you like; a data URL is
+		// enough to show the result in an <img>.
+		result = cropper?.getCanvas()?.toDataURL();
+	}
+</script>
+
+<Cropper bind:this={cropper} {src} />
+<button onclick={onCrop}>Crop Image</button>
+```
+
+### Second approach
+
+Every [cropper callback](/docs/components/Cropper#callbacks) receives the cropper instance as its argument, so you can read the same values from inside a callback. This example uses `onChange`, which fires whenever the selection changes.
+
+<Admonition type="tip">
+
+Drawing a canvas is relatively expensive, and `onChange` fires many times per second while the user drags. Reading coordinates and other plain values there is fine, but if you need the canvas, debounce the work as the demo below does with a plain `setTimeout`.
+
+</Admonition>
+
+<Example
+	source={gettingResultSource}
+	title="GettingResultExample"
+	files={{ 'PreviewResults.svelte': previewResultsSource }}
+>
+	<GettingResultExample />
+</Example>
+
+Without the debounce, the callback is simply:
+
+```svelte
+<script lang="ts">
+	import { Cropper, type Coordinates, type CropperRef } from 'svelte-advanced-cropper';
+
+	let coordinates: Coordinates | null = $state(null);
+	let result: string | undefined = $state();
+
+	function onChange(cropper: CropperRef) {
+		coordinates = cropper.getCoordinates();
+		result = cropper.getCanvas()?.toDataURL();
+	}
+</script>
+
+<Cropper {src} {onChange} />
+```
+
+## Resize the result
+
+If you send only the coordinates to your server, resizing happens there. If you send the canvas, you will often want to scale it down in the browser first.
+
+The easiest way is to pass size limits to `getCanvas()`:
+
+```ts
+const canvas = cropper.getCanvas({
+	minHeight: 0,
+	minWidth: 0,
+	maxHeight: 2048,
+	maxWidth: 2048
+});
+```
+
+To aim for a particular size, pass `width` and `height`. Keep in mind that the canvas always keeps the stencil's aspect ratio, so if the requested size has a different shape, one of the two dimensions will not match what you asked for.
+
+```ts
+const canvas = cropper.getCanvas({
+	height: 256,
+	width: 256
+});
+```
+
+`maxArea` caps the total pixel count (`width × height`). Fill in the fields below and press **Crop** to open the result in a new tab:
+
+<Example source={resizeResultSource} title="ResizeResultExample">
+	<ResizeResultExample />
+</Example>
+
+Scaling uses the browser's built-in canvas drawing. If the quality isn't good enough for your use case, resize the canvas with a dedicated library such as [pica](https://github.com/nodeca/pica) or [downscale](https://github.com/ytiurin/downscale).
+
+## Preview the result
+
+The [`CropperPreview`](/docs/components/CropperPreview) component shows a live, scaled-down copy of the selected area. Its size comes from CSS, and it keeps the stencil's aspect ratio inside that box.
+
+<Example source={previewResultSource} title="PreviewResultExample">
+	<PreviewResultExample />
+</Example>
+
+A preview can be connected to a cropper in three ways. All of them work; pick whichever fits your component.
+
+<Tabs>
+<TabItem label="Update">
+
+Bind the preview with `bind:this` and call its exported `update()` method from the cropper's `onUpdate` callback. This is what the demo above does, and it is the recommended approach.
+
+```svelte
+<script lang="ts">
+	import {
+		Cropper,
+		CropperPreview,
+		type CropperPreviewRef,
+		type CropperRef
+	} from 'svelte-advanced-cropper';
+
+	let preview: CropperPreviewRef | undefined = $state();
+
+	function onUpdate(cropper: CropperRef) {
+		preview?.update(cropper);
+	}
+</script>
+
+<Cropper class="cropper" stencilProps={{ aspectRatio: 1 }} {src} {onUpdate} />
+<CropperPreview bind:this={preview} class="preview" />
+```
+
+</TabItem>
+<TabItem label="Stateful">
+
+Copy the cropper's state, image and transitions into your own state, then spread it onto the preview. This is useful when the preview lives far away from the cropper, because only plain data has to travel between them.
+
+```svelte
+<script lang="ts">
+	import {
+		Cropper,
+		CropperPreview,
+		type CropperImage,
+		type CropperRef,
+		type CropperState,
+		type CropperTransitions
+	} from 'svelte-advanced-cropper';
+
+	interface PreviewState {
+		state: CropperState | null;
+		image: CropperImage | null;
+		transitions: CropperTransitions | null;
+		loading?: boolean;
+		loaded?: boolean;
+	}
+
+	let previewState: PreviewState = $state.raw({
+		state: null,
+		image: null,
+		transitions: null
+	});
+
+	function onUpdate(cropper: CropperRef) {
+		previewState = {
+			state: cropper.getState(),
+			image: cropper.getImage(),
+			transitions: cropper.getTransitions(),
+			loaded: cropper.isLoaded(),
+			loading: cropper.isLoading()
+		};
+	}
+</script>
+
+<Cropper class="cropper" stencilProps={{ aspectRatio: 1 }} {src} {onUpdate} />
+<CropperPreview class="preview" {...previewState} />
+```
+
+</TabItem>
+<TabItem label="Cropper reference">
+
+Pass the cropper instance you bound with `bind:this` straight to the preview's `cropper` prop. In React this needed a ref object plus a manual `refresh()` in `onUpdate`, and react-advanced-cropper deprecated it in 0.20.0. In Svelte the bound instance is reactive, so the preview follows the cropper by itself. The prop is kept for parity, but `update()` is still the preferred approach.
+
+```svelte
+<script lang="ts">
+	import { Cropper, CropperPreview, type CropperRef } from 'svelte-advanced-cropper';
+
+	let cropper: CropperRef | undefined = $state();
+</script>
+
+<Cropper bind:this={cropper} class="cropper" stencilProps={{ aspectRatio: 1 }} {src} />
+<CropperPreview {cropper} class="preview" />
+```
+
+</TabItem>
+</Tabs>
+
+You can also render a preview inside the cropper itself, through a custom `wrapperComponent`, the same way the zoom slider is added in the [absolute zoom tutorial](/docs/tutorials/absolute-zoom). That keeps everything in one component and saves a little work per update.
+
+## Load image from a disc
+
+Getting a file into the cropper has nothing to do with the cropper itself: anything that produces a URL the browser can load will do. Below is one straightforward way to do it with a file input.
+
+<Example source={loadImageSource} title="LoadImageExample">
+	<LoadImageExample />
+</Example>
+
+<Admonition type="warning" title="Browser support">
+
+These examples rely on [Blob](https://developer.mozilla.org/en-US/docs/Web/API/Blob) and object URLs. Every current browser supports them, but check your support matrix if you target very old ones.
+
+</Admonition>
+
+The core of it is an `onchange` handler that turns the selected file into an object URL. Remember to revoke the URL when the image is replaced, so the browser can release the file.
+
+<Tabs>
+<TabItem label="Simple Example">
+
+This version takes the MIME type from `File.type`. That value is derived from the file extension, so a misnamed file reports the wrong type.
+
+```svelte
+<script lang="ts">
+	import { Cropper } from 'svelte-advanced-cropper';
+
+	interface Image {
+		type?: string;
+		src: string;
+	}
+
+	let input: HTMLInputElement | undefined = $state();
+	let image: Image | null = $state(null);
+
+	function onLoadImage(event: Event & { currentTarget: HTMLInputElement }) {
+		const file = event.currentTarget.files?.[0];
+		if (file) {
+			image = { src: URL.createObjectURL(file), type: file.type };
+		}
+		// Allow the same file to be picked again.
+		event.currentTarget.value = '';
+	}
+
+	$effect(() => {
+		const src = image?.src;
+		return () => {
+			if (src) URL.revokeObjectURL(src);
+		};
+	});
+</script>
+
+<Cropper src={image?.src} />
+<button onclick={() => input?.click()}>Upload image</button>
+<input bind:this={input} type="file" accept="image/*" hidden onchange={onLoadImage} />
+```
+
+</TabItem>
+<TabItem label="Advanced Example">
+
+This version reads the first bytes of the file and detects the real format with `getMimeType`. Knowing the real type lets you export the crop in the same format with `canvas.toBlob(callback, image.type)`.
+
+```svelte
+<script lang="ts">
+	import { Cropper } from 'svelte-advanced-cropper';
+	import { getMimeType } from 'advanced-cropper/extensions/mimes';
+
+	interface Image {
+		type?: string;
+		src: string;
+	}
+
+	let input: HTMLInputElement | undefined = $state();
+	let image: Image | null = $state(null);
+
+	function onLoadImage(event: Event & { currentTarget: HTMLInputElement }) {
+		const file = event.currentTarget.files?.[0];
+		if (file) {
+			const src = URL.createObjectURL(file);
+			const reader = new FileReader();
+			reader.addEventListener('load', () => {
+				// Fall back to the extension-based type if the bytes aren't recognised.
+				image = { src, type: getMimeType(reader.result, file.type) };
+			});
+			reader.readAsArrayBuffer(file);
+		}
+		event.currentTarget.value = '';
+	}
+
+	$effect(() => {
+		const src = image?.src;
+		return () => {
+			if (src) URL.revokeObjectURL(src);
+		};
+	});
+</script>
+
+<Cropper src={image?.src} />
+<button onclick={() => input?.click()}>Upload image</button>
+<input bind:this={input} type="file" accept="image/*" hidden onchange={onLoadImage} />
+```
+
+<Admonition type="note">
+
+`getMimeType` comes from `advanced-cropper`, the framework-agnostic core that `svelte-advanced-cropper` is built on, not from `svelte-advanced-cropper` itself. Core extensions are only available from their own subpaths. With a strict package manager such as pnpm, add `advanced-cropper` to your own dependencies before importing it.
+
+</Admonition>
+
+</TabItem>
+</Tabs>
+
+## Upload image to a server
+
+To send the crop to a server, convert the canvas to a [Blob](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob) and post it as `multipart/form-data`. A blob is smaller than a base64 data URL and can be streamed as a regular file upload, which is why it is usually the better choice. [This Stack Overflow answer](https://stackoverflow.com/questions/59020799/which-function-should-i-use-todataurl-or-toblob/59025746#59025746) explains the trade-offs in detail.
+
+How the request should look depends entirely on your backend. Here is one common shape:
+
+<Example source={uploadSource} title="UploadExample">
+	<UploadExample />
+</Example>
+
+<Admonition type="tip">
+
+Open the Network tab in your browser's developer tools and press **Crop Image** to inspect the request. The demo endpoint doesn't exist, so the request fails, and the demo logs the error instead of throwing it.
+
+</Admonition>
+
+```svelte
+<script lang="ts">
+	import { Cropper, type CropperRef } from 'svelte-advanced-cropper';
+
+	let cropper: CropperRef | undefined = $state();
+
+	function onUpload() {
+		cropper?.getCanvas()?.toBlob((blob) => {
+			if (blob) {
+				const form = new FormData();
+				form.append('file', blob);
+				fetch('https://example.com/upload/', { method: 'POST', body: form });
+			}
+		}, 'image/jpeg');
+	}
+</script>
+
+<Cropper bind:this={cropper} {src} />
+<button onclick={onUpload}>Upload</button>
+```

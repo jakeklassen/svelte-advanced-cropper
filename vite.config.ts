@@ -61,13 +61,15 @@ export default defineConfig({
 			},
 
 			extensions: ['.svelte', '.svx'],
+			// mdsvex must run first: it turns code fences into escaped HTML, so `<style>` text
+			// inside docs code samples is not mistaken for a real style block.
 			preprocess: [
-				vitePreprocess(),
 				mdsvex({
 					extensions: ['.svx'],
 					highlight: { highlighter },
 					rehypePlugins: [rehypeHeadingIds, rehypeBasePath(base)]
-				})
+				}),
+				vitePreprocess()
 			],
 			// The docs site is fully prerendered for GitHub Pages.
 			adapter: adapter({ fallback: '404.html' }),

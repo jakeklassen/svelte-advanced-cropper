@@ -61,7 +61,7 @@ Markdown inside a component needs blank lines around it.
   - Outside code spans and fences, `{` starts a Svelte expression and `<Foo>` is markup. Write `&#123;` or wrap the text in backticks.
   - Inline code and fences are safe.
   - Tables are GitHub-flavoured markdown.
-  - Headings `##` / `###` get ids automatically and feed the "On this page" list.
+  - Headings `##` / `###` get ids automatically (repeats get `-1`, `-2` suffixes) and feed the "On this page" list.
 
 ## Svelte API cheatsheet (vs React)
 
@@ -74,7 +74,7 @@ Markdown inside a component needs blank lines around it.
 - `CropperPreview cropper={cropperRef}` takes the `bind:this` value directly (not `{ current }`).
 - Hooks keep their names but take getters where React took values: `useCropperImage(() => ({ src }))`, `useAbstractCropper(() => props)`. `useMoveImageOptions` and friends are pure functions (wrap in `$derived`). `useUpdateEffect(effect, () => deps)`.
 - Styles: users `import 'svelte-advanced-cropper/style.css'`, and themes via `svelte-advanced-cropper/themes/<name>.css`. The docs site already loads the default theme globally.
-- To scope a theme to one demo (ThemeExample, Telegram), use a `<style lang="scss">` block that wraps `@import 'advanced-cropper/themes/<name>.scss'` in `:global(.your-wrapper) { … }`. Sass is installed.
+- To scope a theme to one demo (ThemeExample, Telegram), use a `<style lang="scss">` block with `.your-wrapper :global { @import 'advanced-cropper/themes/<name>.scss'; }` (see `src/site/demos/examples/ThemeExample.svelte`). Do not use `:global(.your-wrapper) { @import … }`: Svelte scopes the nested selectors, drops them as unused, and the theme has no effect. Sass is installed.
 
 ## Quality bar
 

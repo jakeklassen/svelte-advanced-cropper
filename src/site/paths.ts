@@ -1,14 +1,16 @@
 import { asset, resolve } from '$app/paths';
 
-type Pathname = Parameters<typeof resolve>[0];
-type AssetPath = Parameters<typeof asset>[0];
+// `resolve` and `asset` are typed against the generated route and asset unions. Docs
+// links come from data (nav entries, markdown), so treat them as plain strings.
+const resolvePath = resolve as (path: string) => string;
+const assetPath = asset as (file: string) => string;
 
 /** A site link that respects the deploy base path. */
 export function href(path: string): string {
-	return resolve(path as Pathname);
+	return resolvePath(path);
 }
 
 /** URL of a demo photo in `static/img/images`. */
 export function image(name: string): string {
-	return asset(`img/images/${name}` as AssetPath);
+	return assetPath(`img/images/${name}`);
 }

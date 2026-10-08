@@ -1,0 +1,200 @@
+<script>
+	import Example from '#site/components/Example.svelte';
+	import ThemeExample from '#site/demos/examples/ThemeExample.svelte';
+	import themeSource from '#site/demos/examples/ThemeExample.svelte?highlight';
+</script>
+
+# Cropper Themes
+
+## Introduction
+
+A theme is a stylesheet that sets the look of the default building blocks: `Cropper`, `RectangleStencil`, `CircleStencil`, `BoundingBox`, `SimpleHandler` and `SimpleLine`. It does this with plain global rules on their BEM class names, such as `.advanced-cropper`, `.advanced-cropper-rectangle-stencil` and `.advanced-cropper-simple-handler`. The class names come from the `advanced-cropper` core and are shared with the React and Vue versions.
+
+The stylesheet you import while setting up the cropper contains two things: the structural styles the components need in order to work at all, and the default theme.
+
+```ts
+import 'svelte-advanced-cropper/style.css';
+```
+
+The default theme is bundled so that a single import gives you a usable cropper. Because every rule is a single BEM class, any of them can be overridden by CSS loaded afterwards, including another theme:
+
+```ts
+import 'svelte-advanced-cropper/style.css';
+import 'svelte-advanced-cropper/themes/classic.css';
+```
+
+Import these once, for example in your root `+layout.svelte`. The library components carry no component-scoped styles of their own, so the theme is the only place their appearance comes from.
+
+### Customizing a theme
+
+Each theme also ships its SCSS source next to the CSS file. Its settings are `!default` variables, so with Sass you can set your own values before the import:
+
+```scss
+$base-color: cornflowerblue;
+@import 'svelte-advanced-cropper/themes/classic.scss';
+```
+
+The variables each theme accepts are listed under the theme below. Many themes paint their handlers with `currentColor` by default, so you can also recolor them without Sass by setting the CSS `color` property on the cropper.
+
+### Scoping a theme to one cropper
+
+Themes are global, so importing a second one restyles every cropper on the page. To give one cropper a different theme, compile the theme's SCSS inside a wrapper class. Put the cropper in a wrapper element:
+
+```svelte
+<div class="avatar-cropper">
+	<Cropper {src} />
+</div>
+```
+
+Then import the theme in the same component's style block, with `lang="scss"`. Wrap the import in a `:global` block, so that Svelte doesn't scope (and then discard as unused) the rules that target the cropper's elements:
+
+```scss
+.avatar-cropper :global {
+	@import 'svelte-advanced-cropper/themes/bubble.scss';
+}
+```
+
+The demos on this page use this technique: they all share one page, yet each shows a different theme.
+
+## Themes
+
+Every demo below has buttons on the left that switch between the rectangle and circle stencils and toggle the grid.
+
+### Default Theme
+
+This theme comes with `style.css`, so you have already seen it in the rest of these docs.
+
+<Example source={themeSource} title="ThemeExample">
+	<ThemeExample theme="default" />
+</Example>
+
+<details>
+<summary>SCSS variables</summary>
+
+To customize it, set the variables and import `svelte-advanced-cropper/themes/default.scss` after `style.css`. Its handles are painted with `currentColor`, so set `color` on the cropper to recolor them.
+
+| Variable        | Default       | Controls                    |
+| --------------- | ------------- | --------------------------- |
+| `$base-color`   | `white`       | Fallback for the others     |
+| `$handler-color`| `$base-color` | Unused by this theme        |
+| `$line-color`   | `$base-color` | Stencil border color        |
+| `$grid-color`   | `$line-color` | Grid line color             |
+| `$handler-size` | `10px`        | Width and height of handles |
+
+</details>
+
+### Corners Theme
+
+Inspired by the croppers found on many Android phones: thick brackets at the corners and a thin frame in between.
+
+```ts
+import 'svelte-advanced-cropper/themes/corners.css';
+```
+
+<Example source={themeSource} title="ThemeExample">
+	<ThemeExample theme="corners" />
+</Example>
+
+<details>
+<summary>SCSS variables</summary>
+
+| Variable                | Default                                | Controls                                      |
+| ----------------------- | -------------------------------------- | --------------------------------------------- |
+| `$base-color`           | `white`                                | Base for the line color                       |
+| `$accent-color`         | `currentColor`                         | Base for the handler colors                   |
+| `$line-color`           | `$base-color`                          | Stencil border color                          |
+| `$line-width`           | `2px`                                  | Stencil border width                          |
+| `$grid-color`           | `$line-color`                          | Grid line color                               |
+| `$handler-color`        | `$accent-color`                        | Base for both handler colors                  |
+| `$big-handler-color`    | `$handler-color`                       | Corner bracket color                          |
+| `$big-handler-size`     | `16px`                                 | Length of each corner bracket                 |
+| `$big-handler-width`    | `$line-width + 1px`                    | Thickness of each corner bracket              |
+| `$small-handler-color`  | `$handler-color`                       | Edge handler color                            |
+| `$small-handler-size`   | `0px`                                  | Edge handler size (hidden by default)         |
+| `$handler-padding`      | `4px`                                  | Extra hit area around a corner bracket        |
+| `$handler-wrapper-size` | `$big-handler-size + 2 × $handler-padding` | Size of a corner handler's hit area       |
+
+</details>
+
+### Classic Theme
+
+The default theme with extras: square handles that stay faded until you hover them or start dragging, and stronger lines.
+
+```ts
+import 'svelte-advanced-cropper/themes/classic.css';
+```
+
+<Example source={themeSource} title="ThemeExample">
+	<ThemeExample theme="classic" />
+</Example>
+
+<details>
+<summary>SCSS variables</summary>
+
+| Variable         | Default         | Controls                    |
+| ---------------- | --------------- | --------------------------- |
+| `$base-color`    | `white`         | Base for the line color     |
+| `$accent-color`  | `currentColor`  | Base for the handler color  |
+| `$line-color`    | `$base-color`   | Stencil border color        |
+| `$grid-color`    | `$line-color`   | Grid line color             |
+| `$handler-color` | `$accent-color` | Handler color               |
+| `$handler-size`  | `8px`           | Width and height of handles |
+
+</details>
+
+### Compact Theme
+
+A minimal stencil that keeps attention on the image: thin lines, small edge handles and slim corner handles.
+
+```ts
+import 'svelte-advanced-cropper/themes/compact.css';
+```
+
+<Example source={themeSource} title="ThemeExample">
+	<ThemeExample theme="compact" />
+</Example>
+
+<details>
+<summary>SCSS variables</summary>
+
+| Variable               | Default         | Controls                          |
+| ---------------------- | --------------- | --------------------------------- |
+| `$base-color`          | `white`         | Base for the line color           |
+| `$accent-color`        | `currentColor`  | Base for the handler colors       |
+| `$line-color`          | `$base-color`   | Stencil border color              |
+| `$grid-color`          | `$line-color`   | Grid line color                   |
+| `$handler-color`       | `$accent-color` | Unused by this theme              |
+| `$big-handler-color`   | `$accent-color` | Corner handler color              |
+| `$big-handler-size`    | `16px`          | Length of each corner handler     |
+| `$big-handler-width`   | `2px`           | Thickness of each corner handler  |
+| `$small-handler-color` | `$accent-color` | Edge handler color                |
+| `$small-handler-size`  | `4px`           | Size of the square edge handlers  |
+
+</details>
+
+### Bubble Theme
+
+A light, playful theme with round handles that grow when hovered. Its demo starts with the grid turned off.
+
+```ts
+import 'svelte-advanced-cropper/themes/bubble.css';
+```
+
+<Example source={themeSource} title="ThemeExample">
+	<ThemeExample theme="bubble" grid={false} />
+</Example>
+
+<details>
+<summary>SCSS variables</summary>
+
+| Variable              | Default         | Controls                         |
+| --------------------- | --------------- | -------------------------------- |
+| `$base-color`         | `white`         | Base for the line color          |
+| `$accent-color`       | `currentColor`  | Base for the handler color       |
+| `$line-color`         | `$base-color`   | Stencil border color             |
+| `$grid-color`         | `$line-color`   | Grid line color                  |
+| `$handler-color`      | `$accent-color` | Handler color                    |
+| `$handler-size`       | `14px`          | Diameter of a handler            |
+| `$hover-handler-size` | `25px`          | Diameter of a hovered handler    |
+
+</details>

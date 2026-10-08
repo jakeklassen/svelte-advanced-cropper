@@ -1,0 +1,94 @@
+<script>
+	import Admonition from '#site/components/Admonition.svelte';
+</script>
+
+# Cross-Origin
+
+## Introduction
+
+Sooner or later you may need to crop an image that lives on another origin: a different domain, port or protocol than the page running the cropper. A CDN, a cloud bucket or a user's avatar on a third-party service are typical cases.
+
+Browsers treat such images with suspicion. A page may _display_ an image from anywhere, but scripts on the page may not _read its pixels_ unless the image's server explicitly allows it. The rules are called [Cross-Origin Resource Sharing (CORS)](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS).
+
+The reason is privacy. Suppose you are signed in to site A, which serves your private scans. Site B can embed one of those scans in an `<img>`, and your browser will happily send your site A cookies along. If site B's scripts could then read the pixels, they could copy your documents. CORS stops that, and it applies to every cross-origin image, private or not, unless its server opts in.
+
+## How does it relate to cropper?
+
+There are two ways to produce a cropped image, and CORS affects only one of them.
+
+### Client-side
+
+The usual approach is to crop in the browser: draw the selected area on a canvas with `getCanvas()`, turn it into a blob or data URL, and upload the result. Drawing a cross-origin image that the server hasn't approved "taints" the canvas, and from then on `toBlob()` and `toDataURL()` throw a `SecurityError`. No cropper setting can get around this. The only fix is on the server that hosts the image (see [Configuring the storage](#configuring-the-storage)).
+
+The table shows what happens with the default `crossOrigin` setting (`true`) and with `crossOrigin={false}`:
+
+| Image source | Server sends `Access-Control-Allow-Origin` | `crossOrigin` | Image shows | `getCanvas()` result is usable |
+| --- | --- | --- | --- | --- |
+| Same origin | not needed | any | yes | yes |
+| Other origin | yes | `true` (default) | yes | yes |
+| Other origin | no | `true` (default) | **no**, `onError` fires | no |
+| Other origin | no | `false` | yes | **no**, the canvas is tainted |
+
+### Server-side
+
+The other approach is to let the user choose the area in the browser, then send the image URL together with the coordinates (`cropper.getCoordinates()`) to your backend and crop there. Servers aren't bound by CORS, so this works with any image.
+
+For this approach, turn off the canvas and the CORS request:
+
+```svelte
+<script lang="ts">
+	import { Cropper, type CropperRef } from 'svelte-advanced-cropper';
+
+	let { src }: { src: string } = $props();
+	let cropper: CropperRef | undefined = $state();
+
+	async function save() {
+		const coordinates = cropper?.getCoordinates();
+		await fetch('/api/crop', {
+			method: 'POST',
+			body: JSON.stringify({ src, coordinates })
+		});
+	}
+</script>
+
+<Cropper bind:this={cropper} {src} canvas={false} crossOrigin={false} />
+```
+
+<Admonition type="note" title="Why both props?">
+
+`canvas={false}` stops the cropper from rendering its internal canvas, so `getCanvas()` returns `null`. It doesn't change how the image is requested: `crossOrigin` defaults to `true` regardless, and a server without CORS headers would then refuse the image. `crossOrigin={false}` loads it as a plain image instead.
+
+</Admonition>
+
+## The `crossOrigin` prop
+
+`crossOrigin` controls the `crossorigin` attribute of the image the cropper loads and displays:
+
+| Value | Request |
+| --- | --- |
+| `true` (default) or `'anonymous'` | CORS request without credentials (no cookies). |
+| `'use-credentials'` | CORS request with cookies. The server must reply with your exact origin (not `*`) and `Access-Control-Allow-Credentials: true`. |
+| `false` | Plain image request, no CORS. Fine for display, but the canvas will be tainted for cross-origin images. |
+
+The same prop exists on [`CropperBackgroundImage`](/docs/components/CropperBackgroundImage), [`CropperSource`](/docs/components/CropperSource) and the [`useCropperImage`](/docs/hooks/useCropperImage) hook. If you write a custom background component, forward it to your `<img>` the same way.
+
+## Configuring the storage
+
+For client-side cropping, the server that hosts the images has to allow your site to read them. It does this by adding the [`Access-Control-Allow-Origin`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin) header to image responses:
+
+```
+Access-Control-Allow-Origin: https://website-with-cropper.me
+```
+
+<Admonition type="tip" title="Cached responses">
+
+If the same image URL is also shown elsewhere on your site without `crossorigin`, the browser may reuse that cached, non-CORS response and the cropper's request will fail. Have the server send `Vary: Origin` as well, or load the image through a distinct URL.
+
+</Admonition>
+
+If you can't change the storage settings, crop on the server as described above, or serve the images through a proxy on your own origin.
+
+How to set up CORS on popular storage services:
+
+- [Google Cloud Storage](https://cloud.google.com/storage/docs/configuring-cors)
+- [Amazon S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/cors.html)
