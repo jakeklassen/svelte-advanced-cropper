@@ -65,12 +65,13 @@
 	onpointerup={() => (start = null)}
 />
 
-<!-- The frame is laid out at full size and scaled down, like a preview pane. -->
+<!-- Like a preview pane shrunk with a transform: the frame's layout size never changes,
+     only its scale. -->
 <div class="scaled-container-example" bind:clientWidth={width} style:height="{height * scale}px">
 	<div
 		class="scaled-container-example__frame"
 		bind:this={frame}
-		style:width="{width / scale}px"
+		style:width="{width}px"
 		style:height="{height}px"
 		style:transform="scale({scale})"
 	>
@@ -96,7 +97,7 @@
 		background: black;
 	}
 	.scaled-container-example__frame {
-		transform-origin: 0 0;
+		transform-origin: top center;
 	}
 	.scaled-container-example__frame :global(.scaled-container-example__cropper) {
 		height: 100%;
