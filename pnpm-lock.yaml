@@ -11,9 +11,6 @@ importers:
       advanced-cropper:
         specifier: ~0.17.1
         version: 0.17.1
-      esm-env:
-        specifier: ^1.2.2
-        version: 1.2.2
     devDependencies:
       '@lucide/svelte':
         specifier: ^1.52.0

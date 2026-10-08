@@ -18,6 +18,7 @@
 </script>
 
 <script lang="ts">
+	import { crossOriginAttribute } from '../../service/image';
 	import { getPreviewStyle } from 'advanced-cropper';
 	import { preventDefault } from '../../service/events';
 	import { mergeStyles, styleToString } from '../../service/style';
@@ -40,17 +41,19 @@
 			: ''
 	);
 
-	const src = $derived(image ? image.src : undefined);
+	const src = $derived(image?.src);
 </script>
 
 {#if src}
+	<!-- A new element per image, as upstream keys the <img> by src. -->
 	{#key src}
+		<!-- The mousedown handler only blocks the browser's native image drag. -->
 		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 		<img
 			class={['advanced-cropper-background-image', className]}
 			{src}
 			alt=""
-			crossorigin={crossOrigin === true ? 'anonymous' : crossOrigin || undefined}
+			crossorigin={crossOriginAttribute(crossOrigin)}
 			style={mergeStyles(transformStyles, style)}
 			onmousedown={preventDefault}
 		/>

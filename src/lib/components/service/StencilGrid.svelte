@@ -11,7 +11,6 @@
 
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import { useUpdateEffect } from '../../hooks/useUpdateEffect.svelte';
 
 	let { columns = 3, rows = 3, visible = false, class: className }: StencilGridProps = $props();
 
@@ -20,15 +19,12 @@
 	let currentColumns = $state(untrack(() => columns));
 	let currentRows = $state(untrack(() => rows));
 
-	useUpdateEffect(
-		() => {
-			if (visible) {
-				currentRows = rows;
-				currentColumns = columns;
-			}
-		},
-		() => [visible, columns, rows]
-	);
+	$effect(() => {
+		if (visible) {
+			currentRows = rows;
+			currentColumns = columns;
+		}
+	});
 </script>
 
 <div

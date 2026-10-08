@@ -9,8 +9,8 @@ import type {
 export type ArbitraryProps = Record<string, any>;
 
 // Upstream types these as `any` so that any stencil, boundary or background
-// component can be passed. In Svelte they are components that receive at least
-// the documented props.
+// component can be passed. Here they are any Svelte component: they receive the
+// documented props, but the props are not type-checked.
 export type StencilComponent = Component<any, any, any>;
 
 export interface CropperWrapperComponentProps {

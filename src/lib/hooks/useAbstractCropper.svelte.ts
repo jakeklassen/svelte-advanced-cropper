@@ -56,6 +56,13 @@ class CropperRefs implements AbstractCropperRefs {
 	canvas: CropperCanvasMethods | null = $state.raw(null);
 }
 
+// The ref's state-changing methods run untracked. Called from a user's `$effect`, the
+// state they read would otherwise become that effect's dependencies, and their own
+// writes would re-run it.
+function untracked<Args extends unknown[], Result>(method: (...args: Args) => Result) {
+	return (...args: Args) => untrack(() => method(...args));
+}
+
 /**
  * The engine behind `AbstractCropper`: it creates the cropper instance, loads the
  * image, sizes the boundary, keeps the state reconciled with the settings, and
@@ -72,7 +79,9 @@ export function useAbstractCropper<Extension extends SettingsExtension = {}>(
 
 	const refs: AbstractCropperRefs = new CropperRefs();
 
-	let currentImage = $state.raw<CropperImage | null>(null);
+	// The image the cropper shows. It trails the loader's image: a reset sizes the
+	// boundary for a newly loaded image first, then shows it.
+	let displayedImage = $state.raw<CropperImage | null>(null);
 
 	// Callbacks only fire while the cropper is mounted, as upstream's ref is null
 	// before mount and after unmount.
@@ -85,6 +94,14 @@ export function useAbstractCropper<Extension extends SettingsExtension = {}>(
 		};
 	});
 
+	// User callbacks run untracked, so the values they read never become dependencies
+	// of the effect that fired them.
+	function fire(callback: 'onReady' | 'onUpdate' | 'onError') {
+		if (mounted) {
+			untrack(props)[callback]?.(cropperInterface);
+		}
+	}
+
 	const cropper = useCropperInstance<Settings, AbstractCropperRef<Settings>>(() => ({
 		...props(),
 		getInstance() {
@@ -92,7 +109,7 @@ export function useAbstractCropper<Extension extends SettingsExtension = {}>(
 		}
 	}));
 
-	const cropperImage = useCropperImage(() => {
+	const imageLoader = useCropperImage(() => {
 		const {
 			src,
 			crossOrigin = true,
@@ -107,11 +124,7 @@ export function useAbstractCropper<Extension extends SettingsExtension = {}>(
 			checkOrientation,
 			unloadTime,
 			canvas,
-			onError() {
-				if (mounted) {
-					untrack(props).onError?.(cropperInterface);
-				}
-			}
+			onError: () => fire('onError')
 		};
 	});
 
@@ -131,83 +144,93 @@ export function useAbstractCropper<Extension extends SettingsExtension = {}>(
 	// unmount, stops before touching the state. A reset supersedes pending refreshes,
 	// but a refresh (e.g. on window resize) never cancels a reset. Auto-reconcile
 	// always resumes.
-	let resetOperation = 0;
-	let refreshOperation = 0;
+	let latestReset = 0;
+	let latestRefresh = 0;
+
+	// The image a reset is showing. The reset fires onReady for it itself, once the
+	// reset state has rendered, so that getCanvas() works inside onReady.
+	let imageShownByReset: CropperImage | null = null;
 
 	const resetCropper = async () => {
-		const boundaryRef = refs.boundary;
-		if (!boundaryRef) {
+		const boundaryComponent = refs.boundary;
+		if (!boundaryComponent) {
 			return;
 		}
 
-		const id = ++resetOperation;
-		refreshOperation++;
-		const current = () => id === resetOperation && mounted;
+		const id = ++latestReset;
+		latestRefresh++;
+		const isCurrent = () => id === latestReset && mounted;
 		autoReconcile.pause();
 		try {
-			const image = cropperImage.getImage();
-			const boundary = await boundaryRef.stretchTo(image);
-			if (!current()) {
+			const image = imageLoader.getImage();
+			const boundarySize = await boundaryComponent.stretchTo(image);
+			if (!isCurrent()) {
 				return;
 			}
 
-			const previousImage = currentImage;
-			currentImage = image;
+			const imageChanged = image !== null && image !== displayedImage;
+			imageShownByReset = image;
+			displayedImage = image;
 			// Let the new image render before resetting, like upstream's state callback.
 			await tick();
-			if (!current()) {
+			if (!isCurrent()) {
 				return;
 			}
 
-			if (boundary && image) {
-				cropper.reset(boundary, image);
+			if (boundarySize && image) {
+				cropper.reset(boundarySize, image);
 			} else {
 				cropper.clear();
 			}
 
-			if (image && image !== previousImage) {
-				// Wait for the reset state to render, so getCanvas() works inside onReady.
+			if (imageChanged) {
 				await tick();
-				if (current()) {
-					untrack(props).onReady?.(cropperInterface);
+				if (isCurrent()) {
+					fire('onReady');
 				}
 			}
 		} finally {
+			imageShownByReset = null;
 			autoReconcile.resume();
 		}
 	};
 
 	const refreshCropper = async () => {
-		const boundaryRef = refs.boundary;
-		if (!boundaryRef) {
+		const boundaryComponent = refs.boundary;
+		if (!boundaryComponent) {
 			return;
 		}
 
-		const id = ++refreshOperation;
+		const id = ++latestRefresh;
+		const isCurrent = () => id === latestRefresh && mounted;
 		autoReconcile.pause();
 		try {
-			const image = cropperImage.getImage();
-			const boundary = await boundaryRef.stretchTo(image);
-			if (id !== refreshOperation || !mounted) {
+			const image = imageLoader.getImage();
+			const boundarySize = await boundaryComponent.stretchTo(image);
+			if (!isCurrent()) {
 				return;
 			}
 
-			if (boundary && image) {
-				const state = cropper.getState();
-				if (state) {
-					if (
-						boundary.width !== state.boundary.width ||
-						boundary.height !== state.boundary.height
-					) {
-						cropper.setBoundary(boundary);
-						// After a boundary change the state may break restrictions that held before.
-						cropper.reconcileState();
-					}
-				} else {
-					cropper.reset(boundary, image);
-				}
-			} else {
+			if (!boundarySize || !image) {
 				cropper.clear();
+
+				return;
+			}
+
+			const state = cropper.getState();
+			if (!state) {
+				cropper.reset(boundarySize, image);
+
+				return;
+			}
+
+			const boundaryChanged =
+				boundarySize.width !== state.boundary.width ||
+				boundarySize.height !== state.boundary.height;
+			if (boundaryChanged) {
+				cropper.setBoundary(boundarySize);
+				// After a boundary change the state may break restrictions that held before.
+				cropper.reconcileState();
 			}
 		} finally {
 			autoReconcile.resume();
@@ -215,36 +238,27 @@ export function useAbstractCropper<Extension extends SettingsExtension = {}>(
 	};
 
 	const cropperInterface: AbstractCropperRef<Settings> = {
-		reset: () => resetCropper(),
-		refresh: () => refreshCropper(),
-		setImage: (image: CropperImage) => {
-			const previousImage = currentImage;
-			currentImage = image;
-			// Upstream fires onReady whenever the current image changes, after it renders.
-			if (image && image !== previousImage) {
-				void tick().then(() => {
-					if (mounted && currentImage === image) {
-						untrack(props).onReady?.(cropperInterface);
-					}
-				});
-			}
-		},
-		reconcileState: cropper.reconcileState,
-		moveCoordinates: cropper.moveCoordinates,
-		moveCoordinatesEnd: cropper.moveCoordinatesEnd,
-		resizeCoordinates: cropper.resizeCoordinates,
-		clear: cropper.clear,
-		resizeCoordinatesEnd: cropper.resizeCoordinatesEnd,
-		moveImage: cropper.moveImage,
-		flipImage: cropper.flipImage,
-		zoomImage: cropper.zoomImage,
-		rotateImage: cropper.rotateImage,
-		transformImage: cropper.transformImage,
-		transformImageEnd: cropper.transformImageEnd,
-		setCoordinates: cropper.setCoordinates,
-		setVisibleArea: cropper.setVisibleArea,
-		startTransitions: cropper.startTransitions,
-		setState: cropper.setState,
+		reset: untracked(resetCropper),
+		refresh: untracked(refreshCropper),
+		setImage: untracked((image: CropperImage) => {
+			displayedImage = image;
+		}),
+		reconcileState: untracked(cropper.reconcileState),
+		moveCoordinates: untracked(cropper.moveCoordinates),
+		moveCoordinatesEnd: untracked(cropper.moveCoordinatesEnd),
+		resizeCoordinates: untracked(cropper.resizeCoordinates),
+		clear: untracked(cropper.clear),
+		resizeCoordinatesEnd: untracked(cropper.resizeCoordinatesEnd),
+		moveImage: untracked(cropper.moveImage),
+		flipImage: untracked(cropper.flipImage),
+		zoomImage: untracked(cropper.zoomImage),
+		rotateImage: untracked(cropper.rotateImage),
+		transformImage: untracked(cropper.transformImage),
+		transformImageEnd: untracked(cropper.transformImageEnd),
+		setCoordinates: untracked(cropper.setCoordinates),
+		setVisibleArea: untracked(cropper.setVisibleArea),
+		startTransitions: untracked(cropper.startTransitions),
+		setState: untracked(cropper.setState),
 		hasInteractions: cropper.hasInteractions,
 		getStencilCoordinates: cropper.getStencilCoordinates,
 		getCoordinates: cropper.getCoordinates,
@@ -256,26 +270,24 @@ export function useAbstractCropper<Extension extends SettingsExtension = {}>(
 		getState: cropper.getState,
 		getDefaultState() {
 			const state = cropper.getState();
-			const image = cropperImage.getImage();
-			if (state && image) {
-				return cropper.createDefaultState(state.boundary, image);
-			} else {
+			const image = imageLoader.getImage();
+			if (!state || !image) {
 				return null;
 			}
+
+			return cropper.createDefaultState(state.boundary, image);
 		},
 		getCanvas: (options?: DrawOptions) => {
 			const state = cropper.getState();
-			if (refs.image && refs.canvas && state) {
-				return refs.canvas.draw(state, refs.image, options);
-			} else {
+			if (!refs.image || !refs.canvas || !state) {
 				return null;
 			}
+
+			return refs.canvas.draw(state, refs.image, options);
 		},
-		getImage: () => {
-			return currentImage ? { ...currentImage } : null;
-		},
-		isLoading: () => cropperImage.isLoading(),
-		isLoaded: () => cropperImage.isLoaded()
+		getImage: () => (displayedImage ? { ...displayedImage } : null),
+		isLoading: () => imageLoader.isLoading(),
+		isLoaded: () => imageLoader.isLoaded()
 	};
 
 	useWindowResize(() => {
@@ -286,23 +298,31 @@ export function useAbstractCropper<Extension extends SettingsExtension = {}>(
 		() => {
 			void resetCropper();
 		},
-		() => cropperImage.getImage()
+		() => imageLoader.getImage()
+	);
+
+	// Upstream fires onReady whenever the displayed image changes to a new image, after
+	// it renders. Changes made by a reset are left to the reset (see imageShownByReset).
+	useUpdateEffect(
+		() => {
+			if (displayedImage && displayedImage !== imageShownByReset) {
+				fire('onReady');
+			}
+		},
+		() => displayedImage
 	);
 
 	useUpdateEffect(
-		() => {
-			if (mounted) {
-				untrack(props).onUpdate?.(cropperInterface);
-			}
-		},
-		() => [cropperImage.isLoaded(), cropperImage.isLoading()]
+		() => fire('onUpdate'),
+		() => [imageLoader.isLoaded(), imageLoader.isLoading()]
 	);
 
 	return {
 		cropper: cropperInterface,
 		refs,
+		// A getter: destructuring the result would lose reactivity.
 		get image() {
-			return currentImage;
+			return displayedImage;
 		}
 	};
 }

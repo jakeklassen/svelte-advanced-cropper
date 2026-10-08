@@ -1,5 +1,5 @@
 <script lang="ts" module>
-	import type { Component } from 'svelte';
+	import type { Component, Snippet } from 'svelte';
 	import type { ClassValue } from 'svelte/elements';
 	import type { CropperImage, CropperState, CropperTransitions, Size } from 'advanced-cropper';
 	import type { ArbitraryProps, CropperBoundaryComponent } from '../../types';
@@ -23,7 +23,7 @@
 		style?: string;
 		loading?: boolean;
 		loaded?: boolean;
-		children?: import('svelte').Snippet;
+		children?: Snippet;
 	}>;
 
 	export type PreviewBackgroundComponent = Component<{
@@ -59,7 +59,7 @@
 </script>
 
 <script lang="ts">
-	import { untrack } from 'svelte';
+	import { onDestroy, untrack } from 'svelte';
 	import { isGreater, ratio, stretchPreviewBoundary } from 'advanced-cropper';
 	import { useWindowResize } from '../../hooks/useWindowResize.svelte';
 	import StretchableBoundary from '../service/StretchableBoundary.svelte';
@@ -70,16 +70,17 @@
 	let {
 		class: className,
 		contentClassName,
+		// Renamed: a local `state` would clash with the `$state` rune.
 		state: stateProp = null,
 		image = null,
 		transitions = null,
-		backgroundComponent = CropperPreviewBackground,
+		backgroundComponent: BackgroundComponent = CropperPreviewBackground,
 		backgroundProps,
 		backgroundClassName,
-		boundaryComponent = StretchableBoundary,
+		boundaryComponent: BoundaryComponent = StretchableBoundary,
 		boundaryProps,
 		boundaryClassName,
-		wrapperComponent = CropperPreviewWrapper,
+		wrapperComponent: WrapperComponent = CropperPreviewWrapper,
 		wrapperProps,
 		loaded = true,
 		loading = false,
@@ -126,27 +127,35 @@
 
 	const src = $derived(instance.getImage()?.src);
 
+	// Incremented for every stretch and on destroy, so that only the latest stretch, and
+	// none after destroy, sets the size (a custom boundary's stretchTo may be async).
+	let latestStretch = 0;
+	onDestroy(() => latestStretch++);
+
+	// Fits the content box to the boundary, keeping the crop's aspect ratio.
 	function stretch() {
-		const current = instance.getState()?.coordinates;
-		if (boundary && current) {
-			void boundary.stretchTo(current).then((stretched) => {
-				if (stretched && current) {
-					if (isGreater(ratio(current), ratio(stretched))) {
-						size = {
-							width: stretched.width,
-							height: stretched.width / ratio(current)
-						};
-					} else {
-						size = {
-							width: stretched.height * ratio(current),
-							height: stretched.height
-						};
-					}
-				} else {
-					size = null;
-				}
-			});
+		const coordinates = instance.getState()?.coordinates;
+		if (!boundary || !coordinates) {
+			return;
 		}
+
+		const id = ++latestStretch;
+		void boundary.stretchTo(coordinates).then((stretched) => {
+			if (id !== latestStretch) {
+				return;
+			}
+
+			if (!stretched) {
+				size = null;
+
+				return;
+			}
+
+			const aspectRatio = ratio(coordinates);
+			size = isGreater(aspectRatio, ratio(stretched))
+				? { width: stretched.width, height: stretched.width / aspectRatio }
+				: { width: stretched.height * aspectRatio, height: stretched.height };
+		});
 	}
 
 	export function refresh() {
@@ -159,19 +168,16 @@
 		refresh();
 	}
 
-	useWindowResize(() => refresh());
+	useWindowResize(refresh);
 
+	// Upstream: useLayoutEffect(refresh, [coordinates?.height, coordinates?.width]). Here
+	// also once the boundary is bound, since bindings arrive after the first effect run.
 	$effect(() => {
-		// Upstream: useLayoutEffect(refresh, [coordinates?.height, coordinates?.width]).
 		void width;
 		void height;
 		void boundary;
 		untrack(stretch);
 	});
-
-	const WrapperComponent = $derived(wrapperComponent);
-	const BoundaryComponent = $derived(boundaryComponent);
-	const BackgroundComponent = $derived(backgroundComponent);
 </script>
 
 <WrapperComponent

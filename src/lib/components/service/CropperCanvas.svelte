@@ -14,17 +14,17 @@
 		image: HTMLElement,
 		options: DrawOptions = {}
 	): HTMLCanvasElement | null {
-		if (image && canvas && spareCanvas) {
-			return drawCroppedArea(
-				state,
-				image as HTMLImageElement | HTMLCanvasElement,
-				canvas,
-				spareCanvas,
-				options
-			);
-		} else {
+		if (!image || !canvas || !spareCanvas) {
 			return null;
 		}
+
+		return drawCroppedArea(
+			state,
+			image as HTMLImageElement | HTMLCanvasElement,
+			canvas,
+			spareCanvas,
+			options
+		);
 	}
 </script>
 

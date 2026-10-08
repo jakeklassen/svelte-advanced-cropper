@@ -72,7 +72,8 @@
 
 	interface PointNode {
 		name: OrdinalDirection;
-		className: string;
+		/** The snake-case BEM modifier, e.g. `east-north`. */
+		modifier: string;
 		verticalPosition: VerticalCardinalDirection | null;
 		horizontalPosition: HorizontalCardinalDirection | null;
 	}
@@ -80,22 +81,26 @@
 	const HORIZONTAL_DIRECTIONS = ['east', 'west', null] as const;
 	const VERTICAL_DIRECTIONS = ['south', 'north', null] as const;
 
+	// The eight handler positions: every pair of directions except (null, null).
 	const points: PointNode[] = [];
-	for (const hDirection of HORIZONTAL_DIRECTIONS) {
-		for (const vDirection of VERTICAL_DIRECTIONS) {
-			if (hDirection !== vDirection) {
-				const { snakeCase, camelCase } = getDirectionNames(hDirection, vDirection);
-				if (snakeCase && camelCase) {
-					points.push({
-						name: camelCase,
-						className: snakeCase,
-						verticalPosition: vDirection,
-						horizontalPosition: hDirection
-					});
-				}
+	for (const horizontal of HORIZONTAL_DIRECTIONS) {
+		for (const vertical of VERTICAL_DIRECTIONS) {
+			const { snakeCase, camelCase } = getDirectionNames(horizontal, vertical);
+			if (snakeCase && camelCase) {
+				points.push({
+					name: camelCase,
+					modifier: snakeCase,
+					verticalPosition: vertical,
+					horizontalPosition: horizontal
+				});
 			}
 		}
 	}
+
+	// The four lines sit at the cardinal points.
+	const linePoints = points.filter((point): point is PointNode & { name: CardinalDirection } =>
+		isCardinalDirection(point.name)
+	);
 </script>
 
 <script lang="ts">
@@ -108,7 +113,7 @@
 		children,
 		onResize,
 		onResizeEnd,
-		handlerComponent = SimpleHandler,
+		handlerComponent: Handler = SimpleHandler,
 		handlers = {
 			eastNorth: true,
 			north: true,
@@ -127,7 +132,7 @@
 			east: true,
 			south: true
 		},
-		lineComponent = SimpleLine,
+		lineComponent: Line = SimpleLine,
 		lineClassNames = {},
 		lineWrapperClassNames = {},
 		disabled = false,
@@ -138,34 +143,29 @@
 	let lastReference: Coordinates | null = null;
 
 	const lineNodes = $derived(
-		points
-			.filter(
-				(point) => isCardinalDirection(point.name) && (isObject(lines) ? lines[point.name] : lines)
-			)
-			.map((point) => {
-				const name = point.name as CardinalDirection;
-
-				return {
-					name,
-					className: [
-						lineClassNames.default,
-						lineClassNames[name],
-						disabled && lineClassNames.disabled
-					],
-					wrapperClassName: [
-						'advanced-cropper-bounding-box__line',
-						`advanced-cropper-bounding-box__line--${name}`,
-						lineWrapperClassNames.default,
-						lineWrapperClassNames[name],
-						disabled && lineWrapperClassNames.disabled
-					],
-					hoverClassName: lineClassNames.hover,
-					verticalPosition: point.verticalPosition,
-					horizontalPosition: point.horizontalPosition
-				};
-			})
+		linePoints
+			.filter((point) => (isObject(lines) ? lines[point.name] : lines))
+			.map((point) => ({
+				name: point.name,
+				className: [
+					lineClassNames.default,
+					lineClassNames[point.name],
+					disabled && lineClassNames.disabled
+				],
+				wrapperClassName: [
+					'advanced-cropper-bounding-box__line',
+					`advanced-cropper-bounding-box__line--${point.name}`,
+					lineWrapperClassNames.default,
+					lineWrapperClassNames[point.name],
+					disabled && lineWrapperClassNames.disabled
+				],
+				hoverClassName: lineClassNames.hover,
+				verticalPosition: point.verticalPosition,
+				horizontalPosition: point.horizontalPosition
+			}))
 	);
 
+	// Like upstream, handlers never get `handlerClassNames.disabled` (lines do).
 	const handlerNodes = $derived(
 		points
 			.filter((point) => (isObject(handlers) ? handlers[point.name] : handlers))
@@ -174,11 +174,11 @@
 				className: [handlerClassNames.default, handlerClassNames[point.name]],
 				containerClassName: [
 					'advanced-cropper-bounding-box__handler-wrapper',
-					`advanced-cropper-bounding-box__handler-wrapper--${point.className}`
+					`advanced-cropper-bounding-box__handler-wrapper--${point.modifier}`
 				],
 				wrapperClassName: [
 					'advanced-cropper-bounding-box__handler',
-					`advanced-cropper-bounding-box__handler--${point.className}`,
+					`advanced-cropper-bounding-box__handler--${point.modifier}`,
 					handlerWrapperClassNames.default,
 					handlerWrapperClassNames[point.name]
 				],
@@ -188,79 +188,86 @@
 			}))
 	);
 
-	const onHandlerMove =
+	// Builds the onMove handler of the handler or line at the given position.
+	const createResizeHandler =
 		(
 			horizontalPosition: HorizontalCardinalDirection | null,
 			verticalPosition: VerticalCardinalDirection | null
 		) =>
-		({ left, top }: MoveDirections, nativeEvent: MouseEvent | TouchEvent) => {
-			const directions = { left, top };
-
-			let respectDirection: 'width' | 'height' | undefined;
-			if (!verticalPosition && horizontalPosition) {
-				respectDirection = 'width';
-			} else if (verticalPosition && !horizontalPosition) {
-				respectDirection = 'height';
+		(directions: MoveDirections, nativeEvent: MouseEvent | TouchEvent) => {
+			if (disabled) {
+				return;
 			}
 
-			if (!disabled) {
-				// Read the reference before resizing: unlike a React render's props, Svelte props
-				// are live, so after onResize this would already be the new coordinates.
-				const currentReference = reference;
-				if (onResize) {
-					const anchor = getDirectionNames(horizontalPosition, verticalPosition).camelCase;
-					if (anchor) {
-						onResize(anchor, directions, {
-							reference: lastReference || currentReference,
-							preserveAspectRatio: nativeEvent && nativeEvent.shiftKey,
-							respectDirection,
-							compensate: true
-						});
+			// Read the reference before resizing: unlike a React render's props, Svelte props
+			// are live, so after onResize this would already be the new coordinates.
+			const currentReference = reference;
+			const anchor = getDirectionNames(horizontalPosition, verticalPosition).camelCase;
+			if (onResize && anchor) {
+				onResize(
+					anchor,
+					{ left: directions.left, top: directions.top },
+					{
+						reference: lastReference ?? currentReference,
+						preserveAspectRatio: nativeEvent.shiftKey,
+						respectDirection: resizeDirection(horizontalPosition, verticalPosition),
+						compensate: true
 					}
-				}
-
-				if (!lastReference) {
-					lastReference = currentReference;
-				}
+				);
 			}
+
+			lastReference ??= currentReference;
 		};
 
-	const onHandlerMoveEnd = () => {
+	// A side handler or line resizes along one axis only.
+	function resizeDirection(
+		horizontalPosition: HorizontalCardinalDirection | null,
+		verticalPosition: VerticalCardinalDirection | null
+	) {
+		if (horizontalPosition && !verticalPosition) {
+			return 'width';
+		}
+
+		if (verticalPosition && !horizontalPosition) {
+			return 'height';
+		}
+
+		return undefined;
+	}
+
+	const onResizeGestureEnd = () => {
 		onResizeEnd?.();
 		lastReference = null;
 	};
-
-	const LineComponent = $derived(lineComponent);
-	const HandlerComponent = $derived(handlerComponent);
 </script>
 
 <div class={['advanced-cropper-bounding-box', className]} {style}>
 	{@render children?.()}
 	<div>
 		{#each lineNodes as line (line.name)}
-			<LineComponent
+			<Line
 				defaultClassName={line.className}
 				hoverClassName={line.hoverClassName}
 				wrapperClassName={line.wrapperClassName}
 				position={line.name}
 				{disabled}
-				onMove={onHandlerMove(line.horizontalPosition, line.verticalPosition)}
-				onMoveEnd={onHandlerMoveEnd}
+				onMove={createResizeHandler(line.horizontalPosition, line.verticalPosition)}
+				onMoveEnd={onResizeGestureEnd}
 			/>
 		{/each}
 	</div>
 	<div>
 		{#each handlerNodes as handler (handler.name)}
 			<div class={handler.containerClassName}>
-				<HandlerComponent
+				<Handler
 					defaultClassName={handler.className}
 					hoverClassName={handler.hoverClassName}
 					wrapperClassName={handler.wrapperClassName}
 					horizontalPosition={handler.horizontalPosition}
 					verticalPosition={handler.verticalPosition}
 					{disabled}
-					onMove={onHandlerMove(handler.horizontalPosition, handler.verticalPosition)}
-					onMoveEnd={onHandlerMoveEnd}
+					onMove={createResizeHandler(handler.horizontalPosition, handler.verticalPosition)}
+					onMoveEnd={onResizeGestureEnd}
 				/>
 			</div>
 		{/each}

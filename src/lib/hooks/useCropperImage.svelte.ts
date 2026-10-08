@@ -1,4 +1,4 @@
-import { tick, untrack } from 'svelte';
+import { onDestroy, tick, untrack } from 'svelte';
 import { isUndefined, loadImage, promiseTimeout, type CropperImage } from 'advanced-cropper';
 
 export interface CropperImageHookSettings {
@@ -43,115 +43,109 @@ export function useCropperImage(
 	let loading = $state(false);
 	let loaded = $state(false);
 
-	let currentSrc: string | null = null;
-	let initialized = false;
 	// Incremented for every new src and on destroy; async work checks it is still current.
 	let request = 0;
 
-	const applyImage = (value: CropperImage | null) => {
-		image = value;
-	};
+	// `options()` may read many reactive values, but a derived only notifies when its own
+	// value changes, so the loading effect below runs once per distinct src.
+	const src = $derived(options().src || null);
+
+	function startLoading(source: string) {
+		const id = ++request;
+		const isCurrent = () => id === request;
+		const {
+			onLoadingStart,
+			onLoadingEnd,
+			onError,
+			crossOrigin,
+			checkOrientation,
+			canvas,
+			unloadTime
+		} = options();
+
+		// When replacing a loaded image, give the old one `unloadTime` ms to fade out.
+		const fadeOut = loaded && unloadTime ? promiseTimeout(unloadTime) : undefined;
+		loaded = false;
+		loading = true;
+		onLoadingStart?.();
+
+		const load = loadImage(source, {
+			crossOrigin: isUndefined(crossOrigin) ? canvas : crossOrigin,
+			checkOrientation
+		});
+
+		Promise.all([load, fadeOut]).then(
+			([loadedImage]) => {
+				if (!isCurrent()) {
+					return;
+				}
+
+				onLoadingEnd?.();
+				loading = false;
+				image = loadedImage;
+			},
+			() => {
+				if (!isCurrent()) {
+					return;
+				}
+
+				onError?.();
+				onLoadingEnd?.();
+				loading = false;
+			}
+		);
+	}
+
+	function unloadImage() {
+		const id = ++request;
+		const { unloadTime } = options();
+		loaded = false;
+		// Upstream leaves `loading` stuck at true if src is cleared mid-load.
+		loading = false;
+		if (!unloadTime) {
+			image = null;
+
+			return;
+		}
+
+		void promiseTimeout(unloadTime).then(() => {
+			if (id === request) {
+				image = null;
+			}
+		});
+	}
+
+	$effect(() => {
+		const next = src;
+		// Untracked: starting a load reads `loaded` and the other options.
+		untrack(() => {
+			if (next) {
+				startLoading(next);
+			} else {
+				unloadImage();
+			}
+		});
+	});
 
 	// Upstream reacts to the committed image: when it changes to a new image, mark it
 	// loaded and fire onLoad after it renders. Several setImage calls in a row, or
 	// setting the same image again, produce one onLoad (for the latest image) or none.
 	$effect(() => {
-		const value = image;
-		if (!value) {
+		const committed = image;
+		if (!committed) {
 			return;
 		}
 
-		untrack(() => {
-			loaded = true;
-			const id = request;
-			void tick().then(() => {
-				if (id === request && image === value) {
-					untrack(options).onLoad?.(value);
-				}
-			});
-		});
-	});
-
-	$effect(() => {
-		return () => {
-			request++;
-		};
-	});
-
-	$effect(() => {
-		const { src } = options();
-		untrack(() => {
-			const next = src || null;
-			if (initialized && currentSrc === next) {
-				return;
-			}
-
-			initialized = true;
-			currentSrc = next;
-			const id = ++request;
-			const current = () => id === request;
-
-			const {
-				onLoadingStart,
-				onLoadingEnd,
-				onError,
-				crossOrigin,
-				checkOrientation,
-				canvas,
-				unloadTime
-			} = options();
-			const wasLoaded = loaded;
-			loaded = false;
-
-			if (src) {
-				loading = true;
-				onLoadingStart?.();
-				const promises: Promise<unknown>[] = [
-					loadImage(src, {
-						crossOrigin: isUndefined(crossOrigin) ? canvas : crossOrigin,
-						checkOrientation
-					})
-				];
-
-				if (wasLoaded && unloadTime) {
-					promises.push(promiseTimeout(unloadTime));
-				}
-
-				Promise.all(promises).then(
-					(responses) => {
-						if (!current()) {
-							return;
-						}
-
-						onLoadingEnd?.();
-						loading = false;
-						applyImage((responses as [CropperImage])[0]);
-					},
-					() => {
-						if (!current()) {
-							return;
-						}
-
-						onError?.();
-						onLoadingEnd?.();
-						loading = false;
-					}
-				);
-			} else {
-				// Upstream leaves `loading` stuck at true if src is cleared mid-load.
-				loading = false;
-				if (unloadTime) {
-					void promiseTimeout(unloadTime).then(() => {
-						if (current()) {
-							image = null;
-						}
-					});
-				} else {
-					image = null;
-				}
+		loaded = true;
+		const id = request;
+		void tick().then(() => {
+			if (id === request && image === committed) {
+				options().onLoad?.(committed);
 			}
 		});
 	});
+
+	onDestroy(() => request++);
 
 	return {
 		isLoading() {
@@ -164,7 +158,7 @@ export function useCropperImage(
 			return image;
 		},
 		setImage(update) {
-			applyImage(typeof update === 'function' ? update(image) : update);
+			image = typeof update === 'function' ? update(image) : update;
 		}
 	};
 }

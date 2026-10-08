@@ -12,7 +12,7 @@
 		onMoveEnd
 	}: LineComponentProps = $props();
 
-	let hover = $state(false);
+	let hovered = $state(false);
 </script>
 
 <LineWrapper
@@ -25,15 +25,15 @@
 	{disabled}
 	onDrag={onMove}
 	onDragEnd={onMoveEnd}
-	onLeave={() => (hover = false)}
-	onEnter={() => (hover = true)}
+	onLeave={() => (hovered = false)}
+	onEnter={() => (hovered = true)}
 >
 	<div
 		class={[
 			'advanced-cropper-simple-line',
-			hover && 'advanced-cropper-simple-line--hover',
+			hovered && 'advanced-cropper-simple-line--hover',
 			defaultClassName,
-			hover && hoverClassName,
+			hovered && hoverClassName,
 			position && `advanced-cropper-simple-line--${position}`
 		]}
 	></div>

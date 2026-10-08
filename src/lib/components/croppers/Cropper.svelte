@@ -15,7 +15,7 @@
 
 <script lang="ts" generics="Extension extends SettingsExtension = {}">
 	import AbstractCropper from '../AbstractCropper.svelte';
-	import { useAbstractCropperProps } from '../../hooks/useAbstractCropperProps';
+	import { splitCropperProps } from '../../service/cropperProps';
 	import { forwardCropperRef } from '../../service/ref';
 
 	let props: CropperProps<Extension> = $props();
@@ -23,10 +23,11 @@
 	// Upstream also accepted the deprecated `stencilSize` and `autoZoom` props here, but
 	// its prop splitting never routed them to the code that handled them, so they had
 	// no effect. They are not ported; use FixedCropper and `postProcess` instead.
-	const cropperProps = $derived(useAbstractCropperProps<Extension>(props));
+	const cropperProps = $derived(splitCropperProps<Extension>(props));
 
-	let inner: CropperRef<Extension> | undefined = $state.raw();
+	let abstractCropper: CropperRef<Extension> | undefined = $state.raw();
 
+	// Svelte needs static export names. A test checks that every ref method is exported.
 	export const {
 		reset,
 		refresh,
@@ -61,11 +62,11 @@
 		getImage,
 		isLoading,
 		isLoaded
-	} = forwardCropperRef(() => inner);
+	} = forwardCropperRef(() => abstractCropper);
 </script>
 
 <AbstractCropper
 	{...cropperProps.props}
 	settings={cropperProps.settings as CropperInstanceSettingsProp<ExtendedSettings<Extension>>}
-	bind:this={inner}
+	bind:this={abstractCropper}
 />

@@ -31,6 +31,10 @@ export class CropperInstance<
 	notify: () => void;
 	props: () => AbstractCropperInstanceProps<Settings, Instance>;
 
+	/**
+	 * `onChange` is upstream's force-rerender hook. It is optional here: reactivity
+	 * comes from `data` itself, so pass it only to observe changes.
+	 */
 	constructor(
 		props: () => AbstractCropperInstanceProps<Settings, Instance>,
 		onChange: () => void = () => {}

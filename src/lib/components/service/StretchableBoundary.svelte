@@ -39,16 +39,16 @@
 	}
 
 	export function stretchTo(size: Size | null): Promise<Size | null> {
-		if (size?.width && size?.height && stretcher && boundary) {
-			stretchAlgorithm(boundary, stretcher, size);
-			const result = sizeAlgorithm(boundary, size);
-
-			return Promise.resolve(result.width && result.height ? result : null);
-		} else {
+		if (!size?.width || !size?.height || !stretcher || !boundary) {
 			reset();
 
 			return Promise.resolve(null);
 		}
+
+		stretchAlgorithm(boundary, stretcher, size);
+		const result = sizeAlgorithm(boundary, size);
+
+		return Promise.resolve(result.width && result.height ? result : null);
 	}
 </script>
 

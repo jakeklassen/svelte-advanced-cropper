@@ -23,18 +23,18 @@
 	} from 'advanced-cropper/extensions/stencil-size';
 	import { withDefaultSizeRestrictions } from 'advanced-cropper';
 	import AbstractCropper from '../AbstractCropper.svelte';
-	import { useAbstractCropperProps } from '../../hooks/useAbstractCropperProps';
-	import { defaultSettings } from '../../service/constants';
+	import { settingPropNames, splitCropperProps } from '../../service/cropperProps';
 	import { forwardCropperRef } from '../../service/ref';
 
 	let props: FixedCropperProps = $props();
 
 	const cropperProps = $derived(
-		useAbstractCropperProps<FixedCropperSettings>(props, [...defaultSettings, 'stencilSize'])
+		splitCropperProps<FixedCropperSettings>(props, [...settingPropNames, 'stencilSize'])
 	);
 
-	let inner: FixedCropperRef | undefined = $state.raw();
+	let abstractCropper: FixedCropperRef | undefined = $state.raw();
 
+	// Svelte needs static export names. A test checks that every ref method is exported.
 	export const {
 		reset,
 		refresh,
@@ -69,7 +69,7 @@
 		getImage,
 		isLoading,
 		isLoaded
-	} = forwardCropperRef(() => inner);
+	} = forwardCropperRef(() => abstractCropper);
 </script>
 
 <AbstractCropper
@@ -81,10 +81,12 @@
 		aspectRatio,
 		sizeRestrictions: withDefaultSizeRestrictions(sizeRestrictions),
 		...cropperProps.settings,
+		// After the user's settings: the stencil size is fixed, so transforming the image
+		// must never resize the stencil.
 		transformImage: {
 			...cropperProps.settings.transformImage,
 			adjustStencil: false
 		}
 	}}
-	bind:this={inner}
+	bind:this={abstractCropper}
 />
