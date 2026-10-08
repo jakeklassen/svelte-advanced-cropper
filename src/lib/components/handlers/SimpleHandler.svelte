@@ -14,7 +14,7 @@
 		onMoveEnd
 	}: HandlerComponentProps = $props();
 
-	let hover = $state(false);
+	let hovered = $state(false);
 </script>
 
 <HandlerWrapper
@@ -27,22 +27,22 @@
 		horizontalPosition &&
 			verticalPosition &&
 			`advanced-cropper-simple-handler-wrapper--${horizontalPosition}-${verticalPosition}`,
-		hover && 'advanced-cropper-simple-handler-wrapper--hover'
+		hovered && 'advanced-cropper-simple-handler-wrapper--hover'
 	]}
 	{verticalPosition}
 	{horizontalPosition}
 	{disabled}
 	onDrag={onMove}
 	onDragEnd={onMoveEnd}
-	onLeave={() => (hover = false)}
-	onEnter={() => (hover = true)}
+	onLeave={() => (hovered = false)}
+	onEnter={() => (hovered = true)}
 >
 	<div
 		class={[
 			'advanced-cropper-simple-handler',
-			hover && 'advanced-cropper-simple-handler--hover',
+			hovered && 'advanced-cropper-simple-handler--hover',
 			defaultClassName,
-			hover && hoverClassName,
+			hovered && hoverClassName,
 			verticalPosition && `advanced-cropper-simple-handler--${verticalPosition}`,
 			horizontalPosition && `advanced-cropper-simple-handler--${horizontalPosition}`,
 			horizontalPosition &&

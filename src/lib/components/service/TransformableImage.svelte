@@ -2,7 +2,7 @@
 	import type { Snippet } from 'svelte';
 	import type { ClassValue } from 'svelte/elements';
 	import type { ImageTransform } from 'advanced-cropper';
-	import type { TransformableImageEvent } from './TransformableImageEvent';
+	import { TransformableImageEvent } from './TransformableImageEvent';
 
 	export interface TransformableImageProps {
 		onTransform?: (transform: ImageTransform) => void;
@@ -35,7 +35,6 @@
 		wheelEventToImageTransform,
 		type SimpleTouch
 	} from 'advanced-cropper';
-	import { TransformableImageEvent as TransformEvent } from './TransformableImageEvent';
 
 	let {
 		onTransform,
@@ -54,29 +53,35 @@
 		preventDefault = true
 	}: TransformableImageProps = $props();
 
-	let touches: (SimpleTouch & { identifier?: number })[] = [];
+	// Wheel steps scale the image by 10% unless `wheelScale` gives a ratio.
+	const DEFAULT_WHEEL_RATIO = 0.1;
+
+	// The touches (or mouse position) of the previous event of the current gesture.
+	let lastTouches: (SimpleTouch & { identifier?: number })[] = [];
 	let transforming = false;
 	let container: HTMLDivElement | undefined;
 
-	const processMove = (newTouches: SimpleTouch[]) => {
-		if (container && onTransform) {
-			onTransform(
-				touchesToImageTransform(newTouches, touches, container, {
-					scale: touchScale,
-					rotate: touchRotate,
-					move: touchMove
-				})
-			);
-			touches = newTouches;
+	function processMove(touches: SimpleTouch[]) {
+		if (!container || !onTransform) {
+			return;
 		}
-	};
 
-	const processEnd = () => {
+		onTransform(
+			touchesToImageTransform(touches, lastTouches, container, {
+				scale: touchScale,
+				rotate: touchRotate,
+				move: touchMove
+			})
+		);
+		lastTouches = touches;
+	}
+
+	function processEnd() {
 		if (transforming) {
 			transforming = false;
 			onTransformEnd?.();
 		}
-	};
+	}
 
 	// Upstream creates the debounced function once, from the initial `timeout`.
 	const debouncedProcessEnd = debounce(
@@ -84,14 +89,17 @@
 		untrack(() => timeout)
 	);
 
-	const processStart = () => {
+	function processStart() {
 		transforming = true;
 		debouncedProcessEnd.clear();
-	};
+	}
 
-	const processEvent = (nativeEvent: Event) => {
-		const transformEvent = new TransformEvent({ active: transforming });
-
+	/**
+	 * Lets `onEvent` see the event first and veto it with `preventDefault()`. Without
+	 * `onEvent`, the native event is consumed instead. Returns whether to transform.
+	 */
+	function acceptEvent(nativeEvent: Event) {
+		const transformEvent = new TransformableImageEvent({ active: transforming });
 		if (onEvent) {
 			onEvent(transformEvent, nativeEvent);
 		} else if (preventDefault) {
@@ -100,88 +108,85 @@
 		}
 
 		return !disabled && !transformEvent.defaultPrevented;
-	};
+	}
 
 	const onWheel = (event: WheelEvent) => {
-		if (wheelScale) {
-			if (processEvent(event)) {
-				processStart();
-				if (onTransform && container) {
-					onTransform(
-						wheelEventToImageTransform(
-							event,
-							container,
-							wheelScale === true ? 0.1 : wheelScale.ratio
-						)
-					);
-				}
+		if (!wheelScale || !acceptEvent(event)) {
+			return;
+		}
 
-				if (!touches.length) {
-					debouncedProcessEnd();
-				}
-			}
+		processStart();
+		if (onTransform && container) {
+			const ratio = wheelScale === true ? DEFAULT_WHEEL_RATIO : wheelScale.ratio;
+			onTransform(wheelEventToImageTransform(event, container, ratio));
+		}
+
+		// A wheel gesture has no end event: it ends after `timeout` ms without wheeling.
+		if (!lastTouches.length) {
+			debouncedProcessEnd();
 		}
 	};
 
 	const onTouchStart = (event: TouchEvent) => {
-		if (
-			event.cancelable &&
-			(touchMove || ((touchScale || touchRotate) && event.touches.length > 1))
-		) {
-			if (processEvent(event) && container) {
-				const { left, top, bottom, right } = container.getBoundingClientRect();
-				touches = Array.from(event.touches).filter(
-					(touch) =>
-						touch.clientX > left &&
-						touch.clientX < right &&
-						touch.clientY > top &&
-						touch.clientY < bottom
-				);
-			}
+		const multiTouch = (touchScale || touchRotate) && event.touches.length > 1;
+		if (!event.cancelable || !(touchMove || multiTouch)) {
+			return;
 		}
+
+		if (!acceptEvent(event) || !container) {
+			return;
+		}
+
+		// Only touches that start on the image take part in the gesture.
+		const { left, top, bottom, right } = container.getBoundingClientRect();
+		lastTouches = Array.from(event.touches).filter(
+			(touch) =>
+				touch.clientX > left &&
+				touch.clientX < right &&
+				touch.clientY > top &&
+				touch.clientY < bottom
+		);
 	};
 
 	const onTouchEnd = (event: TouchEvent) => {
 		if (event.touches.length === 0) {
-			touches = [];
+			lastTouches = [];
 			processEnd();
 		}
 	};
 
 	const onTouchMove = (event: TouchEvent) => {
-		if (touches.length) {
-			const current = Array.from(event.touches).filter(
-				(touch) =>
-					!touch.identifier ||
-					touches.find((anotherTouch) => anotherTouch.identifier === touch.identifier)
-			);
+		if (!lastTouches.length) {
+			return;
+		}
 
-			if (processEvent(event)) {
-				processMove(current);
-				processStart();
-			}
+		const trackedTouches = Array.from(event.touches).filter(
+			(touch) =>
+				!touch.identifier || lastTouches.some((tracked) => tracked.identifier === touch.identifier)
+		);
+		if (acceptEvent(event)) {
+			processMove(trackedTouches);
+			processStart();
 		}
 	};
 
 	const onMouseDown = (event: MouseEvent) => {
-		if (mouseMove && 'buttons' in event && event.buttons === 1) {
-			if (processEvent(event)) {
-				touches = [{ clientX: event.clientX, clientY: event.clientY }];
-				processStart();
-			}
+		if (!mouseMove || event.buttons !== 1 || !acceptEvent(event)) {
+			return;
 		}
+
+		lastTouches = [{ clientX: event.clientX, clientY: event.clientY }];
+		processStart();
 	};
 
 	const onMouseMove = (event: MouseEvent) => {
-		if (touches.length) {
-			if (processEvent(event)) {
-				processMove([{ clientX: event.clientX, clientY: event.clientY }]);
-			}
+		if (lastTouches.length && acceptEvent(event)) {
+			processMove([{ clientX: event.clientX, clientY: event.clientY }]);
 		}
 	};
 
 	const onMouseUp = () => {
-		touches = [];
+		lastTouches = [];
 		processEnd();
 	};
 

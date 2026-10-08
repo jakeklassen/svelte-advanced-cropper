@@ -23,12 +23,12 @@
 
 	let { cropper, children, class: className, style }: CropperWrapperProps = $props();
 
-	const state = $derived(cropper ? cropper.getState() : null);
-	const loaded = $derived(cropper ? cropper.isLoaded() : false);
+	// Fade in once an image has loaded and has a state.
+	const visible = $derived(Boolean(cropper?.getState()) && Boolean(cropper?.isLoaded()));
 </script>
 
 <div class={[className, 'advanced-cropper-wrapper']} {style}>
-	<CropperFade visible={state && loaded} class="advanced-cropper-wrapper__fade">
+	<CropperFade {visible} class="advanced-cropper-wrapper__fade">
 		{@render children?.()}
 	</CropperFade>
 </div>

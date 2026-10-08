@@ -116,32 +116,27 @@
 	export const boundingBox = 'circle';
 
 	const onMove = (directions: MoveDirections) => {
-		if (cropper && moveAllowed) {
+		if (moveAllowed) {
 			cropper.moveCoordinates(directions);
 		}
 	};
 
-	const onMoveEnd = () => {
-		cropper?.moveCoordinatesEnd();
-	};
-
 	const onResize = (anchor: ResizeAnchor, directions: MoveDirections, options: ResizeOptions) => {
-		if (cropper && resizeAllowed) {
+		if (resizeAllowed) {
 			cropper.resizeCoordinates(anchor, directions, options);
 		}
 	};
 
-	const onResizeEnd = () => {
-		cropper?.resizeCoordinatesEnd();
-	};
+	const stencilCoordinates = $derived.by(() => {
+		if (!coordinates) {
+			return getStencilCoordinates(state);
+		}
 
-	const stencilCoordinates = $derived(
-		coordinates
-			? isFunction(coordinates)
-				? coordinates(state)
-				: coordinates
-			: getStencilCoordinates(state)
-	);
+		return isFunction(coordinates) ? coordinates(state) : coordinates;
+	});
+
+	// A finer grid helps to line the image up while rotating it.
+	const gridSize = $derived(interactions.transformImage.rotate ? 9 : 3);
 </script>
 
 {#if state}
@@ -175,21 +170,21 @@
 			{lineClassNames}
 			{lineWrapperClassNames}
 			{onResize}
-			{onResizeEnd}
+			onResizeEnd={cropper.resizeCoordinatesEnd}
 			disabled={!resizeAllowed}
 		>
 			<DraggableArea
 				disabled={!moveAllowed}
 				{onMove}
-				{onMoveEnd}
+				onMoveEnd={cropper.moveCoordinatesEnd}
 				class={['advanced-cropper-circle-stencil__draggable-area', draggableAreaClassName]}
 			>
 				<StencilOverlay class={['advanced-cropper-circle-stencil__overlay', overlayClassName]}>
 					{#if grid}
 						<StencilGrid
 							visible={cropper.hasInteractions()}
-							columns={interactions.transformImage.rotate ? 9 : 3}
-							rows={interactions.transformImage.rotate ? 9 : 3}
+							columns={gridSize}
+							rows={gridSize}
 							class={['advanced-cropper-circle-stencil__grid', gridClassName]}
 						/>
 					{/if}

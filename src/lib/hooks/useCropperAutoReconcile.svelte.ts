@@ -17,27 +17,33 @@ export function useCropperAutoReconcile(
 	enabled: boolean,
 	isConsistent: () => boolean
 ) {
-	// A counter rather than a flag: reset and refresh can overlap, and reconciling must
+	// A count rather than a flag: reset and refresh can overlap, and reconciling must
 	// stay paused until every one of them has resumed.
-	let paused = $state(0);
+	let pauseCount = $state(0);
 
-	$effect(() => {
-		const consistent = isConsistent();
-		if (enabled && paused === 0 && !consistent) {
+	if (enabled) {
+		$effect(() => {
+			// While paused, only the count is tracked; resuming re-checks everything.
+			if (pauseCount > 0 || isConsistent()) {
+				return;
+			}
+
 			untrack(() => {
 				if (!cropper.hasInteractions()) {
 					cropper.reconcileState();
 				}
 			});
-		}
-	});
+		});
+	}
 
+	// Untracked, so that pausing from inside a caller's effect doesn't make that effect
+	// depend on the count it just changed.
 	return {
 		pause() {
-			paused++;
+			untrack(() => pauseCount++);
 		},
 		resume() {
-			paused = Math.max(0, paused - 1);
+			untrack(() => pauseCount--);
 		}
 	};
 }

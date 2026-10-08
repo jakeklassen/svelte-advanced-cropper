@@ -60,8 +60,7 @@
 		"test:e2e:install": "playwright install chromium"
 	},
 	"dependencies": {
-		"advanced-cropper": "~0.17.1",
-		"esm-env": "^1.2.2"
+		"advanced-cropper": "~0.17.1"
 	},
 	"devDependencies": {
 		"@lucide/svelte": "^1.52.0",

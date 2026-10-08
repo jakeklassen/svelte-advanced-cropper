@@ -49,6 +49,9 @@ Everything upstream exports from `src/index.ts` exists under the same name, exce
    - `autoReconcileState={false}` really disables auto-reconcile. Upstream only uses it as the initial value of a flag that the first reset turns back on.
    - Reset and refresh tolerate an async `stretchTo`: a superseded call or one that finishes after unmount does nothing. Auto-reconcile pausing is counted, so overlapping calls can't re-enable it early.
    - `useCropperImage` fires `onLoad` once per committed image change, as upstream's effect does, even after several `setImage` calls in a row.
+   - Likewise, the cropper fires `onReady` once per change of the displayed image, so `setImage(a); setImage(b); setImage(a)` fires it at most once.
+   - `CropperPreview` ignores a stretch that a newer one superseded, or one that finishes after destroy.
+13. **Ref methods that change the state run untracked.** A React user calls them from `useEffect`; the Svelte equivalent is calling them from `$effect`. Without `untrack`, the state they read would become that effect's dependencies and their writes would re-run it until Svelte stopped the loop (`effect_update_depth_exceeded`). Getters (`getState()`, `getCoordinates()`, …) stay tracked, so templates and effects still react to them.
 5. **Styles** ship as a global stylesheet compiled from the core SCSS (`scripts/build-styles.ts`), not as component `<style>` blocks. Scoped styles would raise specificity and break user theme overrides.
 6. **Callbacks** only fire while the cropper is mounted (`getInstance()` returns null otherwise), as upstream's ref is null outside the mounted lifetime.
 

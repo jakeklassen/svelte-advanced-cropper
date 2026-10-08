@@ -13,49 +13,40 @@
 	let {
 		style,
 		class: className,
-		stencilComponent = RectangleStencil,
+		stencilComponent: StencilComponent = RectangleStencil,
 		stencilConstraints = defaultStencilConstraints as unknown as StencilConstraints<
 			AbstractCropperSettingsProp<ExtendedSettings<Extension>>
 		>,
 		stencilProps = {},
-		wrapperComponent = CropperWrapper,
+		wrapperComponent: WrapperComponent = CropperWrapper,
 		wrapperProps = {},
-		backgroundComponent = CropperBackgroundImage,
+		backgroundComponent: BackgroundComponent = CropperBackgroundImage,
 		backgroundProps = {},
 		backgroundClassName,
-		backgroundWrapperComponent = CropperBackgroundWrapper,
+		backgroundWrapperComponent: BackgroundWrapperComponent = CropperBackgroundWrapper,
 		backgroundWrapperProps = {},
 		backgroundWrapperClassName,
-		boundaryComponent = StretchableBoundary,
+		boundaryComponent: BoundaryComponent = StretchableBoundary,
 		boundaryProps,
 		boundaryClassName,
 		canvas = true,
 		crossOrigin = true,
 		disabled,
 		settings,
-		...parameters
+		...hookProps
 	}: AbstractCropperProps<ExtendedSettings<Extension>> = $props();
 
 	// The stencil instance. Its exports (e.g. `aspectRatio`) are stencil options, as
 	// upstream merges the stencil's imperative handle into them.
 	let stencil: Record<string, unknown> | undefined = $state.raw();
 
-	function stencilExports() {
-		const result: Record<string, unknown> = {};
-		if (stencil) {
-			for (const key of Object.keys(stencil)) {
-				// Skip Svelte's dev-mode `$set`/`$on`/`$destroy` stubs.
-				if (!key.startsWith('$')) {
-					result[key] = stencil[key];
-				}
-			}
-		}
-
-		return result;
-	}
+	// Skips Svelte's dev-mode `$set`/`$on`/`$destroy` stubs.
+	const stencilExports = $derived(
+		Object.fromEntries(Object.entries(stencil ?? {}).filter(([key]) => !key.startsWith('$')))
+	);
 
 	const hook = useAbstractCropper<Extension>(() => ({
-		...parameters,
+		...hookProps,
 		crossOrigin,
 		stencilProps,
 		canvas,
@@ -63,14 +54,16 @@
 			...settings,
 			...stencilConstraints(settings, {
 				...stencilProps,
-				...stencilExports()
+				...stencilExports
 			})
 		}
 	}));
 
-	const cropper = hook.cropper;
-	const refs = hook.refs;
+	// `hook.image` stays a getter: destructuring it would lose reactivity.
+	const { cropper, refs } = hook;
 
+	// Svelte needs static export names. `forwardCropperRef` in service/ref.ts lists the
+	// same methods; a test checks that every one of them is exported.
 	export const {
 		reset,
 		refresh,
@@ -106,12 +99,6 @@
 		isLoading,
 		isLoaded
 	} = cropper;
-
-	const WrapperComponent = $derived(wrapperComponent);
-	const BoundaryComponent = $derived(boundaryComponent);
-	const BackgroundWrapperComponent = $derived(backgroundWrapperComponent);
-	const BackgroundComponent = $derived(backgroundComponent);
-	const StencilComponent = $derived(stencilComponent);
 </script>
 
 <WrapperComponent

@@ -1,3 +1,4 @@
+import { onDestroy } from 'svelte';
 import { Animation, type CropperTransitions } from 'advanced-cropper';
 
 /**
@@ -9,20 +10,18 @@ export function useTransition(getTransitions: () => CropperTransitions | null | 
 	let active = $state(false);
 
 	// Upstream leaves the animation running after unmount; stop it with the component.
-	$effect(() => () => animation.stop());
+	onDestroy(() => animation.stop());
 
 	return {
 		run(callback: (progress: number) => void) {
 			const transitions = getTransitions();
-			if (transitions && transitions.active) {
+			if (transitions?.active) {
 				animation.start({
 					...transitions,
 					onStart() {
 						active = true;
 					},
-					onProgress(progress: number) {
-						callback(progress);
-					},
+					onProgress: callback,
 					onStop() {
 						active = false;
 					}

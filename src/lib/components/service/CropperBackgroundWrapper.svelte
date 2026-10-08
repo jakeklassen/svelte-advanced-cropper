@@ -41,7 +41,7 @@
 		disabled
 	}: CropperBackgroundWrapperProps = $props();
 
-	const transitions = $derived(cropper.getTransitions());
+	const transitionsActive = $derived(cropper.getTransitions().active);
 	const rotateImageOptions = $derived(useRotateImageOptions(rotateImage));
 	const scaleImageOptions = $derived(useScaleImageOptions(scaleImage));
 	const moveImageOptions = $derived(useMoveImageOptions(moveImage));
@@ -57,7 +57,7 @@
 	touchScale={scaleImageOptions.touch}
 	wheelScale={scaleImageOptions.wheel}
 	touchRotate={rotateImageOptions.touch}
-	disabled={transitions.active || disabled}
+	disabled={transitionsActive || disabled}
 	preventDefault={!disabled}
 	{timeout}
 >

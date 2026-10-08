@@ -158,21 +158,9 @@ export { styleToString } from './service/style';
 // Instance
 export { CropperInstance, type CropperInstanceProps } from './instance/CropperInstance.svelte';
 
-// Core. Upstream also re-exports the core subpaths (`/defaults`, `/state`, ...); the
-// root entry already re-exports all of them, and importing only the root avoids loading
-// the core twice under SSR.
+// Core. Upstream also re-exports the core subpaths (`/defaults`, `/state`, ...) and
+// lists a few utils explicitly to disambiguate them; the root entry already re-exports
+// all of them, and importing only the root avoids loading the core twice under SSR.
 export * from 'advanced-cropper';
-export {
-	isLower,
-	isGreater,
-	isRoughlyEqual,
-	isNumber,
-	isUndefined,
-	isArray,
-	isNumeric,
-	isWheelEvent,
-	isMouseEvent,
-	isTouchEvent
-} from 'advanced-cropper';
 
 export type { StencilSize } from 'advanced-cropper/extensions/stencil-size';

@@ -9,17 +9,19 @@
 </script>
 
 <script lang="ts">
+	import { crossOriginAttribute } from '../../service/image';
 	let { src, crossOrigin = true, ref = $bindable(null), ...props }: CropperSourceProps = $props();
 </script>
 
 {#if src}
+	<!-- A new element per image, as upstream keys the <img> by src. -->
 	{#key src}
 		<img
 			bind:this={ref}
 			{src}
 			alt=""
 			class="advanced-cropper-source"
-			crossorigin={crossOrigin === true ? 'anonymous' : crossOrigin || undefined}
+			crossorigin={crossOriginAttribute(crossOrigin)}
 			{...props}
 		/>
 	{/key}

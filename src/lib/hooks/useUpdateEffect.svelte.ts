@@ -1,4 +1,4 @@
-import { untrack } from 'svelte';
+import { onDestroy, untrack } from 'svelte';
 
 function sameDeps(a: unknown, b: unknown): boolean {
 	if (Array.isArray(a) && Array.isArray(b)) {
@@ -38,5 +38,5 @@ export function useUpdateEffect(effect: () => void | (() => void), deps: () => u
 		});
 	});
 
-	$effect(() => () => cleanup?.());
+	onDestroy(() => cleanup?.());
 }

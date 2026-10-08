@@ -20,7 +20,6 @@
 <script lang="ts">
 	import { on } from 'svelte/events';
 	import { distance, type Point, type SimpleTouch } from 'advanced-cropper';
-	import { useUpdateEffect } from '../../hooks/useUpdateEffect.svelte';
 
 	let {
 		class: className,
@@ -36,157 +35,153 @@
 	}: DraggableElementProps = $props();
 
 	// Gesture bookkeeping. Plain variables: none of it is rendered.
-	let touches: SimpleTouch[] = [];
-	let started = false;
+	// The touches (or mouse position) of the previous event of the current gesture.
+	let lastTouches: SimpleTouch[] = [];
+	// A touch gesture only starts moving once it has travelled `activationDistance`.
+	let touchActivated = false;
 	let hovered = false;
+	// Where the gesture started, relative to the element.
 	let anchor: Point = { left: 0, top: 0 };
 	let container: HTMLDivElement | undefined;
 
-	const processMove = (e: MouseEvent | TouchEvent, newTouches: SimpleTouch[]) => {
-		if (container && touches.length) {
-			const { left, top } = container.getBoundingClientRect();
-			if (touches.length === 1 && newTouches.length === 1 && onMove) {
-				const movingToAnchor = {
-					left:
-						Math.abs(newTouches[0].clientX - anchor.left - left) <
-						Math.abs(touches[0].clientX - anchor.left - left),
-					top:
-						Math.abs(newTouches[0].clientY - anchor.top - top) <
-						Math.abs(touches[0].clientY - anchor.top - top)
-				};
-
-				const direction = { left: 0, top: 0 };
-
-				if (!useAnchor || !movingToAnchor.left) {
-					direction.left = newTouches[0].clientX - touches[0].clientX;
-				}
-
-				if (!useAnchor || !movingToAnchor.top) {
-					direction.top = newTouches[0].clientY - touches[0].clientY;
-				}
-
-				onMove(direction, e);
-
-				touches = [...newTouches];
-			}
-		}
-	};
-
-	const processEnd = () => {
-		if (!disabled && touches.length) {
-			onMoveEnd?.();
-		}
-
-		if (hovered) {
-			onLeave?.();
-			hovered = false;
-		}
-
-		touches = [];
-	};
-
-	const initAnchor = (touch: SimpleTouch) => {
-		if (container) {
-			const { left, top } = container.getBoundingClientRect();
-			anchor = {
-				left: touch.clientX - left,
-				top: touch.clientY - top
-			};
-		}
-	};
-
-	const onMouseOver = () => {
+	function enter() {
 		if (!hovered && !disabled) {
 			hovered = true;
 			onEnter?.();
 		}
-	};
+	}
 
-	const onMouseLeave = () => {
-		if (hovered && !touches.length) {
+	function leave() {
+		if (hovered) {
 			hovered = false;
 			onLeave?.();
 		}
+	}
+
+	function setAnchor(touch: SimpleTouch) {
+		if (!container) {
+			return;
+		}
+
+		const { left, top } = container.getBoundingClientRect();
+		anchor = { left: touch.clientX - left, top: touch.clientY - top };
+	}
+
+	function processMove(event: MouseEvent | TouchEvent, touches: SimpleTouch[]) {
+		if (!container || !onMove || lastTouches.length !== 1 || touches.length !== 1) {
+			return;
+		}
+
+		const [previous] = lastTouches;
+		const [current] = touches;
+		const { left, top } = container.getBoundingClientRect();
+		// With useAnchor, an axis doesn't move while the pointer heads back toward the point
+		// where it grabbed the element: after the element stops at a limit, it waits for the
+		// pointer to return to that point before following it again.
+		const movingToAnchor = {
+			left:
+				Math.abs(current.clientX - anchor.left - left) <
+				Math.abs(previous.clientX - anchor.left - left),
+			top:
+				Math.abs(current.clientY - anchor.top - top) < Math.abs(previous.clientY - anchor.top - top)
+		};
+
+		onMove(
+			{
+				left: !useAnchor || !movingToAnchor.left ? current.clientX - previous.clientX : 0,
+				top: !useAnchor || !movingToAnchor.top ? current.clientY - previous.clientY : 0
+			},
+			event
+		);
+		lastTouches = [...touches];
+	}
+
+	function processEnd() {
+		if (!disabled && lastTouches.length) {
+			onMoveEnd?.();
+		}
+
+		leave();
+		lastTouches = [];
+	}
+
+	const onMouseLeave = () => {
+		if (!lastTouches.length) {
+			leave();
+		}
 	};
 
-	const onTouchStart = (e: TouchEvent) => {
-		if (e.cancelable) {
-			touches = Array.from(e.touches);
+	const onTouchStart = (event: TouchEvent) => {
+		if (!event.cancelable) {
+			return;
+		}
 
-			const shouldStartMove = !disabled && e.touches.length === 1;
-			if (shouldStartMove) {
-				onMoveStart?.();
-			}
+		lastTouches = Array.from(event.touches);
+		const shouldStartMove = !disabled && event.touches.length === 1;
+		if (shouldStartMove) {
+			onMoveStart?.();
+		}
 
-			if (!hovered && !disabled) {
-				hovered = true;
-				onEnter?.();
-			}
-
-			if (started || shouldStartMove) {
-				e.preventDefault();
-				e.stopPropagation();
-			}
+		enter();
+		if (touchActivated || shouldStartMove) {
+			event.preventDefault();
+			event.stopPropagation();
 		}
 	};
 
 	const onTouchEnd = () => {
-		started = false;
+		touchActivated = false;
 		processEnd();
 	};
 
-	const onTouchMove = (e: TouchEvent) => {
-		if (touches.length >= 1) {
-			if (started) {
-				processMove(e, Array.from(e.touches));
-				e.preventDefault();
-				e.stopPropagation();
-			} else if (
-				distance(
-					{ left: touches[0].clientX, top: touches[0].clientY },
-					{ left: e.touches[0].clientX, top: e.touches[0].clientY }
-				) > (activationDistance || 0)
-			) {
-				initAnchor({
-					clientX: e.touches[0].clientX,
-					clientY: e.touches[0].clientY
-				});
-				started = true;
-			}
+	const onTouchMove = (event: TouchEvent) => {
+		if (!lastTouches.length) {
+			return;
+		}
+
+		if (touchActivated) {
+			processMove(event, Array.from(event.touches));
+			event.preventDefault();
+			event.stopPropagation();
+
+			return;
+		}
+
+		const [start] = lastTouches;
+		const [current] = event.touches;
+		const travelled = distance(
+			{ left: start.clientX, top: start.clientY },
+			{ left: current.clientX, top: current.clientY }
+		);
+		if (travelled > (activationDistance || 0)) {
+			setAnchor({ clientX: current.clientX, clientY: current.clientY });
+			touchActivated = true;
 		}
 	};
 
-	const onMouseDown = (e: MouseEvent) => {
-		if (!disabled && e.button === 0) {
-			const touch = {
-				clientX: e.clientX,
-				clientY: e.clientY
-			};
-			touches = [touch];
-			initAnchor(touch);
-			e.stopPropagation();
-			onMoveStart?.();
+	const onMouseDown = (event: MouseEvent) => {
+		if (disabled || event.button !== 0) {
+			return;
 		}
+
+		const touch = { clientX: event.clientX, clientY: event.clientY };
+		lastTouches = [touch];
+		setAnchor(touch);
+		event.stopPropagation();
+		onMoveStart?.();
 	};
 
-	const onMouseMove = (e: MouseEvent) => {
-		if (!disabled && touches.length) {
-			processMove(e, [
-				{
-					clientX: e.clientX,
-					clientY: e.clientY
-				}
-			]);
-			if (e.preventDefault && e.cancelable) {
-				e.preventDefault();
-			}
-
-			e.stopPropagation();
+	const onMouseMove = (event: MouseEvent) => {
+		if (disabled || !lastTouches.length) {
+			return;
 		}
-	};
 
-	const onMouseUp = () => {
-		processEnd();
+		processMove(event, [{ clientX: event.clientX, clientY: event.clientY }]);
+		if (event.cancelable) {
+			event.preventDefault();
+		}
+
+		event.stopPropagation();
 	};
 
 	// Native, non-passive listeners: they must call preventDefault/stopPropagation
@@ -196,7 +191,7 @@
 		container = element;
 		const options = { passive: false };
 		const cleanups = [
-			on(window, 'mouseup', onMouseUp, options),
+			on(window, 'mouseup', processEnd, options),
 			on(window, 'mousemove', onMouseMove, options),
 			on(window, 'touchmove', onTouchMove, options),
 			on(window, 'touchend', onTouchEnd, options),
@@ -214,21 +209,18 @@
 	}
 
 	// Upstream's componentDidUpdate: drop the gesture when the element gets disabled.
-	useUpdateEffect(
-		() => {
-			if (disabled) {
-				touches = [];
-			}
-		},
-		() => disabled
-	);
+	$effect(() => {
+		if (disabled) {
+			lastTouches = [];
+		}
+	});
 </script>
 
 <!-- svelte-ignore a11y_mouse_events_have_key_events -->
 <div
 	class={['advanced-cropper-draggable-element', className]}
 	{@attach listen}
-	onmouseover={onMouseOver}
+	onmouseover={enter}
 	onmouseleave={onMouseLeave}
 	role="presentation"
 >
