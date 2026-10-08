@@ -25,7 +25,7 @@ Once you can build all three, you can build nearly any cropper you are likely to
 In a classic cropper the user picks the area mainly by moving and resizing the stencil. Some classic croppers also let the user pan or zoom the image, but that is a secondary way to adjust the selection.
 
 <Example source={cropperTypesSource} title="CropperTypesExample">
-	<CropperTypesExample src={image('pexels-photo-3761018.jpeg')} />
+	<CropperTypesExample src={image('corgi-lying-down.jpg')} />
 </Example>
 
 Examples: [Yandex](https://www.yandex.com).
@@ -45,7 +45,7 @@ A fixed cropper has a static stencil: no handles, no dragging, no resizing, and 
 <Example source={fixedCropperTypeSource} title="FixedCropperTypeExample">
 	<FixedCropperTypeExample
 		size="medium"
-		src={image('photo-1583172332547-c768b4e2f5ff.jpg')}
+		src={image('dog-on-grass.jpg')}
 		stencilProps={{
 			handlers: {},
 			lines: {},
@@ -116,7 +116,7 @@ A hybrid cropper is a fixed cropper whose stencil is left interactive. Take the 
 
 <Example source={fixedCropperTypeSource} title="FixedCropperTypeExample">
 	<FixedCropperTypeExample
-		src={image('photo-1583853287541-6e82b3d5ea12.jpg')}
+		src={image('three-puppies.jpg')}
 		stencilSize={{
 			width: 280,
 			height: 280

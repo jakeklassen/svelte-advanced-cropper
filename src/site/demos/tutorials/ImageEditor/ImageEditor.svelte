@@ -19,7 +19,7 @@
 
 	let cropper: CropperRef | undefined = $state();
 
-	let src = $state(image('pexels-photo-4383577.jpeg'));
+	let src = $state(image('labrador-with-tulip.jpg'));
 
 	let mode: Mode = $state('crop');
 

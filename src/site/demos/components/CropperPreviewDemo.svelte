@@ -6,11 +6,7 @@
 </script>
 
 <div class="cropper-preview-demo">
-	<Cropper
-		bind:this={cropper}
-		class="cropper-preview-demo__cropper"
-		src={image('photo-1623432532623-f8f1347d954c.jpg')}
-	/>
+	<Cropper bind:this={cropper} class="cropper-preview-demo__cropper" src={image('schnauzer.jpg')} />
 	<CropperPreview {cropper} class="cropper-preview-demo__preview" />
 </div>
 

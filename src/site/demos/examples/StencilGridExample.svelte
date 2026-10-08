@@ -2,7 +2,7 @@
 	import { Cropper } from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 
-	const src = image('anna1991anna-0WDLQzK7u0E-unsplash.jpg');
+	const src = image('cat-on-green.jpg');
 </script>
 
 <Cropper class="stencil-grid-example" stencilProps={{ grid: true }} {src} />

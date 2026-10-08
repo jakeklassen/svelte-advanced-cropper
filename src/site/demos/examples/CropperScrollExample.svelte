@@ -3,7 +3,7 @@
 	import BackgroundWrapperWithNotifications from './BackgroundWrapperWithNotifications.svelte';
 	import { image } from '#site/paths.ts';
 
-	const src = image('photo-1633158617942-204b1469bc05.jpg');
+	const src = image('tabby-cat-on-blue.jpg');
 </script>
 
 <Cropper

@@ -2,17 +2,17 @@
 	import { Cropper } from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 
-	const src = image('photo-1527199372136-dff50c10ea34.jpg');
+	const src = image('sunlit-forest.jpg');
 </script>
 
 <Cropper
 	class="default-coordinates-example"
 	{src}
 	defaultCoordinates={{
-		width: 400,
-		height: 400,
-		left: 100,
-		top: 100
+		width: 600,
+		height: 600,
+		left: 150,
+		top: 150
 	}}
 />
 

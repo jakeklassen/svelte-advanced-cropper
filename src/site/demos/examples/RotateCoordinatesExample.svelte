@@ -8,7 +8,7 @@
 		rotate: number;
 	}
 
-	const src = image('pexels-roman-iskanderov-624959616-17587410.jpg');
+	const src = image('orange-cat-stretching.jpg');
 
 	const examples: Example[] = [
 		{ image: { width: 194, height: 353 }, stencil: { width: 150, height: 200 }, rotate: 0 },

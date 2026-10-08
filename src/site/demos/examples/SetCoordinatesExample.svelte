@@ -12,7 +12,7 @@
 	import VerticalButtons from '#site/demos/shared/VerticalButtons.svelte';
 	import { image } from '#site/paths.ts';
 
-	const src = image('photo-1532182657011-d3d31357b5d8.jpg');
+	const src = image('flowers-and-pier.jpg');
 
 	let cropper: CropperRef | undefined = $state();
 

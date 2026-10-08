@@ -24,8 +24,7 @@
 		</div>
 	</div>
 	<p class="footer__copyright">
-		MIT licensed. A Svelte port of Norserium's react-advanced-cropper. Photos from Unsplash and
-		Pexels.
+		MIT licensed. A Svelte port of Norserium's react-advanced-cropper. Photos from Unsplash.
 	</p>
 </footer>
 

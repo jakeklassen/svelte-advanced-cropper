@@ -53,10 +53,10 @@
 	];
 
 	const images = [
-		'karina-tess-GIgMRVBD-1s-unsplash.jpg',
-		'pexels-photo-876344.jpeg',
-		'photo-1599032909756-5deb82fea3b0.jpg',
-		'photo-1639141700803-e5836ba39b4b.jpg'
+		'cat-reaching-up.jpg',
+		'yosemite-river.jpg',
+		'golden-puppy-on-grass.jpg',
+		'siamese-cat.jpg'
 	].map((name) => ({
 		src: image(name),
 		// Each photo has a small thumbnail next to it: `photo.jpg` → `photo__preview.jpg`.

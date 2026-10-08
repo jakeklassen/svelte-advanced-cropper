@@ -3,7 +3,7 @@
 	import TwitterCropper from './TwitterCropper.svelte';
 </script>
 
-<TwitterCropper class="twitter-showcase" src={image('sule-makaroglu-wvEaVy5DGf4-unsplash.jpg')} />
+<TwitterCropper class="twitter-showcase" src={image('corgi-puppy.jpg')} />
 
 <style>
 	:global(.twitter-showcase) {

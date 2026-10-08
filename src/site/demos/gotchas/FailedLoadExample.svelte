@@ -4,7 +4,7 @@
 
 	type Status = 'loading' | 'ready' | 'error';
 
-	const photo = image('photo-1553301208-a3718cc0150e.jpg');
+	const photo = image('orange-cat-on-table.jpg');
 
 	let src = $state(photo);
 	let checkOrientation = $state(true);

@@ -2,7 +2,7 @@
 	import { image } from '#site/paths.ts';
 	import CustomCropper from './CustomCropper.svelte';
 
-	const src = image('kamyar-ghalamchi-HO4cDQGPlq0-unsplash.jpg');
+	const src = image('calico-cat.jpg');
 </script>
 
 <CustomCropper

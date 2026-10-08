@@ -2,7 +2,7 @@
 	import { Cropper, type Size } from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 
-	const src = image('pexels-photo-1451124.jpeg');
+	const src = image('chocolate-labrador.jpg');
 	const height = 360;
 
 	let scale = $state(0.75);

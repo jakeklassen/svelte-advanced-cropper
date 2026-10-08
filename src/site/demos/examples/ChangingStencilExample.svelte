@@ -2,7 +2,7 @@
 	import { CircleStencil, Cropper, type CropperRef } from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 
-	const src = image('photo-1485178575877-1a13bf489dfe.jpg');
+	const src = image('tabby-cat-in-shadow.jpg');
 
 	function onChange(cropper: CropperRef) {
 		console.log(cropper.getCoordinates(), cropper.getCanvas());

@@ -9,7 +9,7 @@
 	import SquareButton from '#site/demos/shared/SquareButton.svelte';
 	import { image } from '#site/paths.ts';
 
-	let src = $state(image('photo-1623432532623-f8f1347d954c.jpg'));
+	let src = $state(image('schnauzer.jpg'));
 
 	let cropper: CropperRef | undefined = $state();
 	let largePreview: CropperPreviewRef | undefined = $state();

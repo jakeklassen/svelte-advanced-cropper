@@ -10,7 +10,7 @@
 
 	type Strategy = 'nothing' | 'refresh' | 'refit';
 
-	const src = image('photo-1553301208-a3718cc0150e.jpg');
+	const src = image('orange-cat-on-table.jpg');
 
 	let cropper: CropperRef | undefined = $state();
 	let strategy: Strategy = $state('refit');

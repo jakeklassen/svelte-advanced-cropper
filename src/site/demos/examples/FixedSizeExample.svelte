@@ -2,7 +2,7 @@
 	import { FixedCropper, ImageRestriction } from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 
-	const src = image('photo-1527137342181-19aab11a8ee8.jpg');
+	const src = image('house-by-lake.jpg');
 </script>
 
 <FixedCropper

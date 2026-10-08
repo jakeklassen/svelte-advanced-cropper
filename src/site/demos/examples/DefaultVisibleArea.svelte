@@ -2,13 +2,14 @@
 	import { Cropper, Priority } from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 
-	const src = image('photo-1602718571797-49d5e9d54563.jpg');
+	const src = image('orange-cat-on-table.jpg');
 
+	// The cat's head, in the photo's own pixels (1400×1960).
 	const defaultVisibleArea = {
 		width: 800,
 		height: 775,
-		left: 63,
-		top: 668
+		left: 175,
+		top: 340
 	};
 </script>
 

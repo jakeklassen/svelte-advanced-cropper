@@ -8,7 +8,7 @@
 	} from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 
-	const src = image('photo-1596473322597-91d5b6938b8a.jpg');
+	const src = image('dog-on-beach.jpg');
 
 	let cropper: CropperRef | undefined = $state();
 	let adjustStencil = $state(false);
@@ -46,10 +46,10 @@
 		{defaultSize}
 		{defaultPosition}
 		defaultVisibleArea={{
-			width: 1024,
-			height: 689,
-			left: 19,
-			top: 285
+			width: 1050,
+			height: 705,
+			left: 115,
+			top: 720
 		}}
 		{src}
 	/>

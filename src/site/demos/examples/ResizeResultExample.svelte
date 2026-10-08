@@ -2,7 +2,7 @@
 	import { Cropper, type CropperRef } from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 
-	const src = image('pexels-isabella-mariana-1988684.jpg');
+	const src = image('dogs-running.jpg');
 
 	let cropper: CropperRef | undefined = $state();
 

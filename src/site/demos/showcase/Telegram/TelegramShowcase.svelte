@@ -3,7 +3,7 @@
 	import TelegramCropper from './TelegramCropper.svelte';
 </script>
 
-<TelegramCropper class="telegram-showcase" src={image('pexels-photo-12381305.jpeg')} />
+<TelegramCropper class="telegram-showcase" src={image('tabby-cat-in-window.jpg')} />
 
 <style>
 	:global(.telegram-showcase) {

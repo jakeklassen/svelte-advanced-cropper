@@ -19,11 +19,11 @@
 	let { theme, grid = true }: Props = $props();
 
 	const images = {
-		bubble: 'photo-1595435934249-5df7ed86e1c0.jpg',
-		classic: 'photo-1520927640400-f9e83b1bc43e.jpg',
-		compact: 'pexels-photo-573238.jpeg',
-		corners: 'adam-flockemann-9j4xyaSQhUQ-unsplash.jpg',
-		default: 'photo-1583149577728-9ab503747013.jpg'
+		bubble: 'flowers-and-pier.jpg',
+		classic: 'tree-in-lake.jpg',
+		compact: 'mountain-lake.jpg',
+		corners: 'snowy-mountains.jpg',
+		default: 'sunlit-forest.jpg'
 	};
 
 	const src = $derived(image(images[theme]));

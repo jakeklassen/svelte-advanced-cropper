@@ -1,61 +1,38 @@
 # Photo credits
 
-The demo photos come from [Unsplash](https://unsplash.com/license) and [Pexels](https://www.pexels.com/license/), and are used under those licenses. They were taken from the react-advanced-cropper docs site, which used the same files. Copyright stays with the photographers.
+The demo photos are from [Unsplash](https://unsplash.com), used under the [Unsplash License](https://unsplash.com/license). Copyright stays with the photographers. Each was downloaded at 2000 px (landscape), 1400 px wide (portrait) or 1600 px (square) and recompressed for the web; the `__preview` files are small thumbnails of the same photos.
 
-- `adam-flockemann-9j4xyaSQhUQ-unsplash.jpg`: https://unsplash.com/photos/9j4xyaSQhUQ (by adam-flockemann)
-- `anna1991anna-0WDLQzK7u0E-unsplash.jpg`: https://unsplash.com/photos/0WDLQzK7u0E (by anna1991anna)
-- `anna1991anna-1mwSwmPrHM4-unsplash.jpg`: https://unsplash.com/photos/1mwSwmPrHM4 (by anna1991anna)
-- `farzin-yarahmadi-yR3GrvkWnLA-unsplash.jpg`: https://unsplash.com/photos/yR3GrvkWnLA (by farzin-yarahmadi)
-- `kamyar-ghalamchi-HO4cDQGPlq0-unsplash.jpg`: https://unsplash.com/photos/HO4cDQGPlq0 (by kamyar-ghalamchi)
-- `karina-tess-GIgMRVBD-1s-unsplash.jpg`: https://unsplash.com/photos/GIgMRVBD-1s (by karina-tess)
-- `karina-tess-GIgMRVBD-1s-unsplash__preview.jpg`: https://unsplash.com/photos/GIgMRVBD-1s (by karina-tess)
-- `pexels-isabella-mariana-1988684.jpg`: https://www.pexels.com/photo/1988684/
-- `pexels-jeandaniel-francoeur-8832900.jpg`: https://www.pexels.com/photo/8832900/
-- `pexels-photo-10426274.jpeg`: https://www.pexels.com/photo/10426274/
-- `pexels-photo-12381305.jpeg`: https://www.pexels.com/photo/12381305/
-- `pexels-photo-1451124.jpeg`: https://www.pexels.com/photo/1451124/
-- `pexels-photo-1642574.jpeg`: https://www.pexels.com/photo/1642574/
-- `pexels-photo-1758144.jpeg`: https://www.pexels.com/photo/1758144/
-- `pexels-photo-2890387.jpeg`: https://www.pexels.com/photo/2890387/
-- `pexels-photo-3761018.jpeg`: https://www.pexels.com/photo/3761018/
-- `pexels-photo-4218687.jpeg`: https://www.pexels.com/photo/4218687/
-- `pexels-photo-4383577.jpeg`: https://www.pexels.com/photo/4383577/
-- `pexels-photo-5006465.jpeg`: https://www.pexels.com/photo/5006465/
-- `pexels-photo-573238.jpeg`: https://www.pexels.com/photo/573238/
-- `pexels-photo-6524107.jpeg`: https://www.pexels.com/photo/6524107/
-- `pexels-photo-876344.jpeg`: https://www.pexels.com/photo/876344/
-- `pexels-photo-876344__preview.jpeg`: https://www.pexels.com/photo/876344/
-- `pexels-roman-iskanderov-624959616-17587410.jpg`: https://www.pexels.com/photo/17587410/
-- `pexels-sampiccs-7244804.jpg`: https://www.pexels.com/photo/7244804/
-- `photo-1485178575877-1a13bf489dfe.jpg`: https://images.unsplash.com/photo-1485178575877-1a13bf489dfe
-- `photo-1494205577727-d32e58564756.jpg`: https://images.unsplash.com/photo-1494205577727-d32e58564756
-- `photo-1507692812060-98338d07aca3.jpeg`: https://images.unsplash.com/photo-1507692812060-98338d07aca3
-- `photo-1520927640400-f9e83b1bc43e.jpg`: https://images.unsplash.com/photo-1520927640400-f9e83b1bc43e
-- `photo-1527137342181-19aab11a8ee8.jpg`: https://images.unsplash.com/photo-1527137342181-19aab11a8ee8
-- `photo-1527199372136-dff50c10ea34.jpg`: https://images.unsplash.com/photo-1527199372136-dff50c10ea34
-- `photo-1532182657011-d3d31357b5d8.jpg`: https://images.unsplash.com/photo-1532182657011-d3d31357b5d8
-- `photo-1538888649860-8fb12eb67541.jpg`: https://images.unsplash.com/photo-1538888649860-8fb12eb67541
-- `photo-1542571255-84471dc5581c.jpg`: https://images.unsplash.com/photo-1542571255-84471dc5581c
-- `photo-1553301208-a3718cc0150e.jpg`: https://images.unsplash.com/photo-1553301208-a3718cc0150e
-- `photo-1571040895662-2daba5bb466f.jpg`: https://images.unsplash.com/photo-1571040895662-2daba5bb466f
-- `photo-1583149577728-9ab503747013.jpg`: https://images.unsplash.com/photo-1583149577728-9ab503747013
-- `photo-1583172332547-c768b4e2f5ff.jpg`: https://images.unsplash.com/photo-1583172332547-c768b4e2f5ff
-- `photo-1583511655857-d19b40a7a54e.jpg`: https://images.unsplash.com/photo-1583511655857-d19b40a7a54e
-- `photo-1583853287541-6e82b3d5ea12.jpg`: https://images.unsplash.com/photo-1583853287541-6e82b3d5ea12
-- `photo-1586083718719-019f9dc6ca94.jpg`: https://images.unsplash.com/photo-1586083718719-019f9dc6ca94
-- `photo-1586598901893-8ac605430b78.jpg`: https://images.unsplash.com/photo-1586598901893-8ac605430b78
-- `photo-1587767959235-abd2d4b4cbe8.jpg`: https://images.unsplash.com/photo-1587767959235-abd2d4b4cbe8
-- `photo-1587977966839-4bd2a74441cc.jpg`: https://images.unsplash.com/photo-1587977966839-4bd2a74441cc
-- `photo-1595435934249-5df7ed86e1c0.jpg`: https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0
-- `photo-1596473322597-91d5b6938b8a.jpg`: https://images.unsplash.com/photo-1596473322597-91d5b6938b8a
-- `photo-1599032909756-5deb82fea3b0.jpg`: https://images.unsplash.com/photo-1599032909756-5deb82fea3b0
-- `photo-1599032909756-5deb82fea3b0__preview.jpg`: https://images.unsplash.com/photo-1599032909756-5deb82fea3b0
-- `photo-1599140849279-1014532882fe.jpg`: https://images.unsplash.com/photo-1599140849279-1014532882fe
-- `photo-1600353068867-5b4de71e3afb.jpg`: https://images.unsplash.com/photo-1600353068867-5b4de71e3afb
-- `photo-1602718571797-49d5e9d54563.jpg`: https://images.unsplash.com/photo-1602718571797-49d5e9d54563
-- `photo-1604335079441-274c03ad99a1.jpg`: https://images.unsplash.com/photo-1604335079441-274c03ad99a1
-- `photo-1623432532623-f8f1347d954c.jpg`: https://images.unsplash.com/photo-1623432532623-f8f1347d954c
-- `photo-1633158617942-204b1469bc05.jpg`: https://images.unsplash.com/photo-1633158617942-204b1469bc05
-- `photo-1639141700803-e5836ba39b4b.jpg`: https://images.unsplash.com/photo-1639141700803-e5836ba39b4b
-- `photo-1639141700803-e5836ba39b4b__preview.jpg`: https://images.unsplash.com/photo-1639141700803-e5836ba39b4b
-- `sule-makaroglu-wvEaVy5DGf4-unsplash.jpg`: https://unsplash.com/photos/wvEaVy5DGf4 (by sule-makaroglu)
+The set is animals and nature only. When adding a photo, keep to that, and credit it here.
+
+- `orange-cat-on-table.jpg`: https://unsplash.com/photos/75715CVEJhI by Amber Kipp
+- `cat-reaching-up.jpg`: https://unsplash.com/photos/ZCHj_2lJP00 by Alvan Nee
+- `kitten-yawning.jpg`: https://unsplash.com/photos/7AIDE8PrvA0 by Loan
+- `tabby-cat-on-stairs.jpg`: https://unsplash.com/photos/mJaD10XeD7w by Alexander London
+- `calico-cat.jpg`: https://unsplash.com/photos/xadzcCQZ_Xc by Uriel Soberanes
+- `orange-cat-stretching.jpg`: https://unsplash.com/photos/ZlFKIG6dApg by Timo Volz
+- `tabby-cat-in-window.jpg`: https://unsplash.com/photos/CEx86maLUSc by Bogdan Farca
+- `orange-cat-in-box.jpg`: https://unsplash.com/photos/mrTydVjg04o by Timo Volz
+- `siamese-cat.jpg`: https://unsplash.com/photos/KGiQFgF7dkc by Alex Meier
+- `labrador-with-tulip.jpg`: https://unsplash.com/photos/Sg3XwuEpybU by Richard Brutyo
+- `dog-on-grass.jpg`: https://unsplash.com/photos/G8cB8hY3yvU by Ralu Gal
+- `corgi-puppy.jpg`: https://unsplash.com/photos/brFsZ7qszSY by Alvan Nee
+- `dog-on-beach.jpg`: https://unsplash.com/photos/AbNO2iejoXA by Ryan Walton
+- `schnauzer.jpg`: https://unsplash.com/photos/8g0D8ZfFXyA by Alvan Nee
+- `golden-puppy-on-grass.jpg`: https://unsplash.com/photos/atOlntWcO4k by PartTime Portraits
+- `golden-puppy.jpg`: https://unsplash.com/photos/9LkqymZFLrE by Bill Stephan
+- `yosemite-river.jpg`: https://unsplash.com/photos/NRQV-hBF10M by Bailey Zindel
+- `snowy-mountains.jpg`: https://unsplash.com/photos/Bkci_8qcdvQ by Kalen Emsley
+- `house-by-lake.jpg`: https://unsplash.com/photos/zAjdgNXsMeg by Luca Bravo
+- `mountain-lake.jpg`: https://unsplash.com/photos/73F4pKoUkM0 by Tobias Keller
+- `tree-in-lake.jpg`: https://unsplash.com/photos/KonWFWUaAuk by Ken Cheung
+- `el-capitan.jpg`: https://unsplash.com/photos/ndN00KmbJ1c by Adam Kool
+- `sunlit-forest.jpg`: https://unsplash.com/photos/RwHv7LgeC7s by Johannes Plenio
+- `flowers-and-pier.jpg`: https://unsplash.com/photos/K2s_YE031CA by Mark Harpur
+- `cat-on-green.jpg`: https://unsplash.com/photos/gKXKBY-C-Dk by Manja Vitolic
+- `dogs-running.jpg`: https://unsplash.com/photos/T-0EW-SEbsE by Alvan Nee
+- `chocolate-labrador.jpg`: https://unsplash.com/photos/v3-zcCWMjgM by James Barker
+- `corgi-lying-down.jpg`: https://unsplash.com/photos/1QsQRkxnU6I by fatty corgi
+- `three-puppies.jpg`: https://unsplash.com/photos/2_3c4dIFYFU by Anoir Chafik
+- `tabby-cat-in-shadow.jpg`: https://unsplash.com/photos/cWOzOnSoh6Q by Pacto Visual
+- `orange-cat-on-yellow.jpg`: https://unsplash.com/photos/p6yH8VmGqxo by Kabo
+- `tabby-cat-on-blue.jpg`: https://unsplash.com/photos/IuJc2qh2TcA by Cédric VT

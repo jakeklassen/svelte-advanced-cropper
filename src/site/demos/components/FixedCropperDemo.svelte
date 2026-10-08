@@ -12,7 +12,7 @@
 
 <FixedCropper
 	class="fixed-cropper-demo"
-	src={image('photo-1527137342181-19aab11a8ee8.jpg')}
+	src={image('house-by-lake.jpg')}
 	{stencilSize}
 	stencilProps={{ handlers: {}, lines: {}, movable: false, resizable: false }}
 	imageRestriction={ImageRestriction.stencil}

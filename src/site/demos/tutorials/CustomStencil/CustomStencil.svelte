@@ -3,7 +3,7 @@
 	import { image } from '#site/paths.ts';
 	import CircleStencil from './CircleStencil.svelte';
 
-	const src = image('pexels-photo-1451124.jpeg');
+	const src = image('chocolate-labrador.jpg');
 </script>
 
 <Cropper class="custom-stencil-example" stencilComponent={CircleStencil} {src} />

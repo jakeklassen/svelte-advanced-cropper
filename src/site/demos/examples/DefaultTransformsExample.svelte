@@ -4,7 +4,7 @@
 
 	let cropper: CropperRef | undefined = $state();
 	let input: HTMLInputElement | undefined = $state();
-	let src = $state(image('farzin-yarahmadi-yR3GrvkWnLA-unsplash.jpg'));
+	let src = $state(image('tabby-cat-on-stairs.jpg'));
 
 	const transforms: Record<string, PartialTransforms> = {
 		'horizontal-flip': { flip: { horizontal: true } },

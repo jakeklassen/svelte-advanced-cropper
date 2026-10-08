@@ -4,7 +4,7 @@
 	import { image } from '#site/paths.ts';
 	import PreviewResults from './PreviewResults.svelte';
 
-	const src = image('photo-1583511655857-d19b40a7a54e.jpg');
+	const src = image('dogs-running.jpg');
 
 	let coordinates: Coordinates | null = $state(null);
 	let preview: string | undefined = $state();

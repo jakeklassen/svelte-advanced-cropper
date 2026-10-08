@@ -5,7 +5,7 @@
 	import VerticalButtons from '#site/demos/shared/VerticalButtons.svelte';
 	import { image } from '#site/paths.ts';
 
-	const src = image('photo-1538888649860-8fb12eb67541.jpg');
+	const src = image('cat-on-green.jpg');
 
 	let cropper: CropperRef | undefined = $state();
 

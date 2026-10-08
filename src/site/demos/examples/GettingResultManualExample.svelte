@@ -3,7 +3,7 @@
 	import { image } from '#site/paths.ts';
 	import PreviewResults from './PreviewResults.svelte';
 
-	const src = image('photo-1586083718719-019f9dc6ca94.jpg');
+	const src = image('orange-cat-in-box.jpg');
 
 	let cropper: CropperRef | undefined = $state();
 	let coordinates: Coordinates | null = $state(null);

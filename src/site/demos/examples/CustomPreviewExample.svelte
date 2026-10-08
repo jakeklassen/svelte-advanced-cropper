@@ -2,7 +2,7 @@
 	import { CircleStencil, Cropper } from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 
-	const src = image('pexels-photo-1642574.jpeg');
+	const src = image('orange-cat-on-yellow.jpg');
 </script>
 
 <Cropper

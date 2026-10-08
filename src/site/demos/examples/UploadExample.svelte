@@ -2,7 +2,7 @@
 	import { Cropper, type CropperRef } from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 
-	const src = image('photo-1604335079441-274c03ad99a1.jpg');
+	const src = image('yosemite-river.jpg');
 
 	let cropper: CropperRef | undefined = $state();
 

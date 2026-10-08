@@ -119,4 +119,4 @@ Pull requests opened by CI don't trigger CI themselves (a GitHub rule for `GITHU
 
 ## License
 
-MIT for the source code. See [LICENSE](LICENSE). This project is derived from Norserium's MIT-licensed `react-advanced-cropper`. The docs site's text is original to this project. Upstream's documentation content belongs to Norserium and was not copied. Demo photos are from Unsplash and Pexels (`static/img/images/CREDITS.md`).
+MIT for the source code. See [LICENSE](LICENSE). This project is derived from Norserium's MIT-licensed `react-advanced-cropper`. The docs site's text is original to this project. Upstream's documentation content belongs to Norserium and was not copied. Demo photos are from Unsplash (`static/img/images/CREDITS.md`).

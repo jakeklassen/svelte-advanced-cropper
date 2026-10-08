@@ -2,7 +2,7 @@
 	import { Cropper, ImageRestriction, type CropperRef } from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 
-	const src = image('pexels-photo-10426274.jpeg');
+	const src = image('kitten-yawning.jpg');
 
 	let cropper: CropperRef | undefined = $state();
 	let imageRestriction = $state(ImageRestriction.none);

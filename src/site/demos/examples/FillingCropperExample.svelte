@@ -2,7 +2,7 @@
 	import { Cropper, type CropperState } from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 
-	const src = image('pexels-photo-6524107.jpeg');
+	const src = image('three-puppies.jpg');
 
 	// Make the stencil cover the whole visible area (or the whole image before the
 	// visible area is known).

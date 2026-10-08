@@ -11,7 +11,7 @@
 
 	let cropper: CropperRef | undefined = $state();
 	let input: HTMLInputElement | undefined = $state();
-	let src = $state(image('photo-1494205577727-d32e58564756.jpg'));
+	let src = $state(image('el-capitan.jpg'));
 
 	// Percentages of the image size. An empty field is `null` (no restriction).
 	let minWidth: number | null = $state(50);
