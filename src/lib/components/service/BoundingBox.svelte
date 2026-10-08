@@ -96,7 +96,6 @@
 			}
 		}
 	}
-
 </script>
 
 <script lang="ts">
@@ -141,8 +140,7 @@
 	const lineNodes = $derived(
 		points
 			.filter(
-				(point) =>
-					isCardinalDirection(point.name) && (isObject(lines) ? lines[point.name] : lines)
+				(point) => isCardinalDirection(point.name) && (isObject(lines) ? lines[point.name] : lines)
 			)
 			.map((point) => {
 				const name = point.name as CardinalDirection;

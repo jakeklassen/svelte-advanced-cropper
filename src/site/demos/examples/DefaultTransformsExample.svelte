@@ -59,11 +59,7 @@
 				<option value="rotate-180">Rotate 180°</option>
 			</select>
 		</label>
-		<button
-			type="button"
-			class="default-transforms-example__button"
-			onclick={() => input?.click()}
-		>
+		<button type="button" class="default-transforms-example__button" onclick={() => input?.click()}>
 			Upload image
 		</button>
 		<input

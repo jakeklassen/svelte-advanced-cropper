@@ -21,7 +21,8 @@
 		{
 			key: 'default-cropper',
 			name: 'Default Cropper',
-			description: 'The standard Cropper with a dark look and a custom toolbar for flips and turns.',
+			description:
+				'The standard Cropper with a dark look and a custom toolbar for flips and turns.',
 			features: ['Custom Navigation', 'Styling'],
 			icon: Crop,
 			settings: ['aspectRatio', 'imageRestriction', 'stencil', 'size', 'scaleImage', 'grid']

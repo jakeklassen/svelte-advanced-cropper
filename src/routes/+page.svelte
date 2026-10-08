@@ -48,7 +48,9 @@
 				<a class="family-item" href="https://advanced-cropper.github.io/react-advanced-cropper/"
 					>React</a
 				>
-				<a class="family-item" href="https://advanced-cropper.github.io/vue-advanced-cropper/">Vue</a>
+				<a class="family-item" href="https://advanced-cropper.github.io/vue-advanced-cropper/"
+					>Vue</a
+				>
 			</nav>
 			<div class="showcase">
 				<CroppersWizard />
@@ -79,8 +81,8 @@
 			</div>
 			<p class="section-text">
 				Under the hood this is closer to a toolkit for building croppers than a single widget, yet
-				the basic case takes a few lines. Install the package, import the styles once, and drop
-				the component into your page.
+				the basic case takes a few lines. Install the package, import the styles once, and drop the
+				component into your page.
 			</p>
 			<div class="installation">
 				<InstallationBlock />
@@ -97,8 +99,10 @@
 		</div>
 		<div class="container">
 			<p class="section-text">
-				The documentation has many more examples for everyday tasks and unusual ones alike, from
-				the <a href={href('/docs/guides/recipes')}>recipes</a> to the
+				The documentation has many more examples for everyday tasks and unusual ones alike, from the <a
+					href={href('/docs/guides/recipes')}>recipes</a
+				>
+				to the
 				<a href={href('/docs/guides/advanced-recipes')}>advanced recipes</a>.
 			</p>
 		</div>

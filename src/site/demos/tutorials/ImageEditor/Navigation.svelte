@@ -42,13 +42,7 @@
 	<Button aria-label="Upload an image" onclick={() => input?.click()}>
 		<Upload size={20} />
 	</Button>
-	<input
-		bind:this={input}
-		type="file"
-		accept="image/*"
-		hidden
-		onchange={onLoadImage}
-	/>
+	<input bind:this={input} type="file" accept="image/*" hidden onchange={onLoadImage} />
 	<div class="image-editor-navigation__buttons">
 		{#each modes as item (item.mode)}
 			<Button

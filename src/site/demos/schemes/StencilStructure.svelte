@@ -19,7 +19,8 @@
 				<span class="stencil-structure__tag stencil-structure__tag--handler">Handler</span>
 			</div>
 			<span class="stencil-structure__tag stencil-structure__tag--overlay">Overlay</span>
-			<span class="stencil-structure__tag stencil-structure__tag--background">Background image</span>
+			<span class="stencil-structure__tag stencil-structure__tag--background">Background image</span
+			>
 		</div>
 	</div>
 	<figcaption>

@@ -12,7 +12,8 @@
 		</div>
 		<div>
 			<div class="footer__title">Family</div>
-			<a href="https://advanced-cropper.github.io/react-advanced-cropper/">React Advanced Cropper</a>
+			<a href="https://advanced-cropper.github.io/react-advanced-cropper/">React Advanced Cropper</a
+			>
 			<a href="https://advanced-cropper.github.io/vue-advanced-cropper/">Vue Advanced Cropper</a>
 			<a href="https://github.com/advanced-cropper/advanced-cropper">advanced-cropper core</a>
 		</div>

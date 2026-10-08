@@ -26,11 +26,21 @@
 </script>
 
 <div class={['absolute-zoom-navigation', className]}>
-	<button type="button" class="absolute-zoom-navigation__button" aria-label="Zoom out" onclick={onZoomOut}>
+	<button
+		type="button"
+		class="absolute-zoom-navigation__button"
+		aria-label="Zoom out"
+		onclick={onZoomOut}
+	>
 		<ZoomOut color="white" size={18} />
 	</button>
 	<Slider value={zoom} onChange={onZoom} />
-	<button type="button" class="absolute-zoom-navigation__button" aria-label="Zoom in" onclick={onZoomIn}>
+	<button
+		type="button"
+		class="absolute-zoom-navigation__button"
+		aria-label="Zoom in"
+		onclick={onZoomIn}
+	>
 		<ZoomIn color="white" size={18} />
 	</button>
 </div>

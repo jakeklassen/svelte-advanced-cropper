@@ -10,11 +10,7 @@
 
 <Cropper
 	{...props}
-	class={[
-		'cropper-types-example',
-		size && `cropper-types-example--${size}`,
-		className
-	]}
+	class={['cropper-types-example', size && `cropper-types-example--${size}`, className]}
 />
 
 <style>

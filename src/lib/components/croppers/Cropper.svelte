@@ -7,7 +7,8 @@
 	} from '../../types';
 	import type { CropperInstanceSettingsProp } from '../../hooks/useCropperInstance.svelte';
 
-	export type CropperProps<Extension extends SettingsExtension = {}> = CustomCropperProps<Extension>;
+	export type CropperProps<Extension extends SettingsExtension = {}> =
+		CustomCropperProps<Extension>;
 
 	export type CropperRef<Extension extends SettingsExtension = {}> = CustomCropperRef<Extension>;
 </script>

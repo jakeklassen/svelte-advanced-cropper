@@ -47,9 +47,7 @@
 			<li>{name}</li>
 		{/each}
 	</ul>
-	<figcaption>
-		The modifiers and helpers on the right all read the same settings object.
-	</figcaption>
+	<figcaption>The modifiers and helpers on the right all read the same settings object.</figcaption>
 </figure>
 
 <style>

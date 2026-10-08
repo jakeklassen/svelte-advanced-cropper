@@ -1131,8 +1131,14 @@ facebook/react#9809, `:223`).
   plain `let`s, non-reactive on purpose.
 - One attachment on the div:
   ```svelte
-  <div class={['advanced-cropper-draggable-element', className]} {@attach draggable}
-       onmouseover={onMouseOver} onmouseleave={onMouseLeave}>{@render children?.()}</div>
+  <div
+  	class={['advanced-cropper-draggable-element', className]}
+  	{@attach draggable}
+  	onmouseover={onMouseOver}
+  	onmouseleave={onMouseLeave}
+  >
+  	{@render children?.()}
+  </div>
   ```
   where `draggable = (node) => { const offs = [on(node,'mousedown',onMouseDown,{passive:false}), on(node,'touchstart',onTouchStart,{passive:false}),
   on(window,'mouseup',…), on(window,'mousemove',…,{passive:false}), on(window,'touchmove',…,{passive:false}), on(window,'touchend',…)];

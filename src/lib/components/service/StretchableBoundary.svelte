@@ -51,7 +51,10 @@
 </script>
 
 <div bind:this={boundary} {style} class={['advanced-cropper-boundary', className]}>
-	<div bind:this={stretcher} class={['advanced-cropper-boundary__stretcher', stretcherClassName]}></div>
+	<div
+		bind:this={stretcher}
+		class={['advanced-cropper-boundary__stretcher', stretcherClassName]}
+	></div>
 	<div class={['advanced-cropper-boundary__content', contentClassName]}>
 		{@render children?.()}
 	</div>

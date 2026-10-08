@@ -12,11 +12,7 @@
 	}
 </script>
 
-<Cropper
-	class="filling-cropper-example"
-	src={image('pexels-photo-6524107.jpeg')}
-	{defaultSize}
-/>
+<Cropper class="filling-cropper-example" src={image('pexels-photo-6524107.jpeg')} {defaultSize} />
 
 <style>
 	:global(.filling-cropper-example) {

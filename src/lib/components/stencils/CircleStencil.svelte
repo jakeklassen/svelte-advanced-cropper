@@ -59,11 +59,7 @@
 </script>
 
 <script lang="ts">
-	import {
-		getStencilCoordinates,
-		isFunction,
-		type ResizeOptions
-	} from 'advanced-cropper';
+	import { getStencilCoordinates, isFunction, type ResizeOptions } from 'advanced-cropper';
 	import SimpleHandler from '../handlers/SimpleHandler.svelte';
 	import SimpleLine from '../lines/SimpleLine.svelte';
 	import BoundingBox from '../service/BoundingBox.svelte';

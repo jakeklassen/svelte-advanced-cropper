@@ -37,18 +37,15 @@ The docs site in `src/routes/docs/**` rebuilds https://advanced-cropper.github.i
 	import stencilGridSource from '#site/demos/examples/StencilGridExample.svelte?highlight';
 </script>
 
-# Page title
-
-Markdown prose. Links are root-relative: [Recipes](/docs/guides/recipes). The base path is added at build time.
+# Page title Markdown prose. Links are root-relative: [Recipes](/docs/guides/recipes). The base path
+is added at build time.
 
 <Example source={stencilGridSource} title="StencilGridExample">
 	<StencilGridExample />
 </Example>
 
 <Admonition type="tip" title="Optional title">
-
-Markdown inside a component needs blank lines around it.
-
+	Markdown inside a component needs blank lines around it.
 </Admonition>
 ```
 

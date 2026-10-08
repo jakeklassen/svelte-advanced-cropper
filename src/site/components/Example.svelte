@@ -34,7 +34,11 @@
 		{#if open}
 			<div class="example__source">
 				{#each entries as [name, file] (name)}
-					<CodeBlock title={entries.length > 1 ? name : undefined} code={file.code} html={file.html} />
+					<CodeBlock
+						title={entries.length > 1 ? name : undefined}
+						code={file.code}
+						html={file.html}
+					/>
 				{/each}
 			</div>
 		{/if}

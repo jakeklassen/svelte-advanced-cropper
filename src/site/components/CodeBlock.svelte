@@ -19,7 +19,8 @@
 
 <div class="code-block">
 	{#if title}<div class="code-block__title">{title}</div>{/if}
-	<button type="button" class="code-block__copy" onclick={copy}>{copied ? 'Copied' : 'Copy'}</button>
+	<button type="button" class="code-block__copy" onclick={copy}>{copied ? 'Copied' : 'Copy'}</button
+	>
 	{@html html}
 </div>
 

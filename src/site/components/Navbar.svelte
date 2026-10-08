@@ -13,8 +13,13 @@
 <nav class={['navbar', `navbar--${variant}`]}>
 	{#if onMenu}
 		<button type="button" class="navbar__menu" aria-label="Open navigation" onclick={onMenu}>
-			<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-				><path d="M3 6h18M3 12h18M3 18h18" /></svg
+			<svg
+				width="22"
+				height="22"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18" /></svg
 			>
 		</button>
 	{/if}

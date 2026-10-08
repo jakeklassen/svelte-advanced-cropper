@@ -51,7 +51,11 @@
 											}
 										]
 									},
-									{ title: 'CropperCanvas', kind: 'component', to: '/docs/components/CropperCanvas' }
+									{
+										title: 'CropperCanvas',
+										kind: 'component',
+										to: '/docs/components/CropperCanvas'
+									}
 								]
 							}
 						]

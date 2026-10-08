@@ -71,7 +71,9 @@
 
 	// While a transition runs, render from the in-flight values so that a re-render
 	// does not jump to the target and fight the animation.
-	const current = $derived(transition.active ? { ...transitionValues } : { width, height, left, top });
+	const current = $derived(
+		transition.active ? { ...transitionValues } : { width, height, left, top }
+	);
 </script>
 
 <div

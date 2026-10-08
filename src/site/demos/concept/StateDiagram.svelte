@@ -9,7 +9,10 @@
 	const fields = ['boundary', 'imageSize', 'transforms', 'visibleArea', 'coordinates'];
 </script>
 
-<figure class={['state-diagram', float && 'state-diagram--float']} aria-label="The fields of CropperState">
+<figure
+	class={['state-diagram', float && 'state-diagram--float']}
+	aria-label="The fields of CropperState"
+>
 	<div class="state-diagram__card">
 		<div class="state-diagram__title">CropperState</div>
 		<ul class="state-diagram__fields">

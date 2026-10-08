@@ -86,7 +86,10 @@
 		></div>
 		<div class="image-editor-slider__dot"></div>
 		<div
-			class={['image-editor-slider__value', handleInsideDot && 'image-editor-slider__value--hidden']}
+			class={[
+				'image-editor-slider__value',
+				handleInsideDot && 'image-editor-slider__value--hidden'
+			]}
 			style:left="{Math.abs(value * 50 + 50)}%"
 		>
 			{formattedValue}
