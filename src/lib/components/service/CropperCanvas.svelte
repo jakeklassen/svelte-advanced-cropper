@@ -19,13 +19,20 @@
 			return null;
 		}
 
-		return drawCroppedArea(
+		const result = drawCroppedArea(
 			state,
 			image as HTMLImageElement | HTMLCanvasElement,
 			canvas,
 			spareCanvas,
 			options
 		);
+		// To export a rotated or flipped image, the core first draws the whole photo, turned,
+		// into the spare canvas. Upstream keeps that copy (about 96 MB for a 24 MP photo) for
+		// as long as the cropper is mounted; shrinking the canvas frees it.
+		spareCanvas.width = 0;
+		spareCanvas.height = 0;
+
+		return result;
 	}
 </script>
 

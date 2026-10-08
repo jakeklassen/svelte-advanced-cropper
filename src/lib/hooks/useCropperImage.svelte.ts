@@ -23,6 +23,18 @@ async function assertBlobReadable(src: string): Promise<void> {
 	await response.body?.cancel();
 }
 
+/**
+ * For a photo with an EXIF orientation, the core shows a copy of the file under an object
+ * URL it created (`revoke: true`), and leaves releasing it to the caller. Upstream never
+ * does, so every rotated photo stayed in memory until the page closed. The app's own URL
+ * (`revoke: false`) is never touched.
+ */
+function release(loadedImage: CropperImage | null) {
+	if (loadedImage?.revoke) {
+		URL.revokeObjectURL(loadedImage.src);
+	}
+}
+
 type ImageUpdate = CropperImage | null | ((previous: CropperImage | null) => CropperImage | null);
 
 export interface CropperImageHook {
@@ -41,9 +53,10 @@ export interface CropperImageHook {
  * initialisation. The returned getters are reactive.
  *
  * Callback order matches upstream: `onLoadingStart`, then `onLoadingEnd`, then
- * `onLoad` once the new image has rendered. Two fixes over upstream: each load is
+ * `onLoad` once the new image has rendered. Three fixes over upstream: each load is
  * identified by a request token, so a stale response can't win when `src` goes
- * A → B → A, and pending work is dropped when the component is destroyed.
+ * A → B → A; pending work is dropped when the component is destroyed; and the copy the
+ * core makes of a rotated photo is released once it is no longer shown.
  */
 export function useCropperImage(
 	settings: CropperImageHookSettings | (() => CropperImageHookSettings)
@@ -55,6 +68,17 @@ export function useCropperImage(
 
 	// Incremented for every new src and on destroy; async work checks it is still current.
 	let request = 0;
+
+	// The image this hook last loaded and showed. `setImage` doesn't change it: the hook only
+	// releases what it loaded itself.
+	let lastLoadedImage: CropperImage | null = null;
+
+	/** Shows a newly loaded image (or none), releasing the one it replaces. */
+	function show(loadedImage: CropperImage | null) {
+		release(lastLoadedImage);
+		lastLoadedImage = loadedImage;
+		image = loadedImage;
+	}
 
 	// `options()` may read many reactive values, but a derived only notifies when its own
 	// value changes, so the loading effect below runs once per distinct src.
@@ -91,14 +115,18 @@ export function useCropperImage(
 		Promise.all([load, fadeOut, readable]).then(
 			([loadedImage]) => {
 				if (!isCurrent()) {
+					release(loadedImage);
+
 					return;
 				}
 
 				onLoadingEnd?.();
 				loading = false;
-				image = loadedImage;
+				show(loadedImage);
 			},
 			() => {
+				// The photo itself may have loaded even though the blob check failed.
+				void load.then(release, () => {});
 				if (!isCurrent()) {
 					return;
 				}
@@ -117,14 +145,14 @@ export function useCropperImage(
 		// Upstream leaves `loading` stuck at true if src is cleared mid-load.
 		loading = false;
 		if (!unloadTime) {
-			image = null;
+			show(null);
 
 			return;
 		}
 
 		void promiseTimeout(unloadTime).then(() => {
 			if (id === request) {
-				image = null;
+				show(null);
 			}
 		});
 	}
@@ -162,7 +190,10 @@ export function useCropperImage(
 		});
 	});
 
-	onDestroy(() => request++);
+	onDestroy(() => {
+		request++;
+		release(lastLoadedImage);
+	});
 
 	return {
 		isLoading() {
