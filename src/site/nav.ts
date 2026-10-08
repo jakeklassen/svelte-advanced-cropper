@@ -27,6 +27,7 @@ export const nav: NavEntry[] = [
 			{ title: 'Customize Appearance', href: '/docs/guides/customize-appearance' },
 			{ title: 'Components / Hooks', href: '/docs/guides/components-and-hooks' },
 			{ title: 'Cross-Origin', href: '/docs/guides/cross-origin' },
+			{ title: 'Gotchas', href: '/docs/guides/gotchas' },
 			{ title: 'Coming from React', href: '/docs/guides/coming-from-react' }
 		]
 	},

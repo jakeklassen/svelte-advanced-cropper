@@ -1,0 +1,142 @@
+<script>
+	import Admonition from '#site/components/Admonition.svelte';
+	import Example from '#site/components/Example.svelte';
+	import FailedLoadExample from '#site/demos/gotchas/FailedLoadExample.svelte';
+	import failedLoadSource from '#site/demos/gotchas/FailedLoadExample.svelte?highlight';
+	import RefitExample from '#site/demos/gotchas/RefitExample.svelte';
+	import refitSource from '#site/demos/gotchas/RefitExample.svelte?highlight';
+	import DialogExample from '#site/demos/gotchas/DialogExample.svelte';
+	import dialogSource from '#site/demos/gotchas/DialogExample.svelte?highlight';
+</script>
+
+# Gotchas
+
+The demos elsewhere in these docs run under ideal conditions: a known photo, a fixed-size box, nothing animating. Real apps are messier. This page collects the problems that tend to appear only once a cropper ships, each with a fix you can try in place.
+
+## Uploaded photos that never finish loading
+
+**Symptom:** the customer picks a photo, the cropper shows nothing, and neither `onReady` nor `onError` ever fires. The spinner spins forever.
+
+**Cause:** by default, the cropper reads the photo's EXIF orientation before showing it (`checkOrientation` is `true`). For a `blob:` URL, the kind `URL.createObjectURL()` gives you for an upload, the [advanced-cropper](https://github.com/advanced-cropper/advanced-cropper) core fetches the blob with a request that has no error handler. If the URL has been revoked, or a phone has evicted the blob from memory under pressure, that request fails silently and the load never settles. The core is shared, so react-advanced-cropper behaves the same way.
+
+**Fix:** turn the orientation read off and handle `onError`:
+
+```svelte
+<Cropper
+	src={uploadedUrl}
+	checkOrientation={false}
+	onReady={() => (status = 'ready')}
+	onError={() => (status = 'error')}
+/>
+```
+
+With `checkOrientation={false}` the cropper loads the URL straight into an image, and a failed image does report an error. Little is lost: current versions of Chrome, Firefox and Safari apply a photo's EXIF orientation themselves when they display or draw it, so the manual read mostly duplicates the browser's work.
+
+Try both settings. "Load a broken upload" hands the cropper a revoked blob URL:
+
+<Example source={failedLoadSource} title="FailedLoadExample">
+	<FailedLoadExample />
+</Example>
+
+## Keeping your opening view after a resize
+
+**Symptom:** the cropper opens showing the whole photo, exactly as your `defaultVisibleArea` asks. After the window gets wider, the photo is suddenly zoomed in and no longer fits.
+
+**Cause:** `defaultVisibleArea` only applies when the cropper resets, that is, when a new image loads or you call `reset()`. On a window resize the cropper calls `refresh()`, which measures the new boundary but keeps the current zoom, changing it only as far as the restrictions require. Shrinking usually forces a re-fit; growing doesn't. A second, quieter problem: the cropper listens to the _window_. If only its container changes size (a sidebar opens, a panel is dragged wider), it doesn't notice at all.
+
+**Fix:** watch the container yourself and apply the opening view again after refreshing:
+
+```svelte
+<script lang="ts">
+	import { Cropper, type CropperRef, type CropperState } from 'svelte-advanced-cropper';
+
+	let { src }: { src: string } = $props();
+
+	let cropper: CropperRef | undefined = $state();
+	let width = $state(0);
+	let height = $state(0);
+
+	function fitWholeImage(state: CropperState) {
+		// The same function you pass as defaultVisibleArea.
+	}
+
+	$effect(() => {
+		void width;
+		void height;
+		if (cropper) {
+			void refit(cropper);
+		}
+	});
+
+	async function refit(target: CropperRef) {
+		await target.refresh();
+		const state = target.getState();
+		if (state) {
+			target.setVisibleArea(fitWholeImage(state), { transitions: false });
+		}
+	}
+</script>
+
+<div class="cropper-box" bind:clientWidth={width} bind:clientHeight={height}>
+	<Cropper bind:this={cropper} {src} defaultVisibleArea={fitWholeImage} />
+</div>
+```
+
+`bind:clientWidth` and `bind:clientHeight` follow the container through any change, window resizes included. The crop the user made is never touched: only the visible area is set. Calling ref methods from an effect is safe; they don't make the effect depend on the cropper's state.
+
+You may see another fix in the wild: save `getCoordinates()`, `await reset()`, then `setCoordinates()` with the saved crop. It also re-applies the opening view, but `reset()` throws away rotation, flips and zoom as well, and the default crop flashes for a frame. Prefer `refresh()` plus `setVisibleArea()`.
+
+Drag the width slider with each option selected:
+
+<Example source={refitSource} title="RefitExample">
+	<RefitExample />
+</Example>
+
+## Croppers in dialogs and scaled containers
+
+Crop UIs often live in a dialog, and dialogs often scale in: from 95% to full size is a common entrance. The cropper is usually ready, and measures itself, while that animation is still running.
+
+A cropper that measured its _on-screen_ size would size its crop area to the shrunken dialog and stay wrong after the animation ended. react-advanced-cropper measures that way (with `getBoundingClientRect()`), which is why React codebases sometimes carry a "never animate the dialog's scale" rule. svelte-advanced-cropper (from version 0.1.1) measures its _layout_ size instead, which CSS transforms don't affect, so a scaling dialog needs no special care. Open the dialog below: it scales in from 90%, and the cropper measures its true size anyway.
+
+<Example source={dialogSource} title="DialogExample">
+	<DialogExample />
+</Example>
+
+If you replace the boundary's size algorithm with one that measures the on-screen size, measure again once the dialog has opened, for example from Svelte's `introend` event or your dialog library's "opened" callback:
+
+```svelte
+<div class="dialog" in:scale onintroend={() => cropper?.refresh()}>
+	<Cropper bind:this={cropper} {src} boundaryProps={{ sizeAlgorithm: myOnScreenMeasure }} />
+</div>
+```
+
+<Admonition type="warning" title="Permanently scaled containers">
+
+A cropper inside an element that stays scaled (for example `transform: scale(0.8)` on a preview pane) is sized correctly, but drags still move at screen speed: in a container scaled to 80%, the stencil moves 80 pixels for every 100 the pointer travels, so it trails the cursor. Size such containers with `width` and `height` rather than a transform.
+
+</Admonition>
+
+## Give the cropper a definite height
+
+**Symptom:** the cropper spills out of its dialog or panel, or the page scrolls even though the container has a `max-height`.
+
+**Cause:** the cropper fills its container's height (`max-height: 100%`), but a percentage height only works against a parent with a _definite_ height. Without one, the cropper sizes itself to the photo instead: in a 600px-wide box, a 4:3 photo makes it 450px tall, even inside a parent limited to `max-height: 300px`.
+
+**Fix:** give the parent a real `height`, not only a `max-height`. In a flex column, the cropper's flex item also needs `min-height: 0`, and the column itself needs a definite height:
+
+```css
+.dialog {
+	display: flex;
+	flex-direction: column;
+	height: 90vh; /* not max-height */
+}
+
+.dialog-body {
+	flex: 1;
+	min-height: 0; /* lets the flex item shrink below its content */
+}
+
+.dialog-body :global(.advanced-cropper) {
+	height: 100%;
+}
+```
