@@ -9,7 +9,6 @@
 	let src = $state(photo);
 	let checkOrientation = $state(true);
 	let status: Status = $state('loading');
-	let stalled = $state(false);
 	// Each load attempt mounts a fresh cropper, so the same src can be retried.
 	let attempt = $state(0);
 
@@ -28,19 +27,6 @@
 		return url;
 	}
 
-	// Flags a load that has taken suspiciously long. Restarts with every attempt.
-	$effect(() => {
-		void attempt;
-		stalled = false;
-		if (status !== 'loading') {
-			return;
-		}
-
-		const timer = setTimeout(() => (stalled = true), 3000);
-
-		return () => clearTimeout(timer);
-	});
-
 	const message = $derived.by(() => {
 		if (status === 'ready') {
 			return 'Ready.';
@@ -48,10 +34,6 @@
 
 		if (status === 'error') {
 			return 'onError fired: time to show a "this photo can\'t be opened" message.';
-		}
-
-		if (stalled) {
-			return 'Still loading after 3 seconds. Neither onReady nor onError will ever fire.';
 		}
 
 		return 'Loading…';

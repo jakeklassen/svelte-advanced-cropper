@@ -13,26 +13,25 @@
 
 The demos elsewhere in these docs run under ideal conditions: a known photo, a fixed-size box, nothing animating. Real apps are messier. This page collects the problems that tend to appear only once a cropper ships, each with a fix you can try in place.
 
-## Uploaded photos that never finish loading
+## Uploads that can't be read
 
-**Symptom:** the customer picks a photo, the cropper shows nothing, and neither `onReady` nor `onError` ever fires. The spinner spins forever.
+**Symptom:** the customer picks a photo, and by the time the cropper reads it, the browser can't: the app revoked the object URL, or a phone evicted the file from memory under pressure. With react-advanced-cropper (and svelte-advanced-cropper before 0.1.2), the load then never finishes: neither `onReady` nor `onError` fires, and the spinner spins forever.
 
-**Cause:** by default, the cropper reads the photo's EXIF orientation before showing it (`checkOrientation` is `true`). For a `blob:` URL, the kind `URL.createObjectURL()` gives you for an upload, the [advanced-cropper](https://github.com/advanced-cropper/advanced-cropper) core fetches the blob with a request that has no error handler. If the URL has been revoked, or a phone has evicted the blob from memory under pressure, that request fails silently and the load never settles. The core is shared, so react-advanced-cropper behaves the same way.
+**Cause:** by default the cropper reads the photo's EXIF orientation first (`checkOrientation` is `true`). For a `blob:` URL, the kind `URL.createObjectURL()` gives you for an upload, the [advanced-cropper](https://github.com/advanced-cropper/advanced-cropper) core reads the blob with a request that has no error handler, so the failure goes unnoticed.
 
-**Fix:** turn the orientation read off and handle `onError`:
+**Fix:** from version 0.1.2, svelte-advanced-cropper checks that a blob URL is still readable and reports `onError` when it isn't, whatever `checkOrientation` is set to. What's left for you is to handle `onError`, so the customer sees a message and can pick another photo:
 
 ```svelte
 <Cropper
 	src={uploadedUrl}
-	checkOrientation={false}
 	onReady={() => (status = 'ready')}
 	onError={() => (status = 'error')}
 />
 ```
 
-With `checkOrientation={false}` the cropper loads the URL straight into an image, and a failed image does report an error. Little is lost: current versions of Chrome, Firefox and Safari apply a photo's EXIF orientation themselves when they display or draw it, so the manual read mostly duplicates the browser's work.
+`checkOrientation={false}` is still a reasonable choice for uploads, just no longer required for this. Current versions of Chrome, Firefox and Safari apply a photo's EXIF orientation themselves when they display or draw it, so the cropper's own read mostly duplicates the browser's work. On react-advanced-cropper it remains the workaround for the hang.
 
-Try both settings. "Load a broken upload" hands the cropper a revoked blob URL:
+"Load a broken upload" hands the cropper a revoked blob URL. Try it with both settings:
 
 <Example source={failedLoadSource} title="FailedLoadExample">
 	<FailedLoadExample />

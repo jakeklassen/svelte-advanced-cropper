@@ -13,6 +13,16 @@ export interface CropperImageHookSettings {
 	unloadTime?: number;
 }
 
+/**
+ * With checkOrientation, the core reads a blob: URL through an XMLHttpRequest that has no
+ * error handler, so a revoked or evicted blob never settles the load. fetch() rejects for
+ * such a URL; the response is cancelled at once, so the photo isn't read twice.
+ */
+async function assertBlobReadable(src: string): Promise<void> {
+	const response = await fetch(src);
+	await response.body?.cancel();
+}
+
 type ImageUpdate = CropperImage | null | ((previous: CropperImage | null) => CropperImage | null);
 
 export interface CropperImageHook {
@@ -74,7 +84,11 @@ export function useCropperImage(
 			checkOrientation
 		});
 
-		Promise.all([load, fadeOut]).then(
+		// Fails fast where the core's load would hang (see assertBlobReadable).
+		const readable =
+			checkOrientation && source.startsWith('blob:') ? assertBlobReadable(source) : undefined;
+
+		Promise.all([load, fadeOut, readable]).then(
 			([loadedImage]) => {
 				if (!isCurrent()) {
 					return;
