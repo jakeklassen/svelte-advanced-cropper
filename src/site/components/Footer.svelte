@@ -11,10 +11,10 @@
 			<a href={href('/docs/guides/advanced-recipes')}>Advanced Recipes</a>
 		</div>
 		<div>
-			<div class="footer__title">Family</div>
-			<a href="https://advanced-cropper.github.io/react-advanced-cropper/">React Advanced Cropper</a
-			>
-			<a href="https://advanced-cropper.github.io/vue-advanced-cropper/">Vue Advanced Cropper</a>
+			<div class="footer__title">Credits</div>
+			<a href="https://github.com/advanced-cropper/react-advanced-cropper">
+				react-advanced-cropper, the original
+			</a>
 			<a href="https://github.com/advanced-cropper/advanced-cropper">advanced-cropper core</a>
 		</div>
 		<div>
@@ -24,7 +24,8 @@
 		</div>
 	</div>
 	<p class="footer__copyright">
-		MIT licensed. A Svelte port of Norserium's react-advanced-cropper. Photos from Unsplash.
+		MIT licensed. A community Svelte port of Norserium's react-advanced-cropper, not affiliated with
+		the Advanced Cropper project. Photos from Unsplash.
 	</p>
 </footer>
 

@@ -2,7 +2,7 @@
 
 A Svelte 5 image cropper you can shape to your design: custom stencils, handlers and wrappers, fixed or free aspect ratios, zoom, rotate, flip, transitions, and full touch support.
 
-It is a port of [react-advanced-cropper](https://github.com/advanced-cropper/react-advanced-cropper) built on the same framework-agnostic core, [`advanced-cropper`](https://github.com/advanced-cropper/advanced-cropper). The components, props, settings and methods match the React library one-to-one. The implementation is idiomatic Svelte 5: runes, snippets and attachments, not translated hooks.
+It is a port of [react-advanced-cropper](https://github.com/advanced-cropper/react-advanced-cropper) built on the same framework-agnostic core, [`advanced-cropper`](https://github.com/advanced-cropper/advanced-cropper). The components, props, settings and methods match the React library one-to-one. The implementation is idiomatic Svelte 5: runes, snippets and attachments, not translated hooks. It is an independent community port, not affiliated with the Advanced Cropper project or its author.
 
 **Documentation and live examples:** https://jakeklassen.github.io/svelte-advanced-cropper/
 

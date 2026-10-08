@@ -25,11 +25,6 @@
 			text: 'Fix the aspect ratio or allow a range, set minimum and maximum sizes, and choose how the image is kept within the stencil or the visible area.'
 		}
 	];
-
-	const otherVersions = [
-		{ name: 'React', url: 'https://advanced-cropper.github.io/react-advanced-cropper/' },
-		{ name: 'Vue', url: 'https://advanced-cropper.github.io/vue-advanced-cropper/' }
-	];
 </script>
 
 <svelte:head>
@@ -48,12 +43,15 @@
 				zoom, smooth transitions, automatic zoom to the stencil and much more come included, and
 				every piece can be restyled or swapped out.
 			</p>
-			<nav class="family" aria-label="Other versions">
-				<span class="family-item family-item--active" aria-current="page">Svelte</span>
-				{#each otherVersions as version (version.name)}
-					<a class="family-item" href={version.url}>{version.name}</a>
-				{/each}
-			</nav>
+			<p class="credit">
+				A community Svelte port of
+				<a href="https://github.com/advanced-cropper/react-advanced-cropper"
+					>react-advanced-cropper</a
+				>
+				by Norserium, built on the
+				<a href="https://github.com/advanced-cropper/advanced-cropper">advanced-cropper</a> core. Not
+				affiliated with the Advanced Cropper project.
+			</p>
 			<div class="showcase">
 				<CroppersWizard />
 			</div>
@@ -137,26 +135,27 @@
 		max-width: 100%;
 		margin: 0 auto 24px;
 	}
-	.family {
-		display: flex;
-		justify-content: center;
-		width: 260px;
+	/* Credit, not a version switcher: this port isn't part of the upstream project. */
+	.credit {
+		width: 520px;
 		max-width: 100%;
-		margin: 50px auto 70px;
-		padding: 15px 0;
+		margin: 40px auto 60px;
+		padding: 14px 0;
 		border-top: solid 1px #262626;
 		border-bottom: solid 1px #262626;
+		font-size: 14px;
+		line-height: 22px;
+		text-align: center;
+		color: #9a989b;
 	}
-	.family-item {
-		margin: 0 20px;
-		color: #777677;
-	}
-	a.family-item:hover {
-		color: var(--color-accent);
-		text-decoration: none;
-	}
-	.family-item--active {
+	.credit a {
+		white-space: nowrap;
 		color: #cbc8cb;
+		text-decoration: underline;
+		text-underline-offset: 3px;
+	}
+	.credit a:hover {
+		color: var(--color-accent);
 	}
 	.showcase {
 		display: flex;
