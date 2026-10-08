@@ -154,10 +154,11 @@ describe('Cropper', () => {
 		);
 		expect(area).not.toBeNull();
 		if (!area) return;
-		cropper().setCoordinates({
-			width: (before?.width ?? 0) / 2,
-			height: (before?.height ?? 0) / 2
-		});
+		// No transition: the core ignores moves while one is running.
+		cropper().setCoordinates(
+			{ width: (before?.width ?? 0) / 2, height: (before?.height ?? 0) / 2 },
+			{ transitions: false }
+		);
 		flushSync();
 		await nextFrame();
 		const start = cropper().getCoordinates();
@@ -209,7 +210,7 @@ describe('Cropper', () => {
 
 	it('resizes the stencil from a handler', async () => {
 		const { cropper, container } = await mountCropper({ transitions: false });
-		cropper().setCoordinates({ width: 200, height: 150 });
+		cropper().setCoordinates({ width: 200, height: 150 }, { transitions: false });
 		flushSync();
 		await nextFrame();
 		const before = cropper().getCoordinates();
