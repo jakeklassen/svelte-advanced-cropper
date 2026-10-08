@@ -1,8 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
-import { AbstractCropper, Cropper, FixedCropper } from '#lib';
+import { AbstractCropper, Cropper, FixedCropper, type CropperRef } from '#lib';
 import { cropperRefMethods } from '#lib/service/ref.ts';
+import AsyncBoundary, { pendingStretches } from './AsyncBoundary.svelte';
 import EffectHarness from './EffectHarness.svelte';
+import Harness from './Harness.svelte';
 import { createTestImage, mountCropper, nextFrame, waitFor } from './fixtures';
 
 describe('cropper ref', () => {
@@ -31,6 +33,29 @@ describe('cropper ref', () => {
 		await nextFrame();
 		await nextFrame();
 		expect(onReady).toHaveBeenCalledTimes(2);
+	});
+
+	it('fires onReady once, with a state, when overlapping resets finish out of order', async () => {
+		pendingStretches.length = 0;
+		const readyWithState: boolean[] = [];
+		const screen = await render(Harness, {
+			src: createTestImage(),
+			boundaryComponent: AsyncBoundary,
+			onReady: (ref: CropperRef) => readyWithState.push(ref.getState() !== null)
+		});
+		const cropper = () => screen.component.getCropper();
+		// The image has loaded and its reset is waiting for the boundary.
+		await waitFor(() => pendingStretches.length === 1);
+		void cropper()?.reset();
+		expect(pendingStretches).toHaveLength(2);
+
+		// The newer reset finishes first, then the superseded one.
+		const [older, newer] = pendingStretches;
+		newer();
+		older();
+		await waitFor(() => readyWithState.length > 0);
+		await nextFrame();
+		expect(readyWithState).toEqual([true]);
 	});
 
 	it('can be driven from a $effect without the effect depending on cropper state', async () => {

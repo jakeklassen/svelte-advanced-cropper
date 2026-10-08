@@ -26,6 +26,25 @@ describe('useCropperImage', () => {
 		expect(hook().getImage()?.src).toBe(first?.src);
 	});
 
+	it('does not report a set image as loaded while a new src is loading', async () => {
+		const log: string[] = [];
+		const screen = await render(ImageHarness, { src: createTestImage(800, 600), log });
+		const hook = () => screen.component.getHook();
+		await waitFor(() => hook().isLoaded());
+		const image = hook().getImage();
+		if (!image) {
+			throw new Error('no image');
+		}
+
+		log.length = 0;
+		// Both changes land in the same effect flush: the new src's load must win.
+		screen.component.setImageAndSrc({ ...image }, createTestImage(400, 300));
+		await delay(0);
+		expect(hook().isLoaded()).toBe(false);
+		expect(hook().isLoading()).toBe(true);
+		expect(log).toEqual(['start']);
+	});
+
 	it('keeps the latest image when src changes quickly (A → B → A)', async () => {
 		const log: string[] = [];
 		const a = createTestImage(800, 600);

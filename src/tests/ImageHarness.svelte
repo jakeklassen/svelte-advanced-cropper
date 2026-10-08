@@ -1,12 +1,15 @@
 <script lang="ts">
-	import { useCropperImage, type CropperImageHook } from '#lib';
+	import { useCropperImage, type CropperImage, type CropperImageHook } from '#lib';
 
 	interface Props {
 		src: string | null;
 		log: string[];
 	}
 
-	let { src, log }: Props = $props();
+	let { src: srcProp, log }: Props = $props();
+
+	// Follows the prop, but `setImageAndSrc` can also change it.
+	let src = $derived(srcProp);
 
 	const hook: CropperImageHook = useCropperImage(() => ({
 		src,
@@ -19,5 +22,11 @@
 
 	export function getHook() {
 		return hook;
+	}
+
+	/** Sets an image and a new src synchronously, so both land in one effect flush. */
+	export function setImageAndSrc(image: CropperImage, nextSrc: string) {
+		hook.setImage(image);
+		src = nextSrc;
 	}
 </script>

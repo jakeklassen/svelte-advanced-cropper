@@ -115,18 +115,9 @@ export function useCropperImage(
 		});
 	}
 
-	$effect(() => {
-		const next = src;
-		// Untracked: starting a load reads `loaded` and the other options.
-		untrack(() => {
-			if (next) {
-				startLoading(next);
-			} else {
-				unloadImage();
-			}
-		});
-	});
-
+	// Registered before the src effect, so it runs first when both change in one flush:
+	// a src change must then clear `loaded` and supersede this image's onLoad.
+	//
 	// Upstream reacts to the committed image: when it changes to a new image, mark it
 	// loaded and fire onLoad after it renders. Several setImage calls in a row, or
 	// setting the same image again, produce one onLoad (for the latest image) or none.
@@ -141,6 +132,18 @@ export function useCropperImage(
 		void tick().then(() => {
 			if (id === request && image === committed) {
 				options().onLoad?.(committed);
+			}
+		});
+	});
+
+	$effect(() => {
+		const next = src;
+		// Untracked: starting a load reads `loaded` and the other options.
+		untrack(() => {
+			if (next) {
+				startLoading(next);
+			} else {
+				unloadImage();
 			}
 		});
 	});

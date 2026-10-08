@@ -147,8 +147,9 @@ export function useAbstractCropper<Extension extends SettingsExtension = {}>(
 	let latestReset = 0;
 	let latestRefresh = 0;
 
-	// The image a reset is showing. The reset fires onReady for it itself, once the
-	// reset state has rendered, so that getCanvas() works inside onReady.
+	// The image the latest reset is showing. That reset fires onReady for it itself, once
+	// the reset state has rendered, so that getCanvas() works inside onReady; the
+	// displayed-image effect below skips it.
 	let imageShownByReset: CropperImage | null = null;
 
 	const resetCropper = async () => {
@@ -190,7 +191,11 @@ export function useAbstractCropper<Extension extends SettingsExtension = {}>(
 				}
 			}
 		} finally {
-			imageShownByReset = null;
+			// A superseded reset must leave the marker to the newer reset that owns it.
+			if (id === latestReset) {
+				imageShownByReset = null;
+			}
+
 			autoReconcile.resume();
 		}
 	};
