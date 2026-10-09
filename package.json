@@ -1,6 +1,6 @@
 {
 	"name": "svelte-advanced-cropper",
-	"version": "0.1.4",
+	"version": "0.2.0",
 	"description": "Svelte 5 image cropper with child stencils, typed snippets, reactive previews and canvas export",
 	"keywords": [
 		"advanced-cropper",
