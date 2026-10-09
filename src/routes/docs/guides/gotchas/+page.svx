@@ -11,6 +11,7 @@
 	import HeicUploadExample from '#site/demos/gotchas/HeicUploadExample.svelte';
 	import heicUploadSource from '#site/demos/gotchas/HeicUploadExample.svelte?highlight';
 	import croppablePhotoSource from '#site/demos/gotchas/croppablePhoto.ts?highlight';
+	import exportCropSource from '#site/demos/gotchas/exportCrop.ts?highlight';
 	import ScaledContainerExample from '#site/demos/gotchas/ScaledContainerExample.svelte';
 	import scaledContainerSource from '#site/demos/gotchas/ScaledContainerExample.svelte?highlight';
 </script>
@@ -35,7 +36,9 @@ The demos elsewhere in these docs run under ideal conditions: a known photo, a f
 />
 ```
 
-`checkOrientation={false}` is still a reasonable choice for uploads, just no longer required for this. Current versions of Chrome, Firefox and Safari apply a photo's EXIF orientation themselves when they display or draw it, so the cropper's own read mostly duplicates the browser's work. On react-advanced-cropper it remains the workaround for the hang.
+`checkOrientation={false}` is still a reasonable choice for uploads, just no longer required for this. Current versions of Chrome, Firefox and Safari apply a photo's EXIF orientation themselves when they display or draw it, so the cropper's own read mostly duplicates the browser's work. Turning it off also saves memory: the read loads the whole file, and for a rotated photo the cropper keeps a second copy while it's shown. On react-advanced-cropper it remains the workaround for the hang.
+
+One difference to know before you turn it off: with `checkOrientation` on, the cropper reports the photo's rotation as its own. `getImage()` gives the size the file was stored at, and `getTransforms()` includes the rotation, so a portrait iPhone photo reports `rotate: 90`. With it off, the browser has already turned the photo upright: the size is the upright size and the rotation is `0`. The crop coordinates are the same either way. This matters if you save the transforms and replay them somewhere else, such as a server that also turns photos upright, which would then turn them twice.
 
 "Load a broken upload" hands the cropper a revoked blob URL. Try it with both settings:
 
@@ -60,6 +63,22 @@ Use the URL it returns as the cropper's `src`, show a message while it works, an
 </Example>
 
 svelte-advanced-cropper doesn't convert HEIC itself. heic-to is about 780 KB compressed and LGPL-licensed, which would be a heavy cost for every app using the cropper; with the dynamic import above, only someone who uploads a HEIC photo in a browser that can't decode it downloads it. Avoid `heic2any`, which many guides still recommend: it hasn't been updated since 2023 and fails on the 24 MP photos recent iPhones take by default.
+
+## Exports that fail on phones
+
+**Symptom:** exporting works on your desktop, but on a phone the upload sometimes arrives empty or never happens, and nothing is logged. Or the exported JPEG has black corners where the photo was transparent.
+
+**Cause:**
+
+- `getCanvas()` exports at the crop's full resolution unless you limit it, and a crop from a 24 MP phone photo can be 6000 px wide. That can exceed iOS Safari's canvas limit (about 16.7 million pixels) or the memory the tab has left.
+- When it does, `canvas.toBlob()` calls back with `null` instead of throwing. Code that returns early on `null`, as many upload examples do, then fails silently.
+- JPEG has no transparency, so transparent areas (a PNG's, or a crop that reaches past the photo's edges) are encoded as black.
+
+**Fix:** always [limit the export's size](/docs/guides/recipes#resize-the-result), treat `null` as a failure (try again smaller, then tell the user), and pass `fillColor` when encoding a JPEG:
+
+<CodeBlock html={exportCropSource.html} code={exportCropSource.code} />
+
+`getCanvas()` also returns the same canvas element every time, drawing each export into it. Turn it into a `Blob` rather than keeping it (`toBlob()` takes its snapshot when you call it), then shrink it as the helper does: otherwise its pixels stay in memory until the next export, 16 MB for 2048 × 2048.
 
 ## Keeping your opening view after a resize
 

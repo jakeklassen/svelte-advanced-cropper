@@ -437,7 +437,7 @@ This version reads the first bytes of the file and detects the real format with 
 
 To send the crop to a server, convert the canvas to a [Blob](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob) and post it as `multipart/form-data`. A blob is smaller than a base64 data URL and can be streamed as a regular file upload, which is why it is usually the better choice. [This Stack Overflow answer](https://stackoverflow.com/questions/59020799/which-function-should-i-use-todataurl-or-toblob/59025746#59025746) explains the trade-offs in detail.
 
-How the request should look depends entirely on your backend. Here is one common shape:
+How the request should look depends entirely on your backend. Here is one common shape. It skips a `null` blob to stay short; in an app, treat `null` as a failure, because on phones it is how a too-large export fails (see [Exports that fail on phones](/docs/guides/gotchas#exports-that-fail-on-phones)):
 
 <Example source={uploadSource} title="UploadExample">
 	<UploadExample />
