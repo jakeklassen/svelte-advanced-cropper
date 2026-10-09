@@ -26,10 +26,12 @@ import { normalizeSettings } from './settings';
 
 class ExportSource {
 	ready = $state(false);
-	constructor(
-		readonly element: BackgroundElement,
-		readonly image: CropperImage | null
-	) {}
+	readonly element: BackgroundElement;
+	readonly image: CropperImage | null;
+	constructor(element: BackgroundElement, image: CropperImage | null) {
+		this.element = element;
+		this.image = image;
+	}
 }
 class CropperElements {
 	readonly source = new RegistrationSlot<ExportSource>();

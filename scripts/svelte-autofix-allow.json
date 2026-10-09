@@ -1,58 +1,144 @@
 {
-	"src/site/demos/examples/CustomRestrictionsExample.svelte": [
+	"src/lib/components/internal/ArtificialTransition.svelte": [
 		{
-			"suggestion": "You are calling a function inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
-			"reason": "Owns the current upload object URL; teardown revokes it on replacement and destruction. This is browser resource cleanup, not derived state."
+			"suggestion": "You are calling the function `untrack` inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "R3 KEEP: attachment-owned animation effect isolates frame lifecycle and DOM writes from its tracked target geometry."
 		},
 		{
-			"suggestion": "The usage of `bind:this` can often be replaced with an easier to read `action` or even better an `attachment`. Consider using the latter if possible.",
-			"reason": "The upload button needs to click a separate hidden file input; a DOM binding is the direct connection between these controls."
-		}
-	],
-	"src/site/demos/examples/DefaultTransformsExample.svelte": [
-		{
-			"suggestion": "You are calling a function inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
-			"reason": "Owns the current upload object URL; teardown revokes it on replacement and destruction. This is browser resource cleanup, not derived state."
+			"suggestion": "You are calling the function `deepCompare` inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "R3 KEEP: pure comparison avoids restarting the DOM animation for an unchanged target box."
 		},
 		{
-			"suggestion": "The usage of `bind:this` can often be replaced with an easier to read `action` or even better an `attachment`. Consider using the latter if possible.",
-			"reason": "The upload button needs to click a separate hidden file input; a DOM binding is the direct connection between these controls."
-		}
-	],
-	"src/site/demos/examples/LoadImageExample.svelte": [
-		{
 			"suggestion": "You are calling a function inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
-			"reason": "Owns the current upload object URL; teardown revokes it on replacement and destruction. This is browser resource cleanup, not derived state."
+			"reason": "R3 KEEP: starts frame interpolation that writes width, height and transform directly to the attached DOM element."
 		},
 		{
-			"suggestion": "The usage of `bind:this` can often be replaced with an easier to read `action` or even better an `attachment`. Consider using the latter if possible.",
-			"reason": "The upload button needs to click a separate hidden file input; a DOM binding is the direct connection between these controls."
+			"suggestion": "You are calling the function `isNumber` inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "R3 KEEP: pure numeric guards select interpolation versus direct assignment inside the animation frame callback."
 		}
 	],
-	"src/site/demos/examples/PreviewResultExample.svelte": [
+	"src/lib/components/internal/CropperCanvas.svelte": [
 		{
-			"suggestion": "You are calling a function inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
-			"reason": "Owns the current upload object URL; teardown revokes it on replacement and destruction. This is browser resource cleanup, not derived state."
+			"suggestion": "The usage of `bind:this` can often be replaced with an easier to read `action` or even better an `attachment`. Consider using the latter if possible.",
+			"reason": "R3 KEEP: output and spare canvas bindings are used by the exported imperative draw method; the spare is released after drawing."
+		}
+	],
+	"src/lib/components/layers/CropperSource.svelte": [
+		{
+			"suggestion": "The usage of `bind:this` can often be replaced with an easier to read `action` or even better an `attachment`. Consider using the latter if possible.",
+			"reason": "R3 KEEP: the image binding implements the public bind:element contract used to expose the actual drawable."
+		}
+	],
+	"src/lib/components/layers/StretchableBoundary.svelte": [
+		{
+			"suggestion": "The usage of `bind:this` can often be replaced with an easier to read `action` or even better an `attachment`. Consider using the latter if possible.",
+			"reason": "R3/F5a KEEP: both elements are read by exported stretchTo/reset measurement methods; registration itself is already attachment-owned."
+		}
+	],
+	"src/lib/components/preview/CropperPreview.svelte": [
+		{
+			"suggestion": "You are calling the function `untrack` inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "R3 KEEP: calls asynchronous custom boundary measurement and publishes only the current stretch result using ownership/version guards; size cannot be derived from props alone."
+		}
+	],
+	"src/lib/controllers/CropperController.svelte.ts": [
+		{
+			"suggestion": "You are calling the function `untrack` inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "F5a KEEP: isolates engine reset/refresh and external notifications from reactive dependency collection in the five explicit synchronization effects."
 		},
 		{
-			"suggestion": "The usage of `bind:this` can often be replaced with an easier to read `action` or even better an `attachment`. Consider using the latter if possible.",
-			"reason": "The upload button needs to click a separate hidden file input; a DOM binding is the direct connection between these controls."
-		}
-	],
-	"src/site/demos/home/CroppersWizard.svelte": [
-		{
-			"suggestion": "You are calling a function inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
-			"reason": "Owns the current uploaded photo URL and revokes it on replacement and destruction; the effect synchronizes browser resource lifetime."
+			"suggestion": "You are calling the function `resetCropper` inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "F5a KEEP: measures the registered boundary asynchronously and resets imperative core geometry when the loaded image or registration generation changes."
 		},
 		{
-			"suggestion": "The usage of `bind:this` can often be replaced with an easier to read `action` or even better an `attachment`. Consider using the latter if possible.",
-			"reason": "The upload button opens a separate hidden file input through its bound DOM element."
-		}
-	],
-	"src/site/demos/gotchas/HeicUploadExample.svelte": [
+			"suggestion": "You are calling the function `notifyReady` inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "R3/F5a KEEP: emits the external onReady callback only after rendered geometry and the current export source are ready, with image identity and lifetime guards."
+		},
+		{
+			"suggestion": "You are calling the function `fire` inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "F5a KEEP: notifies external onUpdate consumers when the scalar loading status changes; this is a callback, not computed state."
+		},
+		{
+			"suggestion": "You are calling the function `isInitializedState` inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "R3 KEEP: pure readiness predicate within the effect that coordinates rendered geometry, export-source readiness and external onReady notification."
+		},
 		{
 			"suggestion": "You are calling a function inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
-			"reason": "Owns the current uploaded photo URL and revokes it on replacement and destruction; the effect synchronizes browser resource lifetime."
+			"reason": "R3/F5a KEEP: calls engine getters, commits stencil selection, ends active interactions, and requests reconciliation inside the five engine/readiness synchronization effects; scalar derived inputs and initialization guards already suppress unchanged notifications."
+		},
+		{
+			"suggestion": "You are calling the function `props` inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "R3/F5a KEEP: reads current canvas enablement and settings for readiness and registration reconciliation; the surrounding effects issue external notifications and engine commands."
+		},
+		{
+			"suggestion": "You are calling the function `Boolean` inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "R3 KEEP: pure state-existence check in the asynchronous onReady lifetime guard; it does not assign reactive state."
+		},
+		{
+			"suggestion": "You are calling the function `normalize` inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "R3 KEEP: tracks reactive stencil constraint reads before requesting imperative engine reconciliation, including when ordinary reconciliation is disabled."
+		},
+		{
+			"suggestion": "You are calling the function `releaseReset` inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "R3 KEEP: releases the counted reconciliation pause owned by a superseded reset when boundary/stencil registration changes."
+		},
+		{
+			"suggestion": "You are calling the function `releaseRefresh` inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "R3 KEEP: releases the counted reconciliation pause owned by a superseded refresh when boundary/stencil registration changes."
+		},
+		{
+			"suggestion": "You are calling the function `refreshCropper` inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "R3 KEEP: asynchronously measures a replacement boundary and reconciles imperative geometry with generation guards."
+		}
+	],
+	"src/lib/controllers/ImageLoader.svelte.ts": [
+		{
+			"suggestion": "You are calling a function inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "R3/F5a KEEP: Promise continuation delivers the committed-image onLoad notification after rendering with request/image guards; loading flags are now owned by explicit commit/load/clear operations."
+		},
+		{
+			"suggestion": "You are calling the function `options` inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "R3 KEEP: reads the latest external onLoad callback after the committed image renders; no derivable state is assigned."
+		},
+		{
+			"suggestion": "You are calling the function `tick` inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "R3 KEEP: waits for DOM rendering before committed-image notification and rechecks request/image identity."
+		},
+		{
+			"suggestion": "You are calling the function `untrack` inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "R3 KEEP: starts or cancels browser image work in response to derived src while isolating incidental loading-option reads."
+		},
+		{
+			"suggestion": "You are calling the function `unloadImage` inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "R3 KEEP: cancels pending image work and schedules delayed unloading; asynchronous resource lifecycle cannot be a derivation."
+		},
+		{
+			"suggestion": "You are calling the function `startLoading` inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "R3 KEEP: starts network/orientation image loading with stale-result disposal; asynchronous loading status belongs to this operation."
+		}
+	],
+	"src/lib/controllers/StencilRegistry.svelte.ts": [
+		{
+			"suggestion": "Found a mutable instance of the built-in Map class. Use SvelteMap instead. at line 6, column 20",
+			"reason": "R3 KEEP: the Map is nonreactive internal storage; an explicit revision publishes membership changes and commit controls settled stencil selection. SvelteMap would alter dependency tracking without replacing that protocol."
+		}
+	],
+	"src/lib/controllers/observeReconciliation.svelte.ts": [
+		{
+			"suggestion": "You are calling the function `enabled` inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "R3/F5a KEEP: reactive enablement getter gates ordinary engine reconciliation while explicit stencil requests remain mandatory."
+		},
+		{
+			"suggestion": "You are calling a function inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "R3 KEEP: reads active core interactions and invokes reconcileState only when pending work can run; this synchronizes the imperative engine."
+		},
+		{
+			"suggestion": "You are calling the function `isConsistent` inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "R3 KEEP: reads geometry/settings consistency before issuing the imperative reconcileState command after pauses and interactions finish."
+		},
+		{
+			"suggestion": "You are calling the function `untrack` inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "R3 KEEP: applies the pending reconciliation revision and invokes the core without collecting incidental mutation reads."
 		}
 	],
 	"src/routes/docs/+layout.svelte": [
@@ -61,10 +147,34 @@
 			"reason": "The article element is passed to the table of contents, which observes its headings across navigation."
 		}
 	],
-	"src/site/demos/algorithms/ResizeAlgorithm.svelte": [
+	"src/site/demos/examples/CustomRestrictionsExample.svelte": [
 		{
 			"suggestion": "The usage of `bind:this` can often be replaced with an easier to read `action` or even better an `attachment`. Consider using the latter if possible.",
-			"reason": "Mount and window resize handlers measure this container and constrain the draggable box to its layout dimensions."
+			"reason": "The upload button needs to click a separate hidden file input; a DOM binding is the direct connection between these controls."
+		}
+	],
+	"src/site/demos/examples/DefaultTransformsExample.svelte": [
+		{
+			"suggestion": "The usage of `bind:this` can often be replaced with an easier to read `action` or even better an `attachment`. Consider using the latter if possible.",
+			"reason": "The upload button needs to click a separate hidden file input; a DOM binding is the direct connection between these controls."
+		}
+	],
+	"src/site/demos/examples/LoadImageExample.svelte": [
+		{
+			"suggestion": "The usage of `bind:this` can often be replaced with an easier to read `action` or even better an `attachment`. Consider using the latter if possible.",
+			"reason": "The upload button needs to click a separate hidden file input; a DOM binding is the direct connection between these controls."
+		}
+	],
+	"src/site/demos/examples/PreviewResultExample.svelte": [
+		{
+			"suggestion": "The usage of `bind:this` can often be replaced with an easier to read `action` or even better an `attachment`. Consider using the latter if possible.",
+			"reason": "The upload button needs to click a separate hidden file input; a DOM binding is the direct connection between these controls."
+		}
+	],
+	"src/site/demos/examples/RefreshExample.svelte": [
+		{
+			"suggestion": "You are calling a function inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "Synchronizes the core boundary with dimensions after Svelte updates the container DOM."
 		}
 	],
 	"src/site/demos/gotchas/DialogExample.svelte": [
@@ -73,10 +183,26 @@
 			"reason": "The cropper ready callback compares its measured boundary with this container during the dialog transition."
 		}
 	],
+	"src/site/demos/gotchas/RefitExample.svelte": [
+		{
+			"suggestion": "You are calling the function `refit` inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "Measures the rendered boundary, then applies the core visible-area operation; this is engine synchronization."
+		},
+		{
+			"suggestion": "You are calling a function inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "Refreshes the core boundary after container dimensions or the selected resize strategy change."
+		}
+	],
 	"src/site/demos/gotchas/ScaledContainerExample.svelte": [
 		{
 			"suggestion": "The usage of `bind:this` can often be replaced with an easier to read `action` or even better an `attachment`. Consider using the latter if possible.",
 			"reason": "Window pointer handlers measure the stencil within this specific frame to demonstrate transform-aware gesture distances."
+		}
+	],
+	"src/site/demos/home/CroppersWizard.svelte": [
+		{
+			"suggestion": "The usage of `bind:this` can often be replaced with an easier to read `action` or even better an `attachment`. Consider using the latter if possible.",
+			"reason": "The upload button opens a separate hidden file input through its bound DOM element."
 		}
 	],
 	"src/site/demos/tutorials/ImageEditor/AdjustableImage.svelte": [
@@ -91,30 +217,24 @@
 			"reason": "The upload button opens the separate hidden file input through its bound DOM element."
 		}
 	],
-	"src/site/demos/examples/RefreshExample.svelte": [
-		{
-			"suggestion": "You are calling a function inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
-			"reason": "Synchronizes the core boundary with dimensions after Svelte updates the container DOM."
-		}
-	],
-	"src/site/demos/gotchas/RefitExample.svelte": [
-		{
-			"suggestion": "You are calling a function inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
-			"reason": "Refreshes the core boundary after container dimensions or the selected resize strategy change."
-		},
-		{
-			"suggestion": "You are calling the function `refit` inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
-			"reason": "Measures the rendered boundary, then applies the core visible-area operation; this is engine synchronization."
-		}
-	],
 	"src/tests/EffectHarness.svelte": [
-		{
-			"suggestion": "You are calling a function inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
-			"reason": "Regression harness deliberately calls core mutations inside an effect to prove their internal reads do not become reactive dependencies."
-		},
 		{
 			"suggestion": "You are calling the function `onEffectRun` inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
 			"reason": "Reports effect executions to the test so unintended engine subscriptions and reruns are observable."
+		},
+		{
+			"suggestion": "You are calling a function inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "Regression harness deliberately calls core mutations inside an effect to prove their internal reads do not become reactive dependencies."
+		}
+	],
+	"src/tests/UpdateEffectHarness.svelte": [
+		{
+			"suggestion": "You are calling the function `untrack` inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "F5a KEEP: deliberately isolates test log writes during notification and native effect teardown, verifying dependency isolation and initialization comparison."
+		},
+		{
+			"suggestion": "You are calling a function inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "F5a KEEP: appends observable run/cleanup events to the test log; replacing the effect would remove the lifecycle behavior under test."
 		}
 	]
 }
