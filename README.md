@@ -53,8 +53,6 @@ Requires Svelte `^5.40`.
 
 ### Upgrading to 0.2.0
 
-**0.2.0 is a breaking release.** Child stencils, typed snippets and structural instance types replace the 0.1.x composition API; public `use*` helpers and per-part class props are removed. Requires Svelte `^5.40`. See [Upgrade from 0.1.x](https://jakeklassen.github.io/svelte-advanced-cropper/docs/migration/from-0-1) for before/after examples and the complete migration mapping.
-
 ## Development
 
 Tool versions are pinned in `mise.toml` (Node 26, pnpm 12). Run the pnpm commands below through `mise x --` when working on the repository.

@@ -19,7 +19,7 @@ This site documents the Svelte-native API of `svelte-advanced-cropper`. Organize
 
 ## Files
 
-- Page: `src/routes/docs/<section>/<lowercase-kebab-name>/+page.svx` (or an existing top-level page such as `/docs/intro`). Add each page to `src/site/nav.ts`; do not create legacy redirects. The upgrade guide for our own release history lives at `/docs/migration/from-0-1`.
+- Page: `src/routes/docs/<section>/<lowercase-kebab-name>/+page.svx` (or an existing top-level page such as `/docs/intro`). Add each page to `src/site/nav.ts`; do not create legacy redirects. Document only the current API; do not publish migration guides. The changelog records breaking changes.
 - Demo: `src/site/demos/<group>/<Name>.svelte`. Groups: `examples`, `showcase`, `tutorials`, `croppers`, `schemes`, `algorithms`, `home`. Small helpers live next to the demo.
 - Shared demo primitives you may use: `#site/demos/shared/SquareButton.svelte` and `VerticalButtons.svelte`. Plus the global `.demo-buttons` / `.demo-button` classes from `site.css`.
 
@@ -71,7 +71,7 @@ path is added at build time.
 - Custom stencils call `getCropperContext()` and `registerStencil(() => options)` during initialization, before state guards. Registration installs destruction cleanup. Read `context.image` and `context.disabled` reactively; effective disabled is inherited disabled OR local disabled.
 - Custom `handler`/`line` snippets preserve the native event in `onMove` and forward `onMoveEnd`. Gesture listeners remain native and non-passive through attachments.
 - Use one `class` and a style string per visual component. Target parts and states with the tested selectors in `/docs/reference/styling`; use direct-child selectors when nested bounding boxes must be styled independently. Demo styles reaching library elements need `:global(...)`.
-- Obsolete API names belong only in migration examples: `stencilComponent`, `stencilProps`, `*Component`/prop bags, `*ClassName`, `CropperRef`, public `use*` and `bind:ref`. Use `CropperSource bind:element` for its image element. There is no public controller constructor or coordinate binding.
+- Obsolete 0.1.x API names must not appear in docs, including examples. Use `CropperSource bind:element` for its image element. There is no public controller constructor or coordinate binding.
 - Show all helper source files used by an example, keep package-name imports and use credited local images. Give grouped API entries explicit stable kebab-case anchors.
 
 ## Styles and theme scoping
