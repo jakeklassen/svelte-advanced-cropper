@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { ClassValue } from 'svelte/elements';
-	import { CropperSource } from 'svelte-advanced-cropper';
+	import { CropperSource, type AttachBackgroundSource } from 'svelte-advanced-cropper';
 	import { drawAdjustedImage, type Adjustments } from './filters.ts';
 
 	interface Props extends Partial<Adjustments> {
@@ -9,22 +9,34 @@
 		crossOrigin?: 'anonymous' | 'use-credentials' | boolean;
 		style?: string;
 		/** The canvas the adjusted image is drawn into. */
-		ref?: HTMLCanvasElement | null;
+		attachSource?: AttachBackgroundSource;
 	}
 
 	let {
 		src,
-		class: className,
+		class: cssClass,
 		crossOrigin,
 		brightness = 0,
 		saturation = 0,
 		hue = 0,
 		contrast = 0,
 		style,
-		ref = $bindable(null)
+		attachSource
 	}: Props = $props();
 
-	let source: HTMLImageElement | HTMLCanvasElement | null = $state(null);
+	let canvas: HTMLCanvasElement | undefined = $state();
+	let source: HTMLImageElement | null = $state(null);
+
+	// Each source owns a readiness promise; registration waits for its filtered pixels.
+	const readiness = $derived.by(() => {
+		void src;
+		let resolve: (() => void) | undefined;
+		const ready = new Promise<void>((done) => {
+			resolve = done;
+		});
+
+		return { ready, resolve };
+	});
 
 	// Draws the source image into the canvas, with the adjustments applied. It runs as an
 	// effect, to redraw whenever an adjustment changes, and once more when the image loads.
@@ -32,22 +44,24 @@
 		// Read the adjustments before the readiness check, so the effect always tracks them,
 		// even when its first run comes before the image has loaded.
 		const adjustments = { brightness, contrast, saturation, hue };
-		if (ref && source instanceof HTMLImageElement && source.complete) {
-			drawAdjustedImage(ref, source, adjustments);
+		if (canvas && source?.complete && source.naturalWidth > 0) {
+			drawAdjustedImage(canvas, source, adjustments);
+			readiness.resolve?.();
 		}
 	}
 
 	$effect(draw);
 </script>
 
-<!--
-	New elements for every image, as upstream keys them by `src`. A fresh canvas starts blank,
-	so the previous picture never shows, stretched to the new image's size, while it loads.
--->
 {#key src}
-	<canvas bind:this={ref} class={['adjustable-image-element', className]} {style}></canvas>
+	<canvas
+		bind:this={canvas}
+		{@attach attachSource?.(readiness.ready)}
+		class={['adjustable-image-element', cssClass]}
+		{style}
+	></canvas>
 	<CropperSource
-		bind:ref={source}
+		bind:element={source}
 		{src}
 		{crossOrigin}
 		class="adjustable-image-source"

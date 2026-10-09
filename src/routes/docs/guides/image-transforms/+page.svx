@@ -1,0 +1,47 @@
+<script>
+	import Example from '#site/components/Example.svelte';
+	import TransformImageExample from '#site/demos/examples/TransformImageExample.svelte';
+	import TransformImageExampleSource from '#site/demos/examples/TransformImageExample.svelte?highlight';
+	import RotateImageExample from '#site/demos/examples/RotateImageExample.svelte';
+	import RotateImageExampleSource from '#site/demos/examples/RotateImageExample.svelte?highlight';
+	import RotateCoordinatesExample from '#site/demos/examples/RotateCoordinatesExample.svelte';
+	import RotateCoordinatesExampleSource from '#site/demos/examples/RotateCoordinatesExample.svelte?highlight';
+	import TransformImageExampleFile0 from '#site/demos/shared/SquareButton.svelte?highlight';
+	import TransformImageExampleFile1 from '#site/demos/shared/VerticalButtons.svelte?highlight';
+	import RotateImageExampleFile0 from '#site/demos/shared/SquareButton.svelte?highlight';
+	import RotateImageExampleFile1 from '#site/demos/shared/VerticalButtons.svelte?highlight';
+</script>
+
+# Move, zoom, rotate, and flip
+
+Image transforms change the picture under the selection. Moving or resizing the stencil changes the selection itself. Both affect the resulting crop, but serve different controls.
+
+## Pan and zoom
+
+Bind a `CropperInstance` and call `moveImage(left, top)` or `zoomImage(factor)`. Zoom factors are relative: `2` zooms in, `0.5` zooms out. Core restrictions limit the result.
+
+<Example source={TransformImageExampleSource} title="TransformImageExample" files={{ 'SquareButton.svelte': TransformImageExampleFile0, 'VerticalButtons.svelte': TransformImageExampleFile1 }}>
+	<TransformImageExample />
+</Example>
+
+For a slider that describes an absolute zoom level, follow [Absolute zoom](/docs/tutorials/absolute-zoom). For mouse, touch and wheel configuration, see [Gestures](/docs/guides/gestures).
+
+## Rotate and flip
+
+`rotateImage(angle)` adds a rotation in degrees. `flipImage(horizontal, vertical)` flips the selected axes. Quarter turns are the straightforward choice with the default restrictions; arbitrary-angle workflows may need an appropriate custom strategy, as in the mobile [showcase](/docs/showcase).
+
+<Example source={RotateImageExampleSource} title="RotateImageExample" files={{ 'SquareButton.svelte': RotateImageExampleFile0, 'VerticalButtons.svelte': RotateImageExampleFile1 }}>
+	<RotateImageExample />
+</Example>
+
+Transforms are part of cropper state and are included in canvas export. Coordinates after rotation belong to the transformed image space. Sending only an unrotated rectangle to a server will not reproduce that result; include transforms or export the canvas.
+
+<Example source={RotateCoordinatesExampleSource} title="RotateCoordinatesExample">
+	<RotateCoordinatesExample />
+</Example>
+
+## Transitions and completion
+
+Action options can disable animation with `{ transitions: false }`. A continuously dragged control should use that option so it follows the pointer. Gesture primitives pair transformation calls with `transformImageEnd()`; custom stencil movement pairs with `moveCoordinatesEnd()` or `resizeCoordinatesEnd()`.
+
+To set the opening rotation and flips, use [default transforms](/docs/guides/defaults-and-restrictions#default-transforms). Changing those defaults does not replace an explicit action on the current image.

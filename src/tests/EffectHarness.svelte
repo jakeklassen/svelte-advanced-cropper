@@ -1,6 +1,6 @@
 <script lang="ts">
 	import 'advanced-cropper/styles/index.scss';
-	import { Cropper, type CropperRef } from '#lib';
+	import { Cropper, type CropperInstance } from '#lib';
 
 	interface Props {
 		src: string;
@@ -11,11 +11,11 @@
 
 	let { src, onReady, onEffectRun }: Props = $props();
 
-	let cropper: CropperRef | undefined = $state();
+	let cropper: CropperInstance | undefined = $state();
 	let ready = $state(false);
 
-	// Calls state-changing ref methods from an effect, the way a React user calls them
-	// from useEffect. The effect depends only on `cropper` and `ready`; the methods'
+	// Calls state-changing methods from an effect. It depends only on `cropper` and
+	// `ready`; the methods'
 	// internal reads of cropper state must not become its dependencies.
 	$effect(() => {
 		if (!cropper || !ready) {

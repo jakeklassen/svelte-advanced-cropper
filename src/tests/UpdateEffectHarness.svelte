@@ -1,25 +1,39 @@
 <script lang="ts">
-	import { useUpdateEffect } from '#lib';
+	import { onMount, untrack } from 'svelte';
 
 	interface Props {
 		log: string[];
+		changeOnMount?: boolean;
 	}
 
-	let { log }: Props = $props();
+	let { log, changeOnMount = false }: Props = $props();
 
 	let data = $state.raw({ value: 1, other: 1 });
 
-	useUpdateEffect(
-		() => {
-			log.push(`run:${data.value}`);
+	onMount(() => {
+		if (changeOnMount) {
+			data = { value: 2, other: 1 };
+		}
+	});
 
-			return () => log.push('cleanup');
-		},
-		() => [data.value]
-	);
+	const value = $derived(data.value);
+	let previous = untrack(() => value);
+	$effect(() => {
+		const current = value;
+		if (current === previous) {
+			return;
+		}
 
-	export function setValue(value: number) {
-		data = { ...data, value };
+		previous = current;
+		untrack(() => log.push(`run:${current}`));
+
+		return () => {
+			untrack(() => log.push('cleanup'));
+		};
+	});
+
+	export function setValue(next: number) {
+		data = { ...data, value: next };
 	}
 
 	export function setOther(other: number) {

@@ -1,5 +1,7 @@
 # 01 — `advanced-cropper@0.17.1` core study
 
+> Historical study of the upstream implementation and earlier port. Proposed mappings and release observations below are not the 0.2.0 API; see the [current design log](00-index.md) for superseding decisions.
+
 Scope: everything under `tmp/advanced-cropper/src` (the framework-agnostic core), cross-checked against
 the shipped package at `node_modules/advanced-cropper` (pnpm store `advanced-cropper@0.17.1`) and against
 `tmp/react-advanced-cropper` where the React layer shows how the core is meant to be driven.

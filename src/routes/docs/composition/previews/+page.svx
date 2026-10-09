@@ -1,0 +1,27 @@
+<script>
+	import Example from '#site/components/Example.svelte';
+	import Demo from '#site/demos/components/CropperPreviewDemo.svelte';
+	import source from '#site/demos/components/CropperPreviewDemo.svelte?highlight';
+</script>
+
+# Customize previews
+
+Pass the value from `bind:this` directly to `CropperPreview`. The source getters are reactive; there is no need to copy state in an update callback.
+
+<Example {source} title="Reactive preview">
+	<Demo />
+</Example>
+
+## Choose a source
+
+The precedence is a non-null `cropper` prop, then the source installed by `update(source)`, then snapshot props (`state`, `image`, `transitions`, `loading`, `loaded`). `update(null)` clears the imperative source. Use `refresh()` after changing an adapter whose getters are not reactive.
+
+## Replace preview layers
+
+`wrapper`, `boundary` and `background` receive a `preview: CropperPreviewSource`, not an enclosing cropper's context. Preserve their classes and render wrapper children exactly once. The default boundary uses `fillLayoutBoundary` and `stretchPreviewBoundary`; register a replacement through `registerBoundary`.
+
+The background receives `size: Size | null`, the fitted preview size. Use `getPreviewStyle` with that size rather than cropper background positioning. Coordinate width/height changes trigger stretching; position-only changes update the image without resizing the boundary. Superseded asynchronous measurements are discarded.
+
+For image adjustments, use the same adjustment values in the cropper and preview backgrounds. The [image editor](/docs/tutorials/image-editor) demonstrates this. Previews have no export-source registration or canvas-export method; export through the cropper.
+
+See [CropperPreview](/docs/reference/cropper-preview) and [preview snippets](/docs/reference/snippets#preview-snippets).

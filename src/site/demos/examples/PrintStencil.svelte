@@ -9,14 +9,13 @@
 		DraggableArea,
 		StencilOverlay,
 		StencilWrapper,
-		type CropperRef,
+		getCropperContext,
 		type MoveDirections,
 		type ResizeAnchor,
 		type ResizeOptions
 	} from 'svelte-advanced-cropper';
 
 	interface Props {
-		cropper: CropperRef;
 		/** The finished print's size, after trimming, in any unit (inches here). */
 		width: number;
 		height: number;
@@ -29,18 +28,22 @@
 		rows?: number;
 	}
 
-	let { cropper, width, height, bleed, safeMargin, columns = 1, rows = 1 }: Props = $props();
+	let { width, height, bleed, safeMargin, columns = 1, rows = 1 }: Props = $props();
+
+	const context = getCropperContext();
+	const cropper = context.cropper;
+	const disabled = $derived(context.disabled);
 
 	const state = $derived(cropper.getState());
 	const coordinates = $derived(cropper.getStencilCoordinates());
 	const transitions = $derived(cropper.getTransitions());
 
 	// The crop covers the print plus its bleed, so the stencil has that shape. The cropper
-	// reads this export through `bind:this` and keeps the crop to it.
+	// reads the registered options whenever the product dimensions change.
 	const fullWidth = $derived(width + 2 * bleed);
 	const fullHeight = $derived(height + 2 * bleed);
 	const stencilAspectRatio = $derived(fullWidth / fullHeight);
-	export { stencilAspectRatio as aspectRatio };
+	context.registerStencil(() => ({ aspectRatio: stencilAspectRatio }));
 
 	/** An inset from the crop's edges, as CSS percentages of its width and height. */
 	function inset(distance: number) {
@@ -51,22 +54,28 @@
 	const safeInset = $derived(inset(bleed + safeMargin));
 
 	function onMove(directions: MoveDirections) {
-		cropper.moveCoordinates(directions);
+		if (!disabled) {
+			cropper.moveCoordinates(directions);
+		}
 	}
 
 	function onResize(anchor: ResizeAnchor, directions: MoveDirections, options: ResizeOptions) {
-		cropper.resizeCoordinates(anchor, directions, options);
+		if (!disabled) {
+			cropper.resizeCoordinates(anchor, directions, options);
+		}
 	}
 </script>
 
 {#if state}
 	<StencilWrapper class="print-stencil" {transitions} {...coordinates}>
 		<BoundingBox
+			{disabled}
 			reference={state.coordinates}
 			{onResize}
 			onResizeEnd={cropper.resizeCoordinatesEnd}
 		>
 			<DraggableArea
+				{disabled}
 				class="print-stencil__draggable-area"
 				{onMove}
 				onMoveEnd={cropper.moveCoordinatesEnd}

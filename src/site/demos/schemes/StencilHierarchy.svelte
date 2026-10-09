@@ -2,60 +2,57 @@
 	import HierarchyTree from './HierarchyTree.svelte';
 	import type { HierarchyNode } from './hierarchy.ts';
 
-	// A line or handler wrapper, with the DraggableElement inside it.
-	const wrapperWithDraggable = (title: string): HierarchyNode[] => [
-		{
-			title,
-			kind: 'component',
-			children: [
-				{ title: 'DraggableElement', kind: 'component', to: '/docs/components/DraggableElement' }
-			]
-		}
-	];
-
 	const root: HierarchyNode = {
 		title: 'RectangleStencil / CircleStencil',
-		kind: 'replaceable',
-		to: '/docs/components/RectangleStencil',
-		note: 'stencilComponent',
+		kind: 'component',
+		to: '/docs/reference/rectangle-stencil',
+		note: 'child of Cropper or FixedCropper',
 		children: [
+			{
+				title: 'getCropperContext()',
+				kind: 'context',
+				note: 'registerStencil · reactive cropper, disabled, image'
+			},
 			{
 				title: 'StencilWrapper',
 				kind: 'component',
-				to: '/docs/components/StencilWrapper',
+				to: '/docs/reference/stencil-primitives#stencil-wrapper',
 				children: [
 					{
 						title: 'BoundingBox',
 						kind: 'component',
-						to: '/docs/components/BoundingBox',
+						to: '/docs/reference/stencil-primitives#bounding-box',
 						children: [
 							{
-								title: 'SimpleLine',
-								kind: 'replaceable',
-								to: '/docs/components/SimpleLine',
-								note: 'lineComponent',
-								children: wrapperWithDraggable('LineWrapper')
+								title: 'line',
+								kind: 'snippet',
+								note: 'SimpleLine by default',
+								children: [{ title: 'LineWrapper → DraggableArea', kind: 'component' }]
 							},
 							{
-								title: 'SimpleHandler',
-								kind: 'replaceable',
-								to: '/docs/components/SimpleHandler',
-								note: 'handlerComponent',
-								children: wrapperWithDraggable('HandlerWrapper')
+								title: 'handler',
+								kind: 'snippet',
+								note: 'SimpleHandler by default',
+								children: [{ title: 'HandlerWrapper → DraggableArea', kind: 'component' }]
 							},
 							{
 								title: 'DraggableArea',
 								kind: 'component',
-								to: '/docs/components/DraggableArea',
+								to: '/docs/reference/interaction-primitives#draggable-area',
 								children: [
 									{
 										title: 'StencilOverlay',
 										kind: 'component',
-										to: '/docs/components/StencilOverlay',
+										to: '/docs/reference/stencil-primitives#stencil-overlay',
 										children: [
-											{ title: 'StencilGrid', kind: 'component', note: 'grid' },
-											{ title: 'preview <div>', kind: 'component', note: 'previewClassName' }
+											{ title: 'StencilGrid', kind: 'component', note: 'grid prop' },
+											{ title: 'preview <div>', kind: 'component', note: '__preview selector' }
 										]
+									},
+									{
+										title: 'children',
+										kind: 'snippet',
+										note: 'custom guides inside the crop region'
 									}
 								]
 							}
@@ -67,4 +64,4 @@
 	};
 </script>
 
-<HierarchyTree {root} label="Default stencil hierarchy" />
+<HierarchyTree {root} label="Child stencil composition" />

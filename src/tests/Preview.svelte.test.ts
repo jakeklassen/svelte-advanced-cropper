@@ -3,11 +3,11 @@ import { render } from 'vitest-browser-svelte';
 import PreviewHarness from './PreviewHarness.svelte';
 import AdapterPreviewHarness from './AdapterPreviewHarness.svelte';
 import { createTestImage, nextFrame, waitFor } from './fixtures';
-import type { CropperRef } from '#lib';
+import type { CropperInstance } from '#lib';
 
 describe('CropperPreview', () => {
-	it('mirrors the cropper image and resizes with the coordinates', async () => {
-		const onReady = vi.fn<(cropper: CropperRef) => void>();
+	it('displays the cropper image and resizes with the coordinates', async () => {
+		const onReady = vi.fn<(cropper: CropperInstance) => void>();
 		const screen = await render(PreviewHarness, { src: createTestImage(), onReady });
 		await waitFor(() => onReady.mock.calls.length > 0);
 		const preview = screen.container.querySelector('.test-preview');
@@ -27,7 +27,7 @@ describe('CropperPreview', () => {
 	});
 
 	it('re-reads a non-reactive cropper object on refresh()', async () => {
-		const onReady = vi.fn<(cropper: CropperRef) => void>();
+		const onReady = vi.fn<(cropper: CropperInstance) => void>();
 		const cropperScreen = await render(PreviewHarness, { src: createTestImage(), onReady });
 		await waitFor(() => onReady.mock.calls.length > 0);
 		const cropper = cropperScreen.component.getCropper();

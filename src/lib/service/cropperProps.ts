@@ -1,47 +1,31 @@
-import type { CoreSettings, DefaultSettings, ModifierSettings } from 'advanced-cropper';
-import type { ExtendedSettings, SettingsExtension } from '../types';
-import type { AbstractCropperIntrinsicProps } from '../components/AbstractCropper.types';
+import {
+	settingPropNames,
+	type CropperProps,
+	type CropperSettingProps,
+	type SettingsExtension
+} from '../types';
 
-/** The flat cropper props that are core settings, routed into the `settings` object. */
-export const settingPropNames = [
-	'transformImage',
-	'moveCoordinates',
-	'resizeCoordinates',
-	'defaultCoordinates',
-	'defaultVisibleArea',
-	'areaPositionRestrictions',
-	'areaSizeRestrictions',
-	'sizeRestrictions',
-	'positionRestrictions',
-	'aspectRatio',
-	'minWidth',
-	'minHeight',
-	'maxWidth',
-	'maxHeight',
-	'defaultSize',
-	'defaultPosition',
-	'defaultTransforms',
-	'imageRestriction',
-	'priority'
-];
+function isSettingName(key: string): key is keyof CropperSettingProps {
+	return Object.hasOwn(settingPropNames, key);
+}
 
-/** Splits flat cropper props into core settings and the remaining component props. */
-export function splitCropperProps<Extension extends SettingsExtension>(
-	props: Record<string, unknown>,
-	settingNames: string[] = settingPropNames
-) {
-	const settings: Record<string, unknown> = {};
-	const componentProps: Record<string, unknown> = {};
-	for (const [key, value] of Object.entries(props)) {
-		if (settingNames.includes(key)) {
-			settings[key] = value;
-		} else {
-			componentProps[key] = value;
+export function collectSettings<E extends SettingsExtension>(
+	props: CropperProps<E>
+): CropperSettingProps<E> {
+	const settings: CropperSettingProps<E> = {};
+	// The generic key preserves the correlation between each prop and its value.
+	// oxlint-disable-next-line typescript/no-unnecessary-type-parameters
+	function copy<K extends keyof CropperSettingProps<E>>(key: K) {
+		if (props[key] !== undefined) {
+			settings[key] = props[key];
 		}
 	}
 
-	return { settings, props: componentProps } as unknown as {
-		settings: Extension & Partial<DefaultSettings & CoreSettings & ModifierSettings>;
-		props: AbstractCropperIntrinsicProps<ExtendedSettings<Extension>>;
-	};
+	for (const key in settingPropNames) {
+		if (isSettingName(key)) {
+			copy(key);
+		}
+	}
+
+	return settings;
 }

@@ -2,14 +2,14 @@
 	import { X } from '@lucide/svelte';
 	import { cubicOut } from 'svelte/easing';
 	import { scale } from 'svelte/transition';
-	import { Cropper, type CropperRef } from 'svelte-advanced-cropper';
+	import { Cropper, type CropperInstance } from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 
 	const src = image('orange-cat-on-table.jpg');
 	const titleId = $props.id();
 
 	let open = $state(false);
-	let cropper: CropperRef | undefined = $state();
+	let cropper: CropperInstance | undefined = $state();
 	let box: HTMLDivElement | undefined = $state();
 	let measurement = $state('');
 

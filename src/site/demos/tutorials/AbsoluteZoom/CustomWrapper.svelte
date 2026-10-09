@@ -1,18 +1,15 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
-	import type { ClassValue } from 'svelte/elements';
-	import { CropperFade, type FixedCropperRef } from 'svelte-advanced-cropper';
+	import {
+		CropperFade,
+		type CropperWrapperSnippetProps,
+		type FixedCropperSettings
+	} from 'svelte-advanced-cropper';
 	import { getAbsoluteZoom, getZoomFactor } from 'advanced-cropper/extensions/absolute-zoom';
 	import Navigation from './Navigation.svelte';
 
-	interface Props {
-		cropper: FixedCropperRef;
-		class?: ClassValue;
-		style?: string;
-		children?: Snippet;
-	}
+	type Props = CropperWrapperSnippetProps<FixedCropperSettings>;
 
-	let { cropper, class: className, style, children }: Props = $props();
+	let { cropper, class: cssClass, style, children }: Props = $props();
 
 	const state = $derived(cropper.getState());
 	const settings = $derived(cropper.getSettings());
@@ -26,7 +23,7 @@
 	}
 </script>
 
-<CropperFade class={['custom-wrapper', className]} {style} {visible}>
+<CropperFade class={['custom-wrapper', cssClass]} {style} {visible}>
 	{@render children?.()}
 	<Navigation class="custom-wrapper__navigation" zoom={absoluteZoom} {onZoom} />
 </CropperFade>

@@ -2,10 +2,7 @@
 	import type { Snippet } from 'svelte';
 	import CodeBlock from './CodeBlock.svelte';
 
-	interface Source {
-		code: string;
-		html: string;
-	}
+	import type { HighlightedSource as Source } from '#site/highlight-types.ts';
 
 	interface Props {
 		/** The demo's own source (`import source from './Demo.svelte?highlight'`). */
@@ -38,7 +35,7 @@
 					<CodeBlock
 						title={entries.length > 1 ? name : undefined}
 						code={file.code}
-						html={file.html}
+						highlighted={file.highlighted}
 					/>
 				{/each}
 			</div>

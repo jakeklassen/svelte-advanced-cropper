@@ -27,32 +27,30 @@
 		label?: string;
 	}
 
-	let { value = 0, onChange, class: className, label = 'Zoom' }: Props = $props();
+	let { value = 0, onChange, class: cssClass, label = 'Zoom' }: Props = $props();
 
-	let track: HTMLDivElement | undefined = $state();
 	let dragging = $state(false);
 
-	function setValueFromPointer(clientX: number) {
-		if (track) {
-			const { left, width } = track.getBoundingClientRect();
-			onChange?.(clamp((clientX - left) / width));
-		}
+	function setValueFromPointer(event: PointerEvent & { currentTarget: HTMLDivElement }) {
+		const track = event.currentTarget;
+		const { left, width } = track.getBoundingClientRect();
+		onChange?.(clamp((event.clientX - left) / width));
 	}
 
-	function onpointerdown(event: PointerEvent) {
+	function onpointerdown(event: PointerEvent & { currentTarget: HTMLDivElement }) {
 		if (event.button !== 0) {
 			return;
 		}
 
 		dragging = true;
-		track?.setPointerCapture(event.pointerId);
-		setValueFromPointer(event.clientX);
+		event.currentTarget.setPointerCapture(event.pointerId);
+		setValueFromPointer(event);
 	}
 
-	function onpointermove(event: PointerEvent) {
+	function onpointermove(event: PointerEvent & { currentTarget: HTMLDivElement }) {
 		if (dragging) {
 			event.preventDefault();
-			setValueFromPointer(event.clientX);
+			setValueFromPointer(event);
 		}
 	}
 
@@ -66,8 +64,7 @@
 </script>
 
 <div
-	class={['slider', className]}
-	bind:this={track}
+	class={['slider', cssClass]}
 	role="slider"
 	tabindex="0"
 	aria-label={label}

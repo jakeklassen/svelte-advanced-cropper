@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Cropper, type CropperRef } from 'svelte-advanced-cropper';
+	import { Cropper, type CropperInstance } from 'svelte-advanced-cropper';
 	import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, ZoomIn, ZoomOut } from '@lucide/svelte';
 	import SquareButton from '#site/demos/shared/SquareButton.svelte';
 	import VerticalButtons from '#site/demos/shared/VerticalButtons.svelte';
@@ -7,7 +7,7 @@
 
 	const src = image('cat-on-green.jpg');
 
-	let cropper: CropperRef | undefined = $state();
+	let cropper: CropperInstance | undefined = $state();
 
 	// Each button moves the image by a quarter of the stencil size, in its direction.
 	const directions = {

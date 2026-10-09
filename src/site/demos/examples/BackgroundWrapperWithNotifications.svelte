@@ -1,27 +1,14 @@
 <script lang="ts">
 	import { onDestroy } from 'svelte';
 	import {
-		TransformableImage,
+		CropperBackgroundWrapper,
 		isTouchEvent,
 		isWheelEvent,
-		useMoveImageOptions,
-		useScaleImageOptions,
-		type CropperBackgroundWrapperProps,
+		type CropperBackgroundWrapperSnippetProps,
 		type TransformableImageEvent
 	} from 'svelte-advanced-cropper';
 
-	let {
-		cropper,
-		scaleImage = true,
-		moveImage = true,
-		children,
-		class: className,
-		style
-	}: CropperBackgroundWrapperProps = $props();
-
-	const moveImageOptions = $derived(useMoveImageOptions(moveImage));
-	const scaleImageOptions = $derived(useScaleImageOptions(scaleImage));
-	const transitions = $derived(cropper.getTransitions());
+	let { children, ...props }: CropperBackgroundWrapperSnippetProps = $props();
 
 	type NotificationType = 'touch' | 'wheel';
 
@@ -76,18 +63,7 @@
 	}
 </script>
 
-<TransformableImage
-	class={className}
-	{style}
-	onTransform={cropper.transformImage}
-	onTransformEnd={cropper.transformImageEnd}
-	{onEvent}
-	touchMove={moveImageOptions.touch}
-	mouseMove={moveImageOptions.mouse}
-	touchScale={scaleImageOptions.touch}
-	wheelScale={scaleImageOptions.wheel}
-	disabled={transitions.active}
->
+<CropperBackgroundWrapper {...props} {onEvent}>
 	{@render children?.()}
 	<div
 		class={[
@@ -97,7 +73,7 @@
 	>
 		{messages[notificationType]}
 	</div>
-</TransformableImage>
+</CropperBackgroundWrapper>
 
 <style>
 	.cropper-event-notification {

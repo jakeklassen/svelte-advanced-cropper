@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Cropper, type CropperRef } from 'svelte-advanced-cropper';
+	import { RectangleStencil, Cropper, type CropperInstance } from 'svelte-advanced-cropper';
 	import {
 		Expand,
 		LocateFixed,
@@ -14,7 +14,7 @@
 
 	const src = image('flowers-and-pier.jpg');
 
-	let cropper: CropperRef | undefined = $state();
+	let cropper: CropperInstance | undefined = $state();
 
 	// Scale the stencil, then re-centre it on its previous centre. Each step of the
 	// array is applied in turn, and each one respects the cropper's restrictions.
@@ -54,14 +54,9 @@
 </script>
 
 <div class="set-coordinates-example">
-	<Cropper
-		bind:this={cropper}
-		class="set-coordinates-example__cropper"
-		{src}
-		stencilProps={{
-			minAspectRatio: 1 / 2
-		}}
-	/>
+	<Cropper bind:this={cropper} class="set-coordinates-example__cropper" {src}>
+		<RectangleStencil minAspectRatio={1 / 2} />
+	</Cropper>
 	<VerticalButtons>
 		<SquareButton title="Resize (x2)" onclick={() => resize(2, 2)}><Expand /></SquareButton>
 		<SquareButton title="Resize height (x2)" onclick={() => resize(1, 2)}>

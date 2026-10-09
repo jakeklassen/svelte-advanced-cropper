@@ -1,4 +1,4 @@
 declare module '*?highlight' {
-	const source: { code: string; html: string };
+	const source: import('./highlight-types.ts').HighlightedSource;
 	export default source;
 }

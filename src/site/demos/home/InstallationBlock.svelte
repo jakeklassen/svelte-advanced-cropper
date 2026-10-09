@@ -9,7 +9,7 @@
 
 	type Manager = keyof typeof commands;
 
-	const managers = Object.keys(commands) as Manager[];
+	const managers = ['npm', 'pnpm', 'yarn', 'bun', 'aube'] as const satisfies readonly Manager[];
 
 	let manager: Manager = $state('npm');
 </script>
@@ -28,6 +28,7 @@
 		{/each}
 	</div>
 </div>
+<p>Requires Svelte <code>^5.40</code>.</p>
 
 <style>
 	.installation-block {

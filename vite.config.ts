@@ -7,7 +7,7 @@ import { mdsvex } from 'mdsvex';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import type { Plugin } from 'vite';
-import { highlight, highlighter } from './src/site/highlight.ts';
+import { highlightTokens, highlighter } from './src/site/highlight.ts';
 import { rehypeBasePath, rehypeHeadingIds } from './src/site/markdown.ts';
 import { coreScssDeprecations } from './scripts/sass.ts';
 
@@ -16,8 +16,8 @@ const base = (process.env.BASE_PATH ?? '') as '' | `/${string}`;
 const brokenLinkHandling = process.env.STRICT_LINKS ? 'fail' : 'warn';
 
 /**
- * `import source from './Demo.svelte?highlight'` gives `{ code, html }`: the file's
- * source and its Shiki-highlighted HTML, computed at build time so the docs can show
+ * `import source from './Demo.svelte?highlight'` gives `{ code, highlighted }`: the file's
+ * source and its Shiki tokens, computed at build time so the docs can show
  * each demo's real code without shipping a highlighter.
  */
 function highlightImports(): Plugin {
@@ -47,10 +47,10 @@ function highlightImports(): Plugin {
 			const file = id.slice(prefix.length, -'.js'.length);
 			this.addWatchFile(file);
 			const code = await readFile(file, 'utf8');
-			// The extension names the language; `highlight` falls back to plain text for unknown ones.
+			// The extension names the language; unsupported languages fail the build.
 			const lang = file.split('.').pop() ?? 'text';
 
-			return `export default ${JSON.stringify({ code, html: highlight(code, lang) })};`;
+			return `export default ${JSON.stringify({ code, highlighted: highlightTokens(code, lang) })};`;
 		}
 	};
 }
@@ -59,6 +59,11 @@ function highlightImports(): Plugin {
 // server starts faster, and a request for a missing file gets a plain 404 instead of booting
 // the site's server renderer (about 10 seconds the first time).
 const libraryTestConfig = {
+	resolve: {
+		alias: {
+			'svelte-advanced-cropper': fileURLToPath(new URL('./src/lib/index.ts', import.meta.url))
+		}
+	},
 	plugins: [svelte({ compilerOptions: { runes: true } })],
 	css: { preprocessorOptions: { scss: { silenceDeprecations: coreScssDeprecations } } }
 };

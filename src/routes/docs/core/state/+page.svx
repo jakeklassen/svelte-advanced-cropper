@@ -1,0 +1,167 @@
+<script>
+	import StateDiagram from '#site/demos/concept/StateDiagram.svelte';
+	import StateGeometry from '#site/demos/concept/StateGeometry.svelte';
+</script>
+
+# State and coordinate spaces
+
+<StateDiagram />
+
+## The cropper state
+
+All cropping data lives in a single object, the **cropper state**. Components draw it, gestures and methods replace it, and nothing else carries information about the crop.
+
+It has five parts: the boundary, the image size, the transforms, the visible area and the coordinates.
+
+```ts
+interface CropperState {
+	boundary: Boundary;
+	imageSize: ImageSize;
+	transforms: Transforms;
+	visibleArea: VisibleArea | null;
+	coordinates: Coordinates | null;
+}
+```
+
+By convention the state itself is `null` until the cropper has an image and a measured boundary. A state whose `visibleArea` and `coordinates` are both set is called _initialized_. Modifiers return an uninitialized state unchanged, and `isInitializedState(state)` tells the two apart.
+
+<StateGeometry />
+
+`visibleArea` and `coordinates` are both rectangles measured in **image pixels**, in the frame of the rotated image. Only `boundary` is measured in screen pixels.
+
+### Boundary
+
+The boundary is the size of the cropper's drawing area on screen, in CSS pixels.
+
+```ts
+interface Boundary {
+	width: number;
+	height: number;
+}
+```
+
+### Image size
+
+The natural size of the image, before any rotation is applied.
+
+```ts
+interface ImageSize {
+	width: number;
+	height: number;
+}
+```
+
+The relation between image pixels and screen pixels matters a lot. If the visible area is twice as wide as the boundary, dragging the stencil one screen pixel moves the coordinates by two image pixels. The core calls this ratio the _coefficient_ (`getCoefficient(state)`, which is `visibleArea.width / boundary.width`) and uses it to convert every pointer delta before applying it.
+
+### Visible area
+
+The part of the image that is currently displayed inside the boundary.
+
+```ts
+interface VisibleArea {
+	top: number;
+	left: number;
+	width: number;
+	height: number;
+}
+```
+
+Because the visible area is stretched to fill the boundary, its aspect ratio always matches the boundary's. Zooming the image in makes the visible area smaller, and panning moves it.
+
+### Coordinates
+
+The crop itself: the part of the image the stencil covers, and the region `getCanvas()` draws.
+
+```ts
+interface Coordinates {
+	top: number;
+	left: number;
+	width: number;
+	height: number;
+}
+```
+
+### Transforms
+
+The rotation and flips applied to the image.
+
+```ts
+interface Transforms {
+	rotate: number;
+	flip: {
+		horizontal: boolean;
+		vertical: boolean;
+	};
+}
+```
+
+`rotate` is in degrees and accumulates: rotating by 90° four times gives `360`, not `0`. See the [FAQ](/docs/guides/crop-state) for why that matters when you reset the cropper.
+
+## Reading the state in Svelte
+
+The cropper instance (from `bind:this`, or the argument of any callback) exposes the state and its parts:
+
+| Method                    | Returns                                                            |
+| ------------------------- | ------------------------------------------------------------------ |
+| `getState()`              | The whole state, or `null`; treat it as read-only                          |
+| `getCoordinates()`        | The coordinates, rounded to whole pixels by default                |
+| `getVisibleArea()`        | A copy of the visible area                                         |
+| `getTransforms()`         | A copy of the transforms (no rotation and no flips when empty)     |
+| `getStencilCoordinates()` | The stencil's box in boundary (screen) pixels                      |
+
+All of them are reactive, so you can use them directly in markup:
+
+```svelte
+<script lang="ts">
+	import { Cropper, type CropperInstance } from 'svelte-advanced-cropper';
+
+	let { src }: { src: string } = $props();
+	let cropper: CropperInstance | undefined = $state();
+
+	const coordinates = $derived(cropper?.getCoordinates());
+</script>
+
+<Cropper bind:this={cropper} {src} />
+{#if coordinates}
+	<p>{coordinates.width} × {coordinates.height} at ({coordinates.left}, {coordinates.top})</p>
+{/if}
+```
+
+To replace the state, pass a complete state, `null`, or a function of the current state to `cropper.setState()`. See [Modifiers](/docs/core/modifiers).
+
+## Image
+
+The other basic building block is the image, described by `CropperImage`:
+
+```ts
+interface CropperImage {
+	src: string;
+	revoke: boolean;
+	transforms: Transforms;
+	arrayBuffer: ArrayBuffer | null;
+	width: number;
+	height: number;
+}
+```
+
+- `src`: the URL to display. When the image needed its EXIF orientation fixed, this is a new object URL or data URL, not the one you passed in.
+- `width`, `height`: the natural size of the image.
+- `transforms`: the rotation and flip taken from the EXIF orientation.
+- `revoke`: `true` when `src` is an object URL created by the loader, which you can free with `URL.revokeObjectURL` once you are done with it.
+- `arrayBuffer`: the raw bytes of the image, when they were read.
+
+You normally get one from [`loadImage`](/docs/core/utilities#loadimage). The cropper loads images for you and releases object URLs that its loader creates. Application-owned URLs remain your responsibility.
+
+## Transitions
+
+The core doesn't animate anything. It only keeps a flag saying that the latest change should be animated, plus the timing to use. `cropper.getTransitions()` returns it as `CropperTransitions`:
+
+```ts
+interface CropperTransitions {
+	timingFunction: string;
+	duration: number;
+	active: boolean;
+}
+```
+
+While `active` is `true`, the components animate towards the new state, and the core ignores stencil drags and resizes until the transition ends.

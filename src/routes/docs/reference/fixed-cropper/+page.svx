@@ -1,0 +1,33 @@
+<script>
+	import Example from '#site/components/Example.svelte';
+	import Demo from '#site/demos/components/FixedCropperDemo.svelte';
+	import source from '#site/demos/components/FixedCropperDemo.svelte?highlight';
+</script>
+
+# FixedCropper
+
+Keeps a configured stencil size while the image moves and zooms underneath it.
+
+<Example {source} title="FixedCropper">
+	<Demo />
+</Example>
+
+## Props
+
+Inherits [Cropper props](/docs/reference/cropper), except `aspectRatio` and `sizeRestrictions` are not accepted. Its extension settings also exclude `stencilSize`.
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `stencilSize` | `StencilSize<CropperSettings<E & FixedCropperSettings>>` | Required |
+| `settings` | `E & { [K in keyof CropperSettingProps` \| `'stencilSize']?: never }` | `undefined` |
+
+
+`StencilSize<S>` accepts `Size` or `(state: CropperState, settings: S) => Size`. These dimensions describe the displayed stencil in boundary pixels. A function can adapt it to available space.
+
+The fixed-size strategy supplies `defaultSize`, `aspectRatio`, `sizeRestrictions`, `fixedStencil` postprocessing and `fixedStencilConstraints`. It forces `transformImage.adjustStencil` to `false`. To prevent direct stencil movement and resizing, set `movable={false}` and `resizable={false}` on its child stencil.
+
+## Snippets, context and instance
+
+The same four [layer snippets](/docs/reference/snippets) receive `CropperInstance<E & FixedCropperSettings>`. The default child is `RectangleStencil`; explicit children replace it. Provides isolated `CropperContext`, requires no parent context, and follows the same readiness and cleanup guarantees as Cropper.
+
+Type `bind:this` as `FixedCropperInstance<E>`. It exposes the same [33 methods](/docs/reference/cropper-instance). Styling uses the same `.advanced-cropper` root and parts; there is no separate fixed-cropper class family.

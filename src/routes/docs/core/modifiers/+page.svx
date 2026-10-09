@@ -1,0 +1,214 @@
+<script>
+	import Admonition from '#site/components/Admonition.svelte';
+</script>
+
+# State modifiers
+
+A modifier is usually a [pure function](https://en.wikipedia.org/wiki/Pure_function): it receives a `state` and the cropper `settings`, plus whatever the operation needs, and returns a new `state`. The input is never changed. The core's modifiers live in `advanced-cropper/state` and are re-exported from `svelte-advanced-cropper`.
+
+```ts
+import { moveCoordinates, setBoundary } from 'svelte-advanced-cropper';
+```
+
+## Using modifiers with the cropper
+
+You rarely need to call a modifier yourself, because the cropper's methods (`moveImage`, `setCoordinates`, `rotateImage`, …) call them for you. When you do, hand the modifier to `cropper.setState()`. It calls the function with the current state and the cropper's full settings:
+
+```ts
+import { moveCoordinates } from 'svelte-advanced-cropper';
+
+// Shift the crop 50 image pixels to the right, with the usual transition.
+cropper.setState((state, settings) =>
+	state ? moveCoordinates(state, settings, { left: 50, top: 0 }) : state
+);
+```
+
+You can also replace the modifier a cropper uses for a whole class of operation with the `*Algorithm` props, for example `moveCoordinatesAlgorithm` or `transformImageAlgorithm`. Each takes a function with the same signature as the default modifier listed below.
+
+## Special functions
+
+These two aren't modifiers, since they don't turn one state into another, but they produce states the same way.
+
+### createState
+
+The standard way to build the initial state:
+
+```ts
+function createState(
+	options: CreateStateOptions,
+	settings: CoreSettings & InitializeSettings
+): CropperState;
+
+interface CreateStateOptions {
+	boundary: Boundary;
+	image: Size & { transforms?: Transforms };
+}
+```
+
+`boundary` is the on-screen size of the cropper, and `image` is the natural size of the image. Its optional `transforms` are the starting rotation and flips, for example the ones read from the image's EXIF data (a `CropperImage` can be passed as is).
+
+The rest comes from the settings:
+
+- `defaultTransforms`, if set, replaces the image's starting transforms.
+- `defaultCoordinates` and `defaultVisibleArea` give the initial crop and the initial visible area.
+- `priority` decides which of those two is computed first. With the default, `'coordinates'`, the crop is placed first and the visible area is fitted around it. With `'visibleArea'`, the visible area is placed first and the crop is kept inside it.
+
+### copyState
+
+Makes a deep copy of a state. Useful as the first line of your own pure modifiers.
+
+```ts
+function copyState<T extends CropperState | null>(state: T): T;
+```
+
+## Default modifiers
+
+### setCoordinates
+
+```ts
+function setCoordinates(
+	state: CropperState,
+	settings: CoreSettings,
+	transform: CoordinatesTransform | CoordinatesTransform[],
+	mode?: boolean | SetCoordinatesMode
+): CropperState;
+
+type CoordinatesTransform =
+	| Partial<Coordinates>
+	| ((state: CropperState, settings: CoreSettings) => Partial<Coordinates> | null)
+	| null;
+```
+
+Sets the crop. Each transform can change any of `width`, `height`, `left` and `top`, and an array applies them in order, so you can set the size first and then position the result. Sizes are adjusted to the aspect ratio and size restrictions, and positions are moved inside the position restrictions.
+
+`mode` controls what happens to the visible area:
+
+| Mode                                  | Effect                                                                       |
+| ------------------------------------- | ---------------------------------------------------------------------------- |
+| `SetCoordinatesMode.zoom` or `true`   | The default. The visible area zooms out or moves so the new crop fits in it. |
+| `SetCoordinatesMode.limit`            | The crop is limited to the current visible area.                             |
+| `SetCoordinatesMode.unsafe` or `false` | The crop may extend beyond the visible area.                                 |
+
+### setVisibleArea
+
+```ts
+function setVisibleArea(
+	state: CropperState,
+	settings: CoreSettings,
+	visibleArea: VisibleArea,
+	safe?: boolean
+): CropperState;
+```
+
+Sets the visible area, then fits it to the area restrictions and the boundary's aspect ratio. When `safe` is `true` (the default), the crop is then moved and shrunk to stay inside the new visible area.
+
+### setBoundary
+
+```ts
+function setBoundary(state: CropperState, settings: CoreSettings, boundary: Boundary): CropperState;
+```
+
+Updates the state for a new boundary size, for example after the window was resized. The visible area takes the new aspect ratio and is rescaled so it still contains the crop.
+
+### moveCoordinates
+
+```ts
+function moveCoordinates(
+	state: CropperState,
+	settings: CoreSettings,
+	directions: MoveDirections
+): CropperState;
+
+interface MoveDirections {
+	left: number;
+	top: number;
+}
+```
+
+Moves the crop by `directions`, in image pixels. The result stays inside both the visible area and the position restrictions.
+
+### resizeCoordinates
+
+```ts
+function resizeCoordinates(
+	state: CropperState,
+	settings: CoreSettings,
+	anchor: ResizeAnchor,
+	directions: MoveDirections,
+	options: ResizeOptions
+): CropperState;
+
+interface ResizeOptions {
+	compensate?: boolean;
+	preserveAspectRatio?: boolean;
+	respectDirection?: 'width' | 'height';
+	reference?: Coordinates | null;
+}
+```
+
+Resizes the crop by dragging one of its sides or corners. `anchor` names the handle being dragged (`'east'`, `'westNorth'`, …) and `directions` is how far it moved, in image pixels. The crop can't grow beyond the visible area or shrink below a minimum of about 20 screen pixels.
+
+- `compensate`: when the crop would cross a position limit on one side, move the overflow to the opposite side instead of losing it.
+- `preserveAspectRatio`: keep the current aspect ratio (the stencils turn this on while <kbd>Shift</kbd> is held).
+- `respectDirection`: when the aspect ratio forces one dimension to adjust, which one follows the pointer: `'width'` or `'height'`.
+- `reference`: the crop at the start of the gesture, used to keep the opposite handle in place.
+
+The [Resize Algorithm](/docs/algorithms/resize-algorithm) page has an interactive demo of the algorithm behind it.
+
+### transformImage
+
+```ts
+function transformImage(
+	state: CropperState,
+	settings: CoreSettings & ModifierSettings,
+	transform: ImageTransform
+): CropperState;
+
+interface ImageTransform {
+	scale?: number | Scale;
+	move?: { left?: number; top?: number };
+	rotate?: number | Rotate;
+	flip?: Flip;
+}
+```
+
+Rotates, flips, moves or zooms the image. It is the modifier behind the background gestures and behind `zoomImage`, `moveImage`, `rotateImage` and `flipImage`. Rotation and flips are applied first, then moving and scaling.
+
+Moving and scaling act on the visible area, so a scale `factor` above `1` zooms in by making the visible area smaller. The crop is scaled together with the visible area, so the stencil keeps its size on screen. When the crop can't follow any further because of its size restrictions, `settings.transformImage.adjustStencil` (on by default in the cropper) lets the visible area keep zooming on its own, and the stencil changes size on screen instead of the zoom stopping.
+
+The three steps are also exported on their own:
+
+```ts
+function rotateImageAlgorithm(
+	state: CropperState,
+	settings: CoreSettings,
+	rotate: number | Rotate
+): CropperState;
+
+function flipImageAlgorithm(
+	state: CropperState,
+	settings: CoreSettings,
+	horizontal?: boolean,
+	vertical?: boolean
+): CropperState;
+
+function transformImageAlgorithm(
+	state: CropperState,
+	settings: CoreSettings & ModifierSettings,
+	transform: ImageTransform
+): CropperState;
+```
+
+### reconcileState
+
+```ts
+function reconcileState(state: CropperState, settings: CoreSettings): CropperState;
+```
+
+Brings a state back in line with the settings after they changed, fixing the aspect ratio, the size and the position of the crop and the visible area. The cropper runs it automatically whenever its settings props change (see `autoReconcileState`), and `isConsistentState(state, settings)` tells you whether it would change anything.
+
+<Admonition type="note">
+
+The modifiers expect complete settings, with every `CoreSettings` field present. Build them with [`createDefaultSettings`](/docs/core/settings) if you call modifiers outside a cropper. Inside `setState()` the cropper passes its own, already complete, settings.
+
+</Admonition>

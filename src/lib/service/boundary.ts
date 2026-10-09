@@ -10,7 +10,7 @@ const toNumber = (value: string) => {
  * The boundary's layout size: its border box, as `getBoundingClientRect()` reports it,
  * but without CSS transforms.
  *
- * Upstream's `fillBoundary` measures with `getBoundingClientRect()`, which includes the
+ * The advanced-cropper core's `fillBoundary` measures with `getBoundingClientRect()`, which includes the
  * transforms of every ancestor. The cropper positions everything inside the boundary in
  * untransformed CSS pixels, so a scaled ancestor (a dialog that scales in, a scaled
  * container) made it size the crop area wrongly. The computed style is the layout size and

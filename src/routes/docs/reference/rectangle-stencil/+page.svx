@@ -1,0 +1,52 @@
+# RectangleStencil
+
+A rectangle crop region registered through its ancestor cropper context.
+
+```svelte
+<script lang="ts">
+	import { Cropper, RectangleStencil } from 'svelte-advanced-cropper';
+</script>
+
+<Cropper src="/photo.jpg" style="height: 360px">
+	<RectangleStencil grid />
+</Cropper>
+```
+
+## Props
+
+All optional props without a default remain `undefined`. `class` accepts Svelte `ClassValue`; `style` is a CSS string.
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `children` | `Snippet` | `undefined` |
+| `coordinates` | `Coordinates` \| `((state: CropperState` \| `null) => Coordinates)` | `undefined` |
+| `handler` | `Snippet<[HandlerSnippetProps]>` | `SimpleHandler` |
+| `handlers` | `boolean` \| `Partial<Record<OrdinalDirection, boolean>>` | All eight directions |
+| `lines` | `boolean` \| `Partial<Record<CardinalDirection, boolean>>` | All four cardinal directions |
+| `line` | `Snippet<[LineSnippetProps]>` | `SimpleLine` |
+| `class` | `ClassValue` | `undefined` |
+| `style` | `string` | `undefined` |
+| `minAspectRatio` | `number` | `undefined` |
+| `maxAspectRatio` | `number` | `undefined` |
+| `aspectRatio` | `RawAspectRatio` | `undefined` |
+| `movable` | `boolean` | `true` |
+| `resizable` | `boolean` | `true` |
+| `grid` | `boolean` | `undefined` |
+| `disabled` | `boolean` | `undefined` |
+
+
+Omitted `grid` and local `disabled` are falsy. The effective disabled value also includes the cropper's disabled state. `resizable={false}` disables controls; `handlers={false}` and `lines={false}` hide them. A direction map shows only entries whose value is `true`; `true` enables every direction.
+
+`coordinates` controls display coordinates in boundary pixels. Without it, the stencil reads `getStencilCoordinates()`. It does not replace crop state. The optional grid appears during interactions, with nine divisions while rotating and three otherwise.
+
+## Snippets and context
+
+`handler: Snippet<[HandlerSnippetProps]>` and `line: Snippet<[LineSnippetProps]>` replace interactive controls. Forward the supplied positioning class and original native event. `children: Snippet` renders inside the draggable crop region above the overlay.
+
+Requires [CropperContext](/docs/reference/stencil-context) and registers during initialization. There are no imperative component methods and no nested context provider.
+
+Rectangle options are computed from `aspectRatio`, `minAspectRatio` and `maxAspectRatio`. An explicit cropper aspect ratio wins under the default constraint strategy.
+
+## Selectors
+
+`.advanced-cropper-rectangle-stencil` owns `--movable`, `--moving`, `--resizable`, `--resizing`, `--disabled`, `__bounding-box`, `__draggable-area`, `__overlay`, `__preview` and `__grid`. See [expanded selectors](/docs/reference/styling).

@@ -1,51 +1,40 @@
 <script lang="ts">
-	import type { ClassValue } from 'svelte/elements';
 	import {
 		getBackgroundStyle,
 		styleToString,
-		type CropperImage,
-		type CropperState,
-		type CropperTransitions
+		type CropperBackgroundSnippetProps
 	} from 'svelte-advanced-cropper';
 	import AdjustableImage from './AdjustableImage.svelte';
 	import type { Adjustments } from './filters.ts';
 
-	interface DesiredCropperRef {
-		getState: () => CropperState | null;
-		getTransitions: () => CropperTransitions | null;
-		getImage: () => CropperImage | null;
-	}
-
-	interface Props extends Partial<Adjustments> {
-		class?: ClassValue;
-		cropper: DesiredCropperRef;
-		crossOrigin?: 'anonymous' | 'use-credentials' | boolean;
-		/** The drawn element. The cropper crops from it in `getCanvas()`. */
-		ref?: HTMLCanvasElement | null;
-	}
-
+	type Props = CropperBackgroundSnippetProps & Partial<Adjustments>;
 	let {
-		class: className,
+		class: cssClass,
+		style,
 		cropper,
 		crossOrigin,
-		ref = $bindable(null),
-		...adjustments
+		attachSource,
+		brightness,
+		contrast,
+		saturation,
+		hue
 	}: Props = $props();
-
 	const state = $derived(cropper.getState());
 	const transitions = $derived(cropper.getTransitions());
 	const image = $derived(cropper.getImage());
-
-	const style = $derived(
+	const imageStyle = $derived(
 		image && state ? styleToString(getBackgroundStyle(image, state, transitions)) : ''
 	);
 </script>
 
 <AdjustableImage
-	{...adjustments}
-	bind:ref
+	{brightness}
+	{contrast}
+	{saturation}
+	{hue}
 	src={image?.src}
 	{crossOrigin}
-	class={className}
-	{style}
+	class={cssClass}
+	style={`${imageStyle};${style ?? ''}`}
+	{attachSource}
 />

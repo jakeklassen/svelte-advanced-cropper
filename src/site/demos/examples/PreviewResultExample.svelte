@@ -1,9 +1,10 @@
 <script lang="ts">
+	import { onDestroy } from 'svelte';
 	import {
+		RectangleStencil,
 		Cropper,
 		CropperPreview,
-		type CropperPreviewRef,
-		type CropperRef
+		type CropperInstance
 	} from 'svelte-advanced-cropper';
 	import { RotateCcw, Upload } from '@lucide/svelte';
 	import SquareButton from '#site/demos/shared/SquareButton.svelte';
@@ -11,50 +12,42 @@
 
 	let src = $state(image('schnauzer.jpg'));
 
-	let cropper: CropperRef | undefined = $state();
-	let largePreview: CropperPreviewRef | undefined = $state();
-	let smallPreview: CropperPreviewRef | undefined = $state();
+	let cropper: CropperInstance | undefined = $state();
 	let input: HTMLInputElement | undefined = $state();
-
-	function onUpdate(instance: CropperRef) {
-		largePreview?.update(instance);
-		smallPreview?.update(instance);
-	}
 
 	function loadImage(event: Event & { currentTarget: HTMLInputElement }) {
 		const file = event.currentTarget.files?.[0];
 		if (file) {
-			src = URL.createObjectURL(file);
+			revokeUploadedUrl();
+			uploadedUrl = URL.createObjectURL(file);
+			src = uploadedUrl;
 		}
 
 		// Reset the input so that picking the same file again still fires `change`.
 		event.currentTarget.value = '';
 	}
 
-	// Free the previous object URL once it is replaced (a no-op for regular URLs).
-	$effect(() => {
-		const current = src;
+	// Own upload URLs separately from preset sources.
+	let uploadedUrl: string | undefined;
 
-		return () => {
-			if (current.startsWith('blob:')) {
-				URL.revokeObjectURL(current);
-			}
-		};
-	});
+	function revokeUploadedUrl() {
+		if (uploadedUrl) {
+			URL.revokeObjectURL(uploadedUrl);
+			uploadedUrl = undefined;
+		}
+	}
+
+	onDestroy(revokeUploadedUrl);
 </script>
 
 <div class="preview-result-example">
-	<Cropper
-		bind:this={cropper}
-		{src}
-		stencilProps={{ aspectRatio: 1 }}
-		class="preview-result-example__cropper"
-		{onUpdate}
-	/>
+	<Cropper bind:this={cropper} {src} class="preview-result-example__cropper">
+		<RectangleStencil aspectRatio={1} />
+	</Cropper>
 	<div class="preview-result-example__previews">
-		<CropperPreview bind:this={largePreview} class="preview-result-example__preview" />
+		<CropperPreview {cropper} class="preview-result-example__preview" />
 		<CropperPreview
-			bind:this={smallPreview}
+			{cropper}
 			class="preview-result-example__preview preview-result-example__preview--small"
 		/>
 	</div>

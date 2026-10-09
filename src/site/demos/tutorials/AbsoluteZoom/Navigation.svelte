@@ -10,7 +10,7 @@
 		class?: ClassValue;
 	}
 
-	let { zoom, onZoom, class: className }: Props = $props();
+	let { zoom, onZoom, class: cssClass }: Props = $props();
 
 	const BUTTON_STEP = 0.25;
 
@@ -20,7 +20,7 @@
 	}
 </script>
 
-<div class={['absolute-zoom-navigation', className]}>
+<div class={['absolute-zoom-navigation', cssClass]}>
 	<button
 		type="button"
 		class="absolute-zoom-navigation__button"

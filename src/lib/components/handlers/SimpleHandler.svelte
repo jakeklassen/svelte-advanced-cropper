@@ -1,27 +1,46 @@
+<script lang="ts" module>
+	import type { HandlerWrapperProps } from '../primitives/HandlerWrapper.svelte';
+
+	export type SimpleHandlerProps = Pick<
+		HandlerWrapperProps,
+		| 'class'
+		| 'style'
+		| 'position'
+		| 'disabled'
+		| 'onMove'
+		| 'onMoveEnd'
+		| 'horizontalPosition'
+		| 'verticalPosition'
+	>;
+</script>
+
 <script lang="ts">
-	import HandlerWrapper from '../service/HandlerWrapper.svelte';
-	import type { HandlerComponentProps } from '../service/BoundingBox.svelte';
+	import { handlerDirections } from '../../service/directions';
+	import HandlerWrapper from '../primitives/HandlerWrapper.svelte';
 
 	let {
-		verticalPosition,
-		horizontalPosition,
-		hoverClassName,
-		wrapperClassName,
-		defaultClassName,
-		wrapperStyle,
+		class: cssClass,
+		style,
+		verticalPosition: vertical,
+		position,
+		horizontalPosition: horizontal,
 		disabled,
 		onMove,
 		onMoveEnd
-	}: HandlerComponentProps = $props();
+	}: SimpleHandlerProps = $props();
 
+	const directions = $derived(position ? handlerDirections(position) : { horizontal, vertical });
+	const horizontalPosition = $derived(directions.horizontal);
+	const verticalPosition = $derived(directions.vertical);
 	let hovered = $state(false);
 </script>
 
 <HandlerWrapper
-	style={wrapperStyle}
+	{style}
 	class={[
 		'advanced-cropper-simple-handler-wrapper',
-		wrapperClassName,
+		cssClass,
+		disabled && 'advanced-cropper-simple-handler-wrapper--disabled',
 		verticalPosition && `advanced-cropper-simple-handler-wrapper--${verticalPosition}`,
 		horizontalPosition && `advanced-cropper-simple-handler-wrapper--${horizontalPosition}`,
 		horizontalPosition &&
@@ -30,19 +49,20 @@
 		hovered && 'advanced-cropper-simple-handler-wrapper--hover'
 	]}
 	{verticalPosition}
+	{position}
 	{horizontalPosition}
 	{disabled}
-	onDrag={onMove}
-	onDragEnd={onMoveEnd}
+	{onMove}
+	{onMoveEnd}
 	onLeave={() => (hovered = false)}
 	onEnter={() => (hovered = true)}
 >
 	<div
 		class={[
 			'advanced-cropper-simple-handler',
+			disabled && 'advanced-cropper-simple-handler--disabled',
 			hovered && 'advanced-cropper-simple-handler--hover',
-			defaultClassName,
-			hovered && hoverClassName,
+
 			verticalPosition && `advanced-cropper-simple-handler--${verticalPosition}`,
 			horizontalPosition && `advanced-cropper-simple-handler--${horizontalPosition}`,
 			horizontalPosition &&

@@ -5,17 +5,12 @@
 	const src = image('orange-cat-on-yellow.jpg');
 </script>
 
-<Cropper
-	{src}
-	class="custom-preview-example"
-	stencilComponent={CircleStencil}
-	stencilProps={{
-		previewClassName: 'custom-preview-example__stencil-preview'
-	}}
-/>
+<Cropper {src} class="custom-preview-example">
+	<CircleStencil />
+</Cropper>
 
 <style>
-	:global(.custom-preview-example__stencil-preview) {
+	:global(.custom-preview-example .advanced-cropper-circle-stencil__preview) {
 		border: dashed 2px rgba(255, 255, 255, 0.45);
 	}
 </style>

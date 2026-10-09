@@ -5,12 +5,12 @@
 		size?: 'small' | 'medium';
 	}
 
-	let { size, class: className, ...props }: Props = $props();
+	let { size, class: cssClass, ...props }: Props = $props();
 </script>
 
 <FixedCropper
 	{...props}
-	class={['fixed-cropper-type-example', size && `fixed-cropper-type-example--${size}`, className]}
+	class={['fixed-cropper-type-example', size && `fixed-cropper-type-example--${size}`, cssClass]}
 />
 
 <style>

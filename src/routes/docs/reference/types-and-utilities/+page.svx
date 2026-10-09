@@ -1,0 +1,39 @@
+# Types and utilities
+
+The package root re-exports the `advanced-cropper` root. Import geometry types such as `Coordinates`, `CropperState`, `CropperImage`, `DrawOptions`, `ImageRestriction` and core functions from `svelte-advanced-cropper`. [Core utilities](/docs/core/utilities) cover the geometry helpers; [extensions](/docs/core/extensions) lists separate entry points.
+
+## Public type families
+
+| Purpose | Exported names |
+| --- | --- |
+| Cropper configuration | `CropperProps<E>`, `FixedCropperProps<E>`, `CropperSettings<E>`, `CropperSettingsInput<E>`, `SettingsExtension`, `FixedCropperSettings` |
+| Instances | `CropperInstance<E>`, `FixedCropperInstance<E>`, `CropperPreviewInstance`, `CropperPreviewSource` |
+| Callbacks and stencils | `CropperCallback<E>`, `CropperCallbacks<E>`, `CropperContext`, `StencilOptions`, `StencilConstraints<E>`, `StencilSize` |
+| Component props | `RectangleStencilProps`, `CircleStencilProps`, `BoundingBoxProps`, `CropperSourceProps`, `StretchableBoundaryProps`, `CropperWrapperProps`, `StencilGridProps`, `DraggableAreaProps`, `TransformableImageProps`, `CropperBackgroundWrapperProps`, `CropperBackgroundImageProps`, `HandlerWrapperProps`, `LineWrapperProps`, `SimpleHandlerProps`, `SimpleLineProps`, `CropperPreviewProps`, `CropperPreviewWrapperProps`, `CropperPreviewBackgroundProps` |
+| Gesture options | `MoveImageOptions`, `ScaleImageOptions`, `RotateImageOptions`, `NormalizedMoveImageOptions`, `NormalizedScaleImageOptions`, `NormalizedRotateImageOptions`, `NativeMoveEvent` |
+| Layer services | `PartProps`, `CrossOrigin`, `BoundaryHandle`, `RegisterBoundary`, `BackgroundElement`, `AttachBackgroundSource` |
+| Snippet arguments | All nine [snippet argument types](/docs/reference/snippets) |
+
+`SettingsExtension = object`. `CropperSettings<E>` combines `DefaultSettings`, `CoreSettings`, `ModifierSettings`, `InitializeSettings` and `E`. `CropperSettingsInput<E>` describes unnormalized inputs for constraint functions; it is not the type of the extension-only `settings` prop.
+
+Use `SimpleHandlerProps` and `SimpleLineProps` for the default controls. These expose a subset of `HandlerWrapperProps` and `LineWrapperProps`; their accepted props are documented in [stencil primitives](/docs/reference/stencil-primitives).
+
+## Option normalizers
+
+```ts
+normalizeMoveImageOptions(value: boolean | MoveImageOptions): NormalizedMoveImageOptions;
+normalizeScaleImageOptions(value: boolean | ScaleImageOptions): NormalizedScaleImageOptions;
+normalizeRotateImageOptions(value: boolean | RotateImageOptions): NormalizedRotateImageOptions;
+```
+
+The move result has required `mouse` and `touch` booleans. The scale result has required `touch` and `wheel: false | { ratio: number }`. The rotation result has required `touch`. `true` enables the corresponding gestures; `false` disables them. Omitted fields in an object are enabled; the default wheel ratio is `0.1`. Cropper itself defaults rotation to false.
+
+Use `$derived(normalizeScaleImageOptions(options))` when the input is reactive. Cropper layer snippets already receive normalized values.
+
+<h2 id="style-to-string">styleToString</h2>
+
+`styleToString(style: Record<string, string | number | null | undefined> | null | undefined): string` converts a core style object to a CSS declaration string, including camelCase property names. Nullish and empty values are omitted; custom property names are preserved. Use it with `getBackgroundStyle` or `getPreviewStyle` in custom image layers.
+
+<h2 id="fill-layout-boundary">fillLayoutBoundary</h2>
+
+`fillLayoutBoundary(boundary: HTMLElement): Size` reads layout dimensions rather than transformed screen dimensions. It is the default boundary-size algorithm and keeps crop geometry consistent inside scaled ancestors. `fillBoundary`, still available from the core, measures the on-screen bounding rectangle instead.

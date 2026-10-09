@@ -1,51 +1,40 @@
 <script>
 	import Example from '#site/components/Example.svelte';
-	import Admonition from '#site/components/Admonition.svelte';
 	import TelegramShowcase from '#site/demos/showcase/Telegram/TelegramShowcase.svelte';
-	import telegramShowcaseSource from '#site/demos/showcase/Telegram/TelegramShowcase.svelte?highlight';
-	import telegramCropperSource from '#site/demos/showcase/Telegram/TelegramCropper.svelte?highlight';
-	import telegramWrapperSource from '#site/demos/showcase/Telegram/CropperWrapper.svelte?highlight';
-	import telegramNavigationSource from '#site/demos/showcase/Telegram/Navigation.svelte?highlight';
-	import telegramRotateSource from '#site/demos/showcase/Telegram/RotateComponent.svelte?highlight';
-	import telegramTypesSource from '#site/demos/showcase/Telegram/types.ts?highlight';
+	import TelegramShowcaseSource from '#site/demos/showcase/Telegram/TelegramShowcase.svelte?highlight';
 	import TwitterShowcase from '#site/demos/showcase/Twitter/TwitterShowcase.svelte';
-	import twitterShowcaseSource from '#site/demos/showcase/Twitter/TwitterShowcase.svelte?highlight';
-	import twitterCropperSource from '#site/demos/showcase/Twitter/TwitterCropper.svelte?highlight';
-	import twitterWrapperSource from '#site/demos/showcase/Twitter/Wrapper.svelte?highlight';
-	import twitterNavigationSource from '#site/demos/showcase/Twitter/Navigation.svelte?highlight';
-	import sliderSource from '#site/demos/croppers/FixedCropper/Slider.svelte?highlight';
+	import TwitterShowcaseSource from '#site/demos/showcase/Twitter/TwitterShowcase.svelte?highlight';
+	import TelegramShowcaseFile0 from '#site/demos/showcase/Telegram/CropperWrapper.svelte?highlight';
+	import TelegramShowcaseFile1 from '#site/demos/showcase/Telegram/Navigation.svelte?highlight';
+	import TelegramShowcaseFile2 from '#site/demos/showcase/Telegram/RotationDial.svelte?highlight';
+	import TelegramShowcaseFile3 from '#site/demos/showcase/Telegram/TelegramCropper.svelte?highlight';
+	import TelegramShowcaseFile4 from '#site/demos/showcase/Telegram/types.ts?highlight';
+	import TwitterShowcaseFile0 from '#site/demos/croppers/FixedCropper/Slider.svelte?highlight';
+	import TwitterShowcaseFile1 from '#site/demos/showcase/Twitter/Navigation.svelte?highlight';
+	import TwitterShowcaseFile2 from '#site/demos/showcase/Twitter/TwitterCropper.svelte?highlight';
+	import TwitterShowcaseFile3 from '#site/demos/showcase/Twitter/Wrapper.svelte?highlight';
 </script>
 
 # Showcase
 
-<Admonition type="tip" title="Seen one we can't do?">
+These composed interfaces combine public croppers, child stencils, snippets and core algorithms. Open **Show code** for the implementation and helper files.
 
-If you come across a cropper on the web that you think this library can't reproduce, [open an issue](https://github.com/jakeklassen/svelte-advanced-cropper/issues) and describe it. Those cases are the best test of the API.
+## Telegram-style editor
 
-</Admonition>
+Resize the frame and release it: the selection grows back into the available space while the image follows. Try fine rotation with the dial, quarter turns, and screen-relative flips.
 
-This page rebuilds croppers from well-known sites. They are ordinary demos built from the public components and the `advanced-cropper` core, so each one shows how far you can take the library without touching its internals. Open "Show code" under a demo to read every file it uses.
-
-## Telegram
-
-A take on the photo cropper in Telegram's mobile app. The stencil can't be dragged: you resize it from its corners, and when you let go it grows back to fill the space while the image zooms to match. Below the image, a dial rotates it in fine steps up to 45° either way, the side buttons turn it by quarters, and the flip buttons stay true to the screen even after a quarter turn.
-
-The behaviour comes from the core's `advanced-cropper/showcase/mobile` module (`stencilConstraints`, `fitStencilToImage`, `zoomStencil`, `defaultSize`, `transformImage` and `resizeCoordinates`), plugged into a regular `Cropper` through its settings and algorithm props. The toolbar is a custom `wrapperComponent`, the dial is built on `DraggableArea`, and the corners theme is applied to this cropper only.
-
-<Example source={telegramShowcaseSource} title="TelegramShowcase" files={{ 'TelegramCropper.svelte': telegramCropperSource, 'CropperWrapper.svelte': telegramWrapperSource, 'Navigation.svelte': telegramNavigationSource, 'RotateComponent.svelte': telegramRotateSource, 'types.ts': telegramTypesSource }}>
+<Example source={TelegramShowcaseSource} title="TelegramShowcase" files={{ 'CropperWrapper.svelte': TelegramShowcaseFile0, 'Navigation.svelte': TelegramShowcaseFile1, 'RotationDial.svelte': TelegramShowcaseFile2, 'TelegramCropper.svelte': TelegramShowcaseFile3, 'types.ts': TelegramShowcaseFile4 }}>
 	<TelegramShowcase />
 </Example>
 
-<Admonition type="info" title="Using it in your app">
+The toolbar is supplied through a wrapper snippet and the child rectangle owns its stencil options. The demo uses the core's packaged `advanced-cropper/showcase/mobile` algorithms and a scoped corners theme. If you copy the demo into an application, declare `advanced-cropper` as a direct dependency for those imports.
 
-The React family publishes this cropper as a separate package, [react-mobile-cropper](https://github.com/advanced-cropper/react-mobile-cropper). There is no Svelte package for it yet, but the demo is self-contained: copy its files into your project and adjust them as you like.
+## Twitter-style avatar cropper
 
-</Admonition>
+Move the photo under the fixed square and use the slider to zoom. `FixedCropper` supplies the frame strategy; an inert child rectangle, wrapper snippet and scoped selectors create the avatar interface.
 
-## Twitter
-
-A take on the avatar cropper from Twitter. The square stencil is fixed in the middle and the image moves and zooms beneath it, with a slider underneath to control the zoom. It is a `FixedCropper` with a custom wrapper, and the slider position comes from the core's `absolute-zoom` extension (`getAbsoluteZoom` and `getZoomFactor`).
-
-<Example source={twitterShowcaseSource} title="TwitterShowcase" files={{ 'TwitterCropper.svelte': twitterCropperSource, 'Wrapper.svelte': twitterWrapperSource, 'Navigation.svelte': twitterNavigationSource, 'Slider.svelte': sliderSource }}>
+<Example source={TwitterShowcaseSource} title="TwitterShowcase" files={{ 'Slider.svelte': TwitterShowcaseFile0, 'Navigation.svelte': TwitterShowcaseFile1, 'TwitterCropper.svelte': TwitterShowcaseFile2, 'Wrapper.svelte': TwitterShowcaseFile3 }}>
 	<TwitterShowcase />
 </Example>
+
+The zoom value comes from the core's absolute-zoom extension. Follow [Absolute zoom](/docs/tutorials/absolute-zoom) to build the slider step by step, or [Styling](/docs/guides/styling) to adapt the visuals.

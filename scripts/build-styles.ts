@@ -1,5 +1,5 @@
 // Compiles the advanced-cropper core SCSS into the stylesheets this package ships,
-// matching react-advanced-cropper's dist layout:
+// Output layout:
 //   dist/style.css          base styles + default theme
 //   dist/themes/<name>.css  each theme, plus the .scss source for customisation
 // Run after svelte-package (it clears dist/).

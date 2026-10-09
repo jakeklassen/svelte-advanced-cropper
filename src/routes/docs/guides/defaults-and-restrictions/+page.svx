@@ -1,0 +1,98 @@
+<script>
+	import Example from '#site/components/Example.svelte';
+	import DefaultCoordinatesExample from '#site/demos/examples/DefaultCoordinatesExample.svelte';
+	import DefaultCoordinatesExampleSource from '#site/demos/examples/DefaultCoordinatesExample.svelte?highlight';
+	import FillingCropperExample from '#site/demos/examples/FillingCropperExample.svelte';
+	import FillingCropperExampleSource from '#site/demos/examples/FillingCropperExample.svelte?highlight';
+	import DefaultVisibleArea from '#site/demos/examples/DefaultVisibleArea.svelte';
+	import DefaultVisibleAreaSource from '#site/demos/examples/DefaultVisibleArea.svelte?highlight';
+	import ImageRestrictionExample from '#site/demos/examples/ImageRestrictionExample.svelte';
+	import ImageRestrictionExampleSource from '#site/demos/examples/ImageRestrictionExample.svelte?highlight';
+	import CustomRestrictionsExample from '#site/demos/examples/CustomRestrictionsExample.svelte';
+	import CustomRestrictionsExampleSource from '#site/demos/examples/CustomRestrictionsExample.svelte?highlight';
+	import FixedSizeExample from '#site/demos/examples/FixedSizeExample.svelte';
+	import FixedSizeExampleSource from '#site/demos/examples/FixedSizeExample.svelte?highlight';
+	import AdjustStencilExample from '#site/demos/examples/AdjustStencilExample.svelte';
+	import AdjustStencilExampleSource from '#site/demos/examples/AdjustStencilExample.svelte?highlight';
+	import DefaultTransformsExample from '#site/demos/examples/DefaultTransformsExample.svelte';
+	import DefaultTransformsExampleSource from '#site/demos/examples/DefaultTransformsExample.svelte?highlight';
+</script>
+
+# Defaults and restrictions
+
+Defaults describe the opening crop. Restrictions constrain both that opening state and later user or programmatic changes. Configure the built-in settings as flat props on `Cropper`.
+
+## Opening coordinates
+
+`defaultCoordinates` accepts an object or a function of state and settings. It is applied when an image loads or you call `reset()`.
+
+<Example source={DefaultCoordinatesExampleSource} title="DefaultCoordinatesExample">
+	<DefaultCoordinatesExample />
+</Example>
+
+If you only need a size or position, use `defaultSize` or `defaultPosition`. The remaining part is computed by the core. This example uses a default-size function to fill the available image region.
+
+<Example source={FillingCropperExampleSource} title="FillingCropperExample">
+	<FillingCropperExample />
+</Example>
+
+## Opening visible area and priority
+
+The visible area describes the viewport in image coordinates, including pan and zoom. Use `defaultVisibleArea` to restore it. `Priority.coordinates` computes the crop first; `Priority.visibleArea` computes the view first and fits the crop to it.
+
+<Example source={DefaultVisibleAreaSource} title="DefaultVisibleArea">
+	<DefaultVisibleArea />
+</Example>
+
+Defaults run on reset. A layout refresh preserves the current view where restrictions permit. To reapply a view after resizing without discarding rotation or the user's crop, see [layout and lifecycle](/docs/guides/layout-and-lifecycle#keep-the-opening-view).
+
+## Image restrictions
+
+`ImageRestriction` is exported from the package root:
+
+| Value | Purpose |
+| --- | --- |
+| `fitArea` | Keep the image within the cropper area as far as possible; the default. |
+| `fillArea` | Keep the cropper area covered by the image. |
+| `stencil` | Keep the selection covered by the image. |
+| `none` | Remove these image-position and scale restrictions. |
+
+<Example source={ImageRestrictionExampleSource} title="ImageRestrictionExample">
+	<ImageRestrictionExample />
+</Example>
+
+## Size restrictions
+
+`minWidth`, `minHeight`, `maxWidth` and `maxHeight` use image pixels. A custom `sizeRestrictions` function can interpret them differently. This example uses percentages and the transformed image size.
+
+<Example source={CustomRestrictionsExampleSource} title="CustomRestrictionsExample">
+	<CustomRestrictionsExample />
+</Example>
+
+The functions and types used by this demo are re-exported from `svelte-advanced-cropper`. For additional application settings shared by algorithms, use the typed `settings` extension object; do not put built-in keys in it. See [core settings](/docs/core/settings).
+
+## Fixed stencil size
+
+`FixedCropper` takes a required `stencilSize`, either a size or a function of state and settings. It controls the displayed frame size, rather than the exported pixel dimensions. The fixed-stencil strategy combines it with the registered stencil ratio and fits it within the boundary.
+
+<Example source={FixedSizeExampleSource} title="FixedSizeExample">
+	<FixedSizeExample />
+</Example>
+
+## Adjust the stencil while zooming
+
+`transformImage={{ adjustStencil: true }}` lets ordinary `Cropper` adjust the selection during image transforms. Toggle it below and compare zoom behaviour near size limits. `FixedCropper` forces it to `false` to preserve the fixed frame.
+
+<Example source={AdjustStencilExampleSource} title="AdjustStencilExample">
+	<AdjustStencilExample />
+</Example>
+
+## Default transforms
+
+`defaultTransforms` supplies opening rotation and flips. Like other defaults, it takes effect on reset. This demo explicitly resets after changing its controls.
+
+<Example source={DefaultTransformsExampleSource} title="DefaultTransformsExample">
+	<DefaultTransformsExample />
+</Example>
+
+A cropper-level aspect ratio normally takes precedence over a stencil suggestion. A custom `stencilConstraints` strategy can change that precedence; see [stencil context](/docs/reference/stencil-context).

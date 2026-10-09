@@ -1,18 +1,20 @@
 <script lang="ts">
-	import { Cropper, type CropperRef } from 'svelte-advanced-cropper';
+	import { Cropper, RectangleStencil, type CropperInstance } from 'svelte-advanced-cropper';
 	import 'svelte-advanced-cropper/style.css';
+	import { image } from '#site/paths.ts';
 
-	const src = '/images/photo.jpg';
-
-	function onChange(cropper: CropperRef) {
-		console.log(cropper.getCoordinates());
-	}
+	let cropper: CropperInstance | undefined = $state();
+	const coordinates = $derived(cropper?.getCoordinates());
 </script>
 
-<Cropper {src} {onChange} class="my-cropper" />
+<Cropper bind:this={cropper} src={image('calico-cat.jpg')} style="height: 360px">
+	<RectangleStencil aspectRatio={16 / 9} />
+</Cropper>
 
-<style>
-	:global(.my-cropper) {
-		height: 500px;
-	}
-</style>
+{#if coordinates}
+	<p>{coordinates.width} × {coordinates.height} pixels</p>
+{/if}
+
+<button type="button" disabled={!coordinates} onclick={() => cropper?.rotateImage(90)}>
+	Rotate
+</button>

@@ -1,33 +1,18 @@
 <script lang="ts" module>
-	import type {
-		CustomCropperProps,
-		CustomCropperRef,
-		ExtendedSettings,
-		SettingsExtension
-	} from '../../types';
-	import type { CropperInstanceSettingsProp } from '../../hooks/useCropperInstance.svelte';
+	import type { SettingsExtension, CropperSettingProps, CropperProps } from '../../types';
 
-	export type CropperProps<Extension extends SettingsExtension = {}> =
-		CustomCropperProps<Extension>;
-
-	export type CropperRef<Extension extends SettingsExtension = {}> = CustomCropperRef<Extension>;
+	export type { CropperProps } from '../../types';
 </script>
 
-<script lang="ts" generics="Extension extends SettingsExtension = {}">
-	import AbstractCropper from '../AbstractCropper.svelte';
-	import { splitCropperProps } from '../../service/cropperProps';
-	import { forwardCropperRef } from '../../service/ref';
+<script lang="ts" generics="E extends SettingsExtension = {}">
+	import { CropperController } from '../../controllers/CropperController.svelte';
+	import CropperView from '../internal/CropperView.svelte';
+	import RegistrationCheck from '../internal/RegistrationCheck.svelte';
 
-	let props: CropperProps<Extension> = $props();
-
-	// Upstream also accepted the deprecated `stencilSize` and `autoZoom` props here, but
-	// its prop splitting never routed them to the code that handled them, so they had
-	// no effect. They are not ported; use FixedCropper and `postProcess` instead.
-	const cropperProps = $derived(splitCropperProps<Extension>(props));
-
-	let abstractCropper: CropperRef<Extension> | undefined = $state.raw();
-
-	// Svelte needs static export names. A test checks that every ref method is exported.
+	// Exclude validation-only keys when inferring from a spread props object.
+	type Extension = Omit<E, keyof CropperSettingProps>;
+	let props: CropperProps<NoInfer<Extension>> & { settings?: E } = $props();
+	const controller = new CropperController<Extension>(() => props);
 	export const {
 		reset,
 		refresh,
@@ -62,11 +47,8 @@
 		getImage,
 		isLoading,
 		isLoaded
-	} = forwardCropperRef(() => abstractCropper);
+	} = controller.api;
 </script>
 
-<AbstractCropper
-	{...cropperProps.props}
-	settings={cropperProps.settings as CropperInstanceSettingsProp<ExtendedSettings<Extension>>}
-	bind:this={abstractCropper}
-/>
+<CropperView {...props} {controller} />
+<RegistrationCheck validate={controller.stencils.commit} />

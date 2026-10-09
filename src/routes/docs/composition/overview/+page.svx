@@ -1,0 +1,34 @@
+<script>
+	import ComponentsHierarchy from '#site/demos/schemes/ComponentsHierarchy.svelte';
+	import Example from '#site/components/Example.svelte';
+	import Demo from '#site/demos/examples/GettingStartedExample.svelte';
+	import source from '#site/demos/examples/GettingStartedExample.svelte?highlight';
+</script>
+
+# Compose a cropper
+
+`Cropper` and `FixedCropper` own image loading, geometry, cleanup and context. Compose their children to choose the crop region; use snippets to replace a visual layer.
+
+<Example {source} title="Child stencil and reactive coordinates">
+	<Demo />
+</Example>
+
+## Children choose the stencil
+
+With no `children`, a cropper creates a `RectangleStencil`. Supplying children replaces that default entirely. Children without a registered stencil are valid: the image can still be transformed and exported. Put extra guides inside the stencil's own `children` snippet so they share its positioned crop region.
+
+Only one stencil may be registered in each cropper. Conditional replacement preserves the existing crop as far as the new constraints allow. A nested cropper supplies its own context.
+
+<ComponentsHierarchy />
+
+## Rendering layers
+
+The default tree is `CropperWrapper` → `StretchableBoundary` → `CropperBackgroundWrapper` → background image and stencil children. The boundary also contains the internal export canvas. The `wrapper`, `boundary`, `backgroundWrapper` and `background` snippets replace their respective layers.
+
+See [layer composition](/docs/composition/layers), [custom stencils](/docs/composition/stencil-context) and [preview composition](/docs/composition/previews).
+
+## Settings and algorithms
+
+Pass built-in settings directly: `minWidth`, `aspectRatio`, `defaultCoordinates` and `imageRestriction` are cropper props. The `settings` object is reserved for your extension fields; those fields cannot redefine built-in settings. `CropperInstance<E>` preserves the extension type in `getSettings()` and callbacks.
+
+Algorithm props, `postProcess` and `stencilConstraints` let a composed cropper change geometry policy. See [Cropper](/docs/reference/cropper) and [core settings](/docs/core/settings). There is no public headless Svelte controller; an independently managed core integration owns its own loading, reactivity and cleanup.

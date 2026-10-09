@@ -1,0 +1,86 @@
+<script>
+	import Example from '#site/components/Example.svelte';
+	import CodeBlock from '#site/components/CodeBlock.svelte';
+	import PreviewResultExample from '#site/demos/examples/PreviewResultExample.svelte';
+	import PreviewResultExampleSource from '#site/demos/examples/PreviewResultExample.svelte?highlight';
+	import GettingResultManualExample from '#site/demos/examples/GettingResultManualExample.svelte';
+	import GettingResultManualExampleSource from '#site/demos/examples/GettingResultManualExample.svelte?highlight';
+	import GettingResultExample from '#site/demos/examples/GettingResultExample.svelte';
+	import GettingResultExampleSource from '#site/demos/examples/GettingResultExample.svelte?highlight';
+	import ResizeResultExample from '#site/demos/examples/ResizeResultExample.svelte';
+	import ResizeResultExampleSource from '#site/demos/examples/ResizeResultExample.svelte?highlight';
+	import PrintSizeExample from '#site/demos/examples/PrintSizeExample.svelte';
+	import PrintSizeExampleSource from '#site/demos/examples/PrintSizeExample.svelte?highlight';
+	import UploadExample from '#site/demos/examples/UploadExample.svelte';
+	import UploadExampleSource from '#site/demos/examples/UploadExample.svelte?highlight';
+	import exportSource from '#site/demos/gotchas/exportCrop.ts?highlight';
+	import PreviewResultExampleFile0 from '#site/demos/shared/SquareButton.svelte?highlight';
+	import GettingResultManualExampleFile0 from '#site/demos/examples/PreviewResults.svelte?highlight';
+	import GettingResultExampleFile0 from '#site/demos/examples/PreviewResults.svelte?highlight';
+</script>
+
+# Preview and export
+
+Use a preview for continuous visual feedback and request a canvas when you need output pixels.
+
+## Live preview
+
+Pass the instance bound with `bind:this` straight to `CropperPreview`. It follows the cropper's reactive getters without an update callback.
+
+<Example source={PreviewResultExampleSource} title="PreviewResultExample" files={{ 'SquareButton.svelte': PreviewResultExampleFile0 }}>
+	<PreviewResultExample />
+</Example>
+
+Give the preview a size in CSS. It fits the crop's ratio inside that box. Snapshot inputs (`state`, `image`, `transitions`, `loading`, `loaded`) and imperative adapters are also supported; see [customize previews](/docs/composition/previews).
+
+## Export on an action
+
+`getCanvas()` returns the cropped bitmap, or `null` if export is disabled or the current source is not ready. `onReady` guarantees the initial rendered export source is ready with the default configuration.
+
+<Example source={GettingResultManualExampleSource} title="GettingResultManualExample" files={{ 'PreviewResults.svelte': GettingResultManualExampleFile0 }}>
+	<GettingResultManualExample />
+</Example>
+
+## Continuous results
+
+Reading coordinates is cheap; drawing and encoding pixels on every drag is not. If your workflow needs continuous exports, debounce them and cancel pending work on destruction. This demo includes that pattern.
+
+<Example source={GettingResultExampleSource} title="GettingResultExample" files={{ 'PreviewResults.svelte': GettingResultExampleFile0 }}>
+	<GettingResultExample />
+</Example>
+
+## Resize the result
+
+Pass `width` and `height` to request dimensions, or `maxWidth`, `maxHeight` and `maxArea` to cap them. Export keeps the crop's aspect ratio, so a differently shaped width/height request does not force distortion.
+
+<Example source={ResizeResultExampleSource} title="ResizeResultExample">
+	<ResizeResultExample />
+</Example>
+
+For example, `getCanvas({ maxWidth: 2048, maxHeight: 2048, fillColor: 'white' })` limits memory and fills transparent areas before JPEG encoding. A circle stencil still exports a rectangular canvas; create a circular mask yourself if required.
+
+## Print resolution
+
+Compare the selected pixel dimensions with the output requirement: a 4-inch square at 300 DPI needs 1200 × 1200 pixels. Upscaling cannot restore missing detail. A warning lets the user decide; `minWidth` and `minHeight` can enforce a minimum instead.
+
+<Example source={PrintSizeExampleSource} title="PrintSizeExample">
+	<PrintSizeExample />
+</Example>
+
+## Blob export and memory
+
+Use `canvas.toBlob()` for binary output. Treat its `null` result as a failure and report it; a large image or memory pressure can prevent encoding. This helper retries at a smaller size and releases the output canvas's pixels after encoding.
+
+<CodeBlock highlighted={exportSource.highlighted} code={exportSource.code} />
+
+`getCanvas()` reuses the same output canvas on later calls. Encode or copy its pixels before another export. The library releases the spare canvas used for transforms, but the returned canvas stays allocated until it is resized or the cropper is destroyed. Serialize exports if you also shrink that shared canvas.
+
+CORS failures may throw a `SecurityError` instead of returning `null`; see [cross-origin images](/docs/guides/cross-origin).
+
+## Upload integration
+
+Convert the canvas to a Blob and append it to `FormData`. The request URL, authentication and response handling belong to your application. This demo prepares the upload and simulates submission locally; it does not contact a server.
+
+<Example source={UploadExampleSource} title="UploadExample">
+	<UploadExample />
+</Example>

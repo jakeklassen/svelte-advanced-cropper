@@ -1,5 +1,7 @@
 # 02 — Components: react-advanced-cropper → Svelte 5
 
+> Historical study of the upstream implementation and earlier port. Proposed mappings and release observations below are not the 0.2.0 API; see the [current design log](00-index.md) for superseding decisions.
+
 Study of every React component in `tmp/react-advanced-cropper/src/components/**` (react-advanced-cropper
 `0.20.2`, upstream commit `a51e293`, core `advanced-cropper@0.17.1`). Each component has its props,
 DOM and CSS classes, refs, events, customization points, the React mechanics it uses, and a proposed

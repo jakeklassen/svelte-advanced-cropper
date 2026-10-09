@@ -5,11 +5,11 @@
 	import { ImageRestriction } from 'svelte-advanced-cropper';
 	import SettingsCheckbox from './SettingsCheckbox.svelte';
 	import SettingsInput from './SettingsInput.svelte';
-	import type { CropperSettings, SettingsGroup } from './wizard';
+	import type { WizardSettings, SettingsGroup } from './wizard.ts';
 
 	interface Props {
 		/** The draft being edited. The wizard applies it when the panel closes. */
-		settings: CropperSettings;
+		settings: WizardSettings;
 		properties: SettingsGroup[];
 		open?: boolean;
 		onClose?: () => void;
@@ -21,7 +21,7 @@
 		properties,
 		open = false,
 		onClose,
-		class: className
+		class: cssClass
 	}: Props = $props();
 
 	interface AspectRatioOption {
@@ -87,7 +87,7 @@
 </script>
 
 <div
-	class={['croppers-wizard-settings', open && 'croppers-wizard-settings--visible', className]}
+	class={['croppers-wizard-settings', open && 'croppers-wizard-settings--visible', cssClass]}
 	inert={!open}
 >
 	<button type="button" class="close-button" aria-label="Apply settings" onclick={onClose}>

@@ -35,6 +35,7 @@ jobs:
 
       - run: pnpm format:check
       - run: pnpm lint
+      - run: pnpm lint:svelte
       - run: pnpm check
       - run: pnpm test:unit --run
 

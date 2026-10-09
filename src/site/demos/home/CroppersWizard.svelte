@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount, type Component } from 'svelte';
+	import { onDestroy, onMount, type Component } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { Crop, Frame, Info, Plus, Settings, Smartphone, X } from '@lucide/svelte';
 	import {
@@ -16,14 +16,14 @@
 	import { croppablePhotoUrl } from '../gotchas/croppablePhoto.ts';
 	import CroppersWizardInfo from './CroppersWizardInfo.svelte';
 	import CroppersWizardSettings from './CroppersWizardSettings.svelte';
-	import type { CropperDescription, CropperKey, CropperSettings } from './wizard';
+	import type { CropperDescription, CropperKey, WizardSettings } from './wizard.ts';
 
 	const croppers: (CropperDescription & { icon: Component })[] = [
 		{
 			key: 'default-cropper',
 			name: 'Default Cropper',
 			description:
-				'The standard Cropper with a dark look and a custom toolbar for flips and turns.',
+				'A Cropper with a child stencil, a dark theme, and controls for flips and turns.',
 			features: ['Custom Navigation', 'Styling'],
 			icon: Crop,
 			settings: ['aspectRatio', 'imageRestriction', 'stencil', 'size', 'scaleImage', 'grid']
@@ -32,7 +32,7 @@
 			key: 'mobile-cropper',
 			name: 'Mobile Cropper',
 			description:
-				'A fully custom cropper modelled on the croppers of popular Android apps: a fixed stencil that zooms to fit, and a dial for fine rotation.',
+				'A mobile cropper with a wrapper snippet for navigation, a child stencil that zooms to fit, and a dial for fine rotation.',
 			features: ['Custom Postprocess', 'Custom Navigation', 'Styling'],
 			icon: Smartphone,
 			settings: ['aspectRatio', 'stencil', 'size', 'grid'],
@@ -64,7 +64,7 @@
 		preview: image(name.replace(/(\.\w+)$/, '__preview$1'))
 	}));
 
-	let settings: CropperSettings = $state({
+	let settings: WizardSettings = $state({
 		aspectRatio: undefined,
 		minAspectRatio: undefined,
 		maxAspectRatio: undefined,
@@ -79,7 +79,7 @@
 	});
 
 	// The settings panel edits a copy, applied when the panel closes.
-	let draft: CropperSettings = $state({});
+	let draft: WizardSettings = $state({});
 	let showSettings = $state(false);
 	let showInfo = $state(false);
 
@@ -96,26 +96,19 @@
 	let photoStatus: 'ok' | 'preparing' | 'error' = $state('ok');
 	let latestPick = 0;
 
-	// Free an uploaded image's object URL once it is replaced (a no-op for the photos).
-	$effect(() => {
-		const current = src;
+	// Own upload URLs separately from preset sources.
+	let uploadedUrl: string | undefined;
 
-		return () => {
-			if (current.startsWith('blob:')) {
-				URL.revokeObjectURL(current);
-			}
-		};
-	});
+	function revokeUploadedUrl() {
+		if (uploadedUrl) {
+			URL.revokeObjectURL(uploadedUrl);
+			uploadedUrl = undefined;
+		}
+	}
 
-	const stencilComponent = $derived(
-		settings.stencilType === 'circle' ? CircleStencil : RectangleStencil
-	);
-
-	const stencilProps = $derived({
-		aspectRatio: settings.aspectRatio,
-		minAspectRatio: settings.minAspectRatio,
-		maxAspectRatio: settings.maxAspectRatio,
-		grid: settings.grid
+	onDestroy(() => {
+		latestPick++;
+		revokeUploadedUrl();
 	});
 
 	function readHash() {
@@ -130,7 +123,10 @@
 		void goto(`#${key}`, { shallow: true, replace: true });
 	}
 
-	function showPhoto(next: string) {
+	function showPhoto(next: string, owned = false) {
+		latestPick++;
+		revokeUploadedUrl();
+		uploadedUrl = owned ? next : undefined;
 		src = next;
 		photoStatus = 'ok';
 	}
@@ -156,7 +152,7 @@
 				return;
 			}
 
-			showPhoto(url);
+			showPhoto(url, true);
 		} catch {
 			if (id === latestPick) {
 				photoStatus = 'error';
@@ -207,12 +203,22 @@
 				minHeight={settings.minHeight}
 				maxWidth={settings.maxWidth}
 				maxHeight={settings.maxHeight}
-				{stencilComponent}
-				{stencilProps}
-			/>
+			>
+				{#if settings.stencilType === 'circle'}
+					<CircleStencil grid={settings.grid} movable={false} />
+				{:else}
+					<RectangleStencil
+						aspectRatio={settings.aspectRatio}
+						minAspectRatio={settings.minAspectRatio}
+						maxAspectRatio={settings.maxAspectRatio}
+						grid={settings.grid}
+						movable={false}
+					/>
+				{/if}
+			</TelegramCropper>
 		{:else if selectedKey === 'default-cropper'}
 			<DefaultCropper
-				wrapperClassName="croppers-wizard__cropper"
+				class="croppers-wizard__cropper"
 				{src}
 				{onError}
 				minWidth={settings.minWidth}
@@ -222,17 +228,26 @@
 				priority={settings.imageRestriction === ImageRestriction.fillArea
 					? Priority.visibleArea
 					: Priority.coordinates}
-				{stencilComponent}
-				{stencilProps}
 				transformImage={{
 					adjustStencil:
 						settings.imageRestriction !== ImageRestriction.stencil &&
 						settings.imageRestriction !== ImageRestriction.none
 				}}
 				postProcess={settings.scaleImage ? undefined : preventZoom}
-				backgroundWrapperProps={{ scaleImage: settings.scaleImage }}
+				scaleImage={settings.scaleImage}
 				imageRestriction={settings.imageRestriction}
-			/>
+			>
+				{#if settings.stencilType === 'circle'}
+					<CircleStencil grid={settings.grid} />
+				{:else}
+					<RectangleStencil
+						aspectRatio={settings.aspectRatio}
+						minAspectRatio={settings.minAspectRatio}
+						maxAspectRatio={settings.maxAspectRatio}
+						grid={settings.grid}
+					/>
+				{/if}
+			</DefaultCropper>
 		{:else}
 			<FixedCropper
 				class="croppers-wizard__cropper"

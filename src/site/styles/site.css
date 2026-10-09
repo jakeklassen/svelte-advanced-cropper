@@ -127,6 +127,11 @@ pre.shiki code {
 }
 
 /* Prose inside docs pages */
+.prose {
+	/* API names in headings and prose must fit regardless of fallback font metrics. */
+	overflow-wrap: anywhere;
+}
+
 .prose h1 {
 	font-size: 2.2rem;
 	line-height: 1.2;

@@ -1,0 +1,27 @@
+# Core extensions
+
+The package root includes the core root exports and the `StencilSize` type. Other extensions have their own `advanced-cropper/extensions/*` entry points. Add `advanced-cropper` as a direct application dependency when importing those entry points.
+
+| Entry point | Exports and purpose |
+| --- | --- |
+| `advanced-cropper/extensions/absolute-zoom` | `getAbsoluteZoom`, `getZoomFactor`: convert between an absolute zoom value and the relative factor passed to `zoomImage`. |
+| `advanced-cropper/extensions/stencil-size` | `StencilSize`, `FixedStencilSettings`, `fixedStencilConstraints`, `getStencilSize`, `sizeRestrictions`, `defaultSize`, `aspectRatio`, `fixedStencilAlgorithm`, `fixedStencil`: fixed displayed stencil geometry. |
+| `advanced-cropper/extensions/fit-to-image` | `approximateSizeInsideImage`, `fitToImage`, `moveToImage`, `BoundingBoxType` and related types: fit crop geometry to rotated image bounds. |
+| `advanced-cropper/extensions/prevent-zoom` | `preventZoom`: postprocess a state to prevent automatic zoom changes. |
+| `advanced-cropper/extensions/mimes` | `getMimeType`: detect an image format from bytes or a data URL. |
+
+## Absolute zoom
+
+The [absolute zoom tutorial](/docs/tutorials/absolute-zoom) reads `getAbsoluteZoom(state, settings)` reactively. For a slider change, calculate `getZoomFactor(state, settings, value)` and pass the result to the cropper's `zoomImage` method. Keep the slider synchronized through `$derived` reads.
+
+## Fixed stencil and fit-to-image
+
+Prefer [FixedCropper](/docs/reference/fixed-cropper) when you need its complete lifecycle. It already configures the stencil-size strategy. A circular custom stencil registers `BoundingBoxType.Circle` alongside its ratio so fitting algorithms can account for its shape.
+
+## Postprocessing
+
+`postProcess` accepts one function or an array. An extension receives state, settings and the action being processed, and returns the resulting state. Combine it with typed extension settings when the algorithm needs application-specific values.
+
+## Mobile composition
+
+The [Telegram showcase](/docs/showcase) uses the published `advanced-cropper/showcase/mobile` entry point. This is a site-demo exception: those algorithms are not available from the installed core root or an extensions/mobile entry point. Application code adopting that example should declare the core dependency explicitly. Library code uses root and supported extension imports.

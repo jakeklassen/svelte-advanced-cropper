@@ -1,0 +1,79 @@
+<script>
+	import Example from '#site/components/Example.svelte';
+	import CodeBlock from '#site/components/CodeBlock.svelte';
+	import SetCoordinatesExample from '#site/demos/examples/SetCoordinatesExample.svelte';
+	import SetCoordinatesExampleSource from '#site/demos/examples/SetCoordinatesExample.svelte?highlight';
+	import defaultCropperSource from '#site/demos/croppers/DefaultCropper/DefaultCropper.svelte?highlight';
+	import SetCoordinatesExampleFile0 from '#site/demos/shared/SquareButton.svelte?highlight';
+	import SetCoordinatesExampleFile1 from '#site/demos/shared/VerticalButtons.svelte?highlight';
+</script>
+
+# Read and change the crop
+
+Bind the component instance for actions, and read its getters inside `$derived` for values used by the UI.
+
+## Read reactive coordinates
+
+```svelte
+<script lang="ts">
+	import { Cropper, type CropperInstance } from 'svelte-advanced-cropper';
+
+	let { src }: { src: string } = $props();
+	let cropper: CropperInstance | undefined = $state();
+	const coordinates = $derived(cropper?.getCoordinates() ?? null);
+</script>
+
+<Cropper bind:this={cropper} {src} style="height: 400px" />
+```
+
+The binding is initially undefined, and getters may return `null` before initialization. `getCoordinates()` describes the crop in transformed-image pixels; `getStencilCoordinates()` describes its displayed rectangle. Read [coordinate spaces](/docs/core/state) before sending geometry to a server, especially when rotation or flips are involved.
+
+Getters stay reactive. Treat the returned objects as observations; change state through methods. There is no `bind:coordinates` API.
+
+## Change the selection
+
+`setCoordinates` accepts partial coordinates, a function of state and settings, or an array of these transforms. Each array step is constrained before the next one runs. This makes it possible to resize first and then centre the actual resulting size.
+
+<Example source={SetCoordinatesExampleSource} title="SetCoordinatesExample" files={{ 'SquareButton.svelte': SetCoordinatesExampleFile0, 'VerticalButtons.svelte': SetCoordinatesExampleFile1 }}>
+	<SetCoordinatesExample />
+</Example>
+
+Aspect-ratio, size and position restrictions still apply, so the result can differ from the requested rectangle. Use `{ transitions: false }` for updates that should follow a control immediately.
+
+## Callbacks and readiness
+
+`onChange` receives the typed instance when geometry changes. `onUpdate` also covers loading, interactions and transitions. Prefer `$derived` for display state, and callbacks for work such as notifying a parent or saving after `onInteractionEnd`.
+
+`onReady` runs after initialization has rendered and, with canvas enabled, after the current export source is ready. It is the place to request the first canvas. Callbacks run only while mounted. Repeated resets of the same image do not produce another image-ready notification.
+
+## Reset and dirty state
+
+`await cropper.reset()` rebuilds state from the current defaults. `getDefaultState()` computes that baseline without applying it. Use the core's `isEqualState` to compare it with `getState()` while tolerating small numeric differences.
+
+For an animated reset after repeated rotations, use `getCloserAngle` to choose the equivalent default angle nearest the current rotation before calling `setState`. The composed cropper below shows both the comparison and reset action:
+
+<CodeBlock highlighted={defaultCropperSource.highlighted} code={defaultCropperSource.code} />
+
+`refresh()` measures layout while preserving the current crop where restrictions allow; it is not a reset. See [layout and lifecycle](/docs/guides/layout-and-lifecycle).
+
+## Typed extension settings
+
+For shared algorithms with application-specific settings, bind `CropperInstance<MySettings>` and pass a typed `settings` object. Built-in settings remain flat props; extension keys cannot redefine them. See [composition](/docs/composition/overview) and the [instance contract](/docs/reference/cropper-instance).
+
+```svelte
+<script lang="ts">
+	import { Cropper, type CropperInstance } from 'svelte-advanced-cropper';
+
+	interface PrintSettings {
+		dpi: number;
+	}
+
+	let { src }: { src: string } = $props();
+	const settings: PrintSettings = { dpi: 300 };
+	let cropper: CropperInstance<PrintSettings> | undefined = $state();
+	const dpi = $derived(cropper?.getSettings().dpi);
+</script>
+
+<Cropper bind:this={cropper} {src} {settings} style="height: 400px" />
+<p>Output resolution: {dpi ?? settings.dpi} DPI</p>
+```

@@ -1,5 +1,7 @@
 # 04 — Upstream docs site study (react-advanced-cropper → SvelteKit rebuild)
 
+> Historical study of the upstream implementation and earlier port. Proposed mappings and release observations below are not the 0.2.0 API; see the [current design log](00-index.md) for superseding decisions.
+
 Source studied: `tmp/react-advanced-cropper/example` (upstream commit `a51e293`, 2026-07-26).
 The live site (https://advanced-cropper.github.io/react-advanced-cropper/) is still this Docusaurus 2
 build. A spot check of `/docs/showcase` matched the source: same sidebar, no search box, no visible

@@ -91,7 +91,7 @@
 		<div class="code-wrapper">
 			<div class="code">
 				<CodeBlock
-					html={gettingStarted.html}
+					highlighted={gettingStarted.highlighted}
 					code={gettingStarted.code}
 					title="GettingStarted.svelte"
 				/>
@@ -100,9 +100,9 @@
 		<div class="container">
 			<p class="section-text">
 				The documentation has many more examples for everyday tasks and unusual ones alike, from the
-				<a href={href('/docs/guides/recipes')}>recipes</a>
+				<a href={href('/docs/guides/stencils')}>stencil guide</a>
 				to the
-				<a href={href('/docs/guides/advanced-recipes')}>advanced recipes</a>.
+				<a href={href('/docs/guides/defaults-and-restrictions')}>defaults and restrictions</a>.
 			</p>
 		</div>
 	</section>

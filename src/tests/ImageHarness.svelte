@@ -1,32 +1,34 @@
 <script lang="ts">
-	import { useCropperImage, type CropperImage, type CropperImageHook } from '#lib';
+	import type { CropperImage } from '#lib';
+	import { ImageLoader } from '#lib/controllers/ImageLoader.svelte.ts';
 
 	interface Props {
 		src: string | null;
 		log: string[];
+		unloadTime?: number;
 	}
 
-	let { src: srcProp, log }: Props = $props();
+	let { src: srcProp, log, unloadTime = 0 }: Props = $props();
 
 	// Follows the prop, but `setImageAndSrc` can also change it.
 	let src = $derived(srcProp);
 
-	const hook: CropperImageHook = useCropperImage(() => ({
+	const loader = new ImageLoader(() => ({
 		src,
-		unloadTime: 0,
+		unloadTime,
 		onLoadingStart: () => log.push('start'),
-		onLoadingEnd: () => log.push(`end:${hook.isLoading()}`),
-		onLoad: () => log.push(`load:${hook.isLoading()}`),
+		onLoadingEnd: () => log.push(`end:${loader.isLoading()}`),
+		onLoad: () => log.push(`load:${loader.isLoading()}`),
 		onError: () => log.push('error')
 	}));
 
-	export function getHook() {
-		return hook;
+	export function getLoader() {
+		return loader;
 	}
 
 	/** Sets an image and a new src synchronously, so both land in one effect flush. */
 	export function setImageAndSrc(image: CropperImage, nextSrc: string) {
-		hook.setImage(image);
+		loader.setImage(image);
 		src = nextSrc;
 	}
 </script>

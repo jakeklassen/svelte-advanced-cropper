@@ -1,6 +1,6 @@
 import type { ImageRestriction } from 'svelte-advanced-cropper';
 
-export interface CropperSettings {
+export interface WizardSettings {
 	aspectRatio?: number;
 	minAspectRatio?: number;
 	maxAspectRatio?: number;

@@ -1,0 +1,46 @@
+<script>
+	import Example from '#site/components/Example.svelte';
+	import CodeBlock from '#site/components/CodeBlock.svelte';
+	import CropperScrollExample from '#site/demos/examples/CropperScrollExample.svelte';
+	import CropperScrollExampleSource from '#site/demos/examples/CropperScrollExample.svelte?highlight';
+	import wrapperSource from '#site/demos/examples/BackgroundWrapperWithNotifications.svelte?highlight';
+	import CropperScrollExampleFile0 from '#site/demos/examples/BackgroundWrapperWithNotifications.svelte?highlight';
+</script>
+
+# Gestures and page scrolling
+
+Configure image gestures on the cropper and stencil gestures on its child. They are separate interaction surfaces.
+
+## Choose input methods
+
+| Prop | Options |
+| --- | --- |
+| `moveImage` | Boolean, or `mouse` and `touch` flags. |
+| `scaleImage` | Boolean, or `touch` and `wheel`; wheel may contain a `ratio`. |
+| `rotateImage` | Boolean, or a `touch` flag. Touch rotation defaults to off. |
+
+Image movement and scaling are enabled by default. For example, keep touch zoom but allow the mouse wheel to scroll the page:
+
+```svelte
+<Cropper {src} scaleImage={{ touch: true, wheel: false }} />
+```
+
+Use `movable`, `resizable`, `handlers` and `lines` on the [stencil](/docs/guides/stencils). Cropper `disabled` blocks user interactions throughout the cropper; programmatic methods remain available.
+
+## Let the page scroll
+
+Replace the `backgroundWrapper` snippet when the rule depends on the event. The example leaves a plain wheel or one-finger swipe to the page, then accepts Ctrl + wheel or two fingers for image manipulation.
+
+<Example source={CropperScrollExampleSource} title="CropperScrollExample" files={{ 'BackgroundWrapperWithNotifications.svelte': CropperScrollExampleFile0 }}>
+	<CropperScrollExample />
+</Example>
+
+<CodeBlock highlighted={wrapperSource.highlighted} code={wrapperSource.code} />
+
+The wrapper composes `CropperBackgroundWrapper` and uses its `onEvent` callback. Calling `preventDefault()` on the supplied `TransformableImageEvent` vetoes the image transform. This differs from calling it on the native event, which prevents the browser's own action. Accepted image gestures should not also scroll the page.
+
+## Finish interactions
+
+The cropper reports `onInteractionStart` and `onInteractionEnd`, as well as move, resize and image-transform callbacks. Custom controls must call the matching end method when their gesture finishes so reconciliation and interaction UI can settle.
+
+The gesture primitives use native non-passive listeners installed through `{@attach}`. When forwarding movement callbacks, preserve the native event: resizing uses it for modifier keys. Use [HandlerWrapper and LineWrapper](/docs/reference/stencil-primitives) when replacing stencil controls so their event behaviour remains intact.

@@ -7,10 +7,10 @@
 		children?: Snippet;
 	}
 
-	let { children, class: className }: Props = $props();
+	let { children, class: cssClass }: Props = $props();
 </script>
 
-<div class={['vertical-buttons', className]}>
+<div class={['vertical-buttons', cssClass]}>
 	{@render children?.()}
 </div>
 

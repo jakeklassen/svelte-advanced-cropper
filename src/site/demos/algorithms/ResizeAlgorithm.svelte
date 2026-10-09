@@ -1,22 +1,20 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import {
 		BoundingBox,
 		anchoredResizeCoordinatesAlgorithm,
 		approximateSize,
 		createAspectRatio,
 		moveToPositionRestrictions,
-		useWindowResize,
 		type Coordinates,
 		type MoveDirections,
 		type ResizeAnchor,
 		type ResizeOptions
 	} from 'svelte-advanced-cropper';
-	import { coordinatesToStyle } from './utils';
+	import { coordinatesToStyle } from './utils.ts';
 
 	const aspectRatio = 1;
 
-	let container: HTMLDivElement | undefined = $state();
+	let initialized = false;
 	let boundary = $state.raw({ width: 0, height: 0 });
 	let coordinates: Coordinates = $state.raw({ width: 100, height: 100, left: 0, top: 0 });
 	// The coordinates at the start of the current resize, drawn as an outline.
@@ -49,12 +47,26 @@
 		reference = null;
 	}
 
-	function updateBoundary() {
-		if (!container) {
+	function updateBoundary(dimension: 'width' | 'height', value: number | null | undefined) {
+		if (value == null) {
 			return;
 		}
 
-		boundary = { width: container.clientWidth, height: container.clientHeight };
+		boundary = { ...boundary, [dimension]: value };
+		if (!boundary.width || !boundary.height) {
+			return;
+		}
+
+		if (!initialized) {
+			initialized = true;
+			coordinates = {
+				width: 100,
+				height: 100,
+				left: boundary.width / 2 - 50,
+				top: boundary.height / 2 - 50
+			};
+		}
+
 		// Keep the box inside the (possibly smaller) boundary.
 		coordinates = moveToPositionRestrictions(
 			{
@@ -69,23 +81,13 @@
 			positionRestrictions
 		);
 	}
-
-	useWindowResize(updateBoundary);
-
-	onMount(() => {
-		if (container) {
-			coordinates = {
-				width: 100,
-				height: 100,
-				left: container.clientWidth / 2 - 50,
-				top: container.clientHeight / 2 - 50
-			};
-			updateBoundary();
-		}
-	});
 </script>
 
-<div class="resize-algorithm" bind:this={container}>
+<div
+	class="resize-algorithm"
+	bind:clientWidth={null, (width) => updateBoundary('width', width)}
+	bind:clientHeight={null, (height) => updateBoundary('height', height)}
+>
 	<div
 		class="resize-algorithm__boundary"
 		style:width="{boundary.width}px"
@@ -97,7 +99,6 @@
 			class="resize-algorithm__stencil"
 			{onResize}
 			{onResizeEnd}
-			lineClassNames={{ default: 'resize-algorithm__stencil-line' }}
 		/>
 		{#if reference}
 			<div class="resize-algorithm__reference" style={coordinatesToStyle(reference)}></div>
@@ -117,7 +118,7 @@
 		position: absolute;
 		color: var(--color-primary);
 	}
-	.resize-algorithm :global(.resize-algorithm__stencil-line) {
+	.resize-algorithm :global(.resize-algorithm__stencil .advanced-cropper-simple-line) {
 		border-color: var(--color-primary);
 	}
 	.resize-algorithm__reference {

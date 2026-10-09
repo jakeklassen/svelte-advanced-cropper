@@ -1,22 +1,19 @@
 <script lang="ts">
-	import type { ClassValue } from 'svelte/elements';
 	import {
 		Cropper,
 		getCloserAngle,
 		isEqualState,
 		type CropperProps,
-		type CropperRef
+		type CropperInstance
 	} from 'svelte-advanced-cropper';
 	import Navigation from './Navigation.svelte';
 
-	type Props = CropperProps & {
-		wrapperClassName?: ClassValue;
-	};
+	type Props = CropperProps;
 
-	let { wrapperClassName, class: className, onChange, ...props }: Props = $props();
+	let { class: cssClass, ...props }: Props = $props();
 
-	let cropper: CropperRef | undefined = $state();
-	let changed = $state(false);
+	let cropper: CropperInstance | undefined = $state();
+	const changed = $derived(!isEqualState(cropper?.getState() ?? null, getDefaultState()));
 
 	// The default state, with its rotation moved to the full turn closest to the current
 	// one, so that resetting never spins the image all the way around.
@@ -34,21 +31,10 @@
 				}
 			: null;
 	}
-
-	// Show the reset button only while the state differs from the default one.
-	function updateChanged(instance: CropperRef) {
-		changed = !isEqualState(instance.getState(), getDefaultState());
-		onChange?.(instance);
-	}
 </script>
 
-<div class={['default-cropper', wrapperClassName]}>
-	<Cropper
-		{...props}
-		onChange={updateChanged}
-		class={['default-cropper__cropper', className]}
-		bind:this={cropper}
-	/>
+<div class={['default-cropper', cssClass]}>
+	<Cropper {...props} class="default-cropper__cropper" bind:this={cropper} />
 	<div class="default-cropper__navigation">
 		<Navigation
 			{changed}

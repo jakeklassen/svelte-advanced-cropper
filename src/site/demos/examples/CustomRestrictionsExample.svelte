@@ -1,15 +1,16 @@
 <script lang="ts">
+	import { onDestroy } from 'svelte';
 	import {
 		Cropper,
 		getTransformedImageSize,
 		retrieveSizeRestrictions,
-		type CropperRef,
+		type CropperInstance,
 		type CropperState,
 		type DefaultSettings
 	} from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 
-	let cropper: CropperRef | undefined = $state();
+	let cropper: CropperInstance | undefined = $state();
 	let input: HTMLInputElement | undefined = $state();
 	let src = $state(image('el-capitan.jpg'));
 
@@ -48,23 +49,26 @@
 	function loadImage(event: Event & { currentTarget: HTMLInputElement }) {
 		const file = event.currentTarget.files?.[0];
 		if (file) {
-			src = URL.createObjectURL(file);
+			revokeUploadedUrl();
+			uploadedUrl = URL.createObjectURL(file);
+			src = uploadedUrl;
 		}
 
 		// Reset the input so that picking the same file again still fires `change`.
 		event.currentTarget.value = '';
 	}
 
-	// Free the previous object URL once it is replaced (a no-op for regular URLs).
-	$effect(() => {
-		const current = src;
+	// Own upload URLs separately from preset sources.
+	let uploadedUrl: string | undefined;
 
-		return () => {
-			if (current.startsWith('blob:')) {
-				URL.revokeObjectURL(current);
-			}
-		};
-	});
+	function revokeUploadedUrl() {
+		if (uploadedUrl) {
+			URL.revokeObjectURL(uploadedUrl);
+			uploadedUrl = undefined;
+		}
+	}
+
+	onDestroy(revokeUploadedUrl);
 </script>
 
 <div class="custom-restrictions-example">

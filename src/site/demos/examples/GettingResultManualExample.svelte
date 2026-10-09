@@ -1,11 +1,16 @@
 <script lang="ts">
-	import { Cropper, type Coordinates, type CropperRef } from 'svelte-advanced-cropper';
+	import {
+		RectangleStencil,
+		Cropper,
+		type Coordinates,
+		type CropperInstance
+	} from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 	import PreviewResults from './PreviewResults.svelte';
 
 	const src = image('orange-cat-in-box.jpg');
 
-	let cropper: CropperRef | undefined = $state();
+	let cropper: CropperInstance | undefined = $state();
 	let coordinates: Coordinates | null = $state(null);
 	let preview: string | undefined = $state();
 
@@ -22,12 +27,9 @@
 </script>
 
 <div class="getting-result-manual-example">
-	<Cropper
-		bind:this={cropper}
-		class="getting-result-manual-example__cropper"
-		stencilProps={{ aspectRatio: 1 }}
-		{src}
-	/>
+	<Cropper bind:this={cropper} class="getting-result-manual-example__cropper" {src}>
+		<RectangleStencil aspectRatio={1} />
+	</Cropper>
 	<button type="button" class="getting-result-manual-example__crop-button" onclick={crop}>
 		Crop Image
 	</button>

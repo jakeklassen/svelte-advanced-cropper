@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Cropper, type CropperRef } from 'svelte-advanced-cropper';
+	import { Cropper, type CropperInstance } from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 
 	const src = image('dogs-running.jpg');
 
-	let cropper: CropperRef | undefined = $state();
+	let cropper: CropperInstance | undefined = $state();
 
 	// An empty number input binds to null; getCanvas() expects undefined for "no limit".
 	let maxWidth: number | null = $state(256);

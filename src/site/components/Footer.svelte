@@ -7,8 +7,8 @@
 		<div>
 			<div class="footer__title">Docs</div>
 			<a href={href('/docs/intro')}>Getting started</a>
-			<a href={href('/docs/guides/recipes')}>Recipes</a>
-			<a href={href('/docs/guides/advanced-recipes')}>Advanced Recipes</a>
+			<a href={href('/docs/guides/stencils')}>Stencils</a>
+			<a href={href('/docs/guides/defaults-and-restrictions')}>Defaults and restrictions</a>
 		</div>
 		<div>
 			<div class="footer__title">Credits</div>

@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { Cropper, CropperPreview, type CropperRef } from '#lib';
+	import { Cropper, CropperPreview, type CropperInstance } from '#lib';
 
 	interface Props {
 		src: string;
-		onReady?: (cropper: CropperRef) => void;
+		onReady?: (cropper: CropperInstance) => void;
 	}
 
 	let { src, onReady }: Props = $props();
 
-	let cropper: CropperRef | undefined = $state();
+	let cropper: CropperInstance | undefined = $state();
 	export function getCropper() {
 		return cropper;
 	}

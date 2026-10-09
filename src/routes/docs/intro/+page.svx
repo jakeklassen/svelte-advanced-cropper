@@ -1,80 +1,67 @@
 <script>
 	import Example from '#site/components/Example.svelte';
 	import GettingStartedExample from '#site/demos/examples/GettingStartedExample.svelte';
-	import source from '#site/demos/examples/GettingStartedExample.svelte?highlight';
-	import Tabs from '#site/components/Tabs.svelte';
-	import TabItem from '#site/components/TabItem.svelte';
+	import GettingStartedExampleSource from '#site/demos/examples/GettingStartedExample.svelte?highlight';
 </script>
 
-# Getting started
+# Introduction
 
-## Introduction
+`svelte-advanced-cropper` is a Svelte 5 image cropper built on the `advanced-cropper` geometry core. Start with a movable selection or a fixed frame, then customize its stencil, controls and visual layers using Svelte composition.
 
-`svelte-advanced-cropper` is a Svelte 5 image cropper built on [`advanced-cropper`](https://github.com/advanced-cropper/advanced-cropper), the framework-agnostic core of the Advanced Cropper family. It is a port of [react-advanced-cropper](https://github.com/advanced-cropper/react-advanced-cropper): the components, props, settings and methods match the React library one-to-one, while the implementation uses Svelte's own tools (runes, snippets and attachments).
+## Install
 
-### Why this cropper
-
-Most croppers give you a fixed widget with a handful of options. This one is built the other way around. It is a set of small components and a state core that you can assemble, restyle and extend, from swapping the stencil to replacing the image gesture layer. The defaults are polished and work out of the box (mobile gestures, transitions, themes), but nothing is locked in.
-
-If you are coming from the React version, read [Coming from React](/docs/guides/coming-from-react) for the handful of places where the Svelte API differs.
-
-## Installation
-
-<Tabs>
-<TabItem label="npm">
-
-```shell
-npm install svelte-advanced-cropper
-```
-
-</TabItem>
-
-<TabItem label="pnpm">
+Requires Svelte `^5.40`.
 
 ```shell
 pnpm add svelte-advanced-cropper
 ```
 
-</TabItem>
-
-<TabItem label="yarn">
-
-```shell
-yarn add svelte-advanced-cropper
-```
-
-</TabItem>
-
-<TabItem label="bun">
-
-```shell
-bun add svelte-advanced-cropper
-```
-
-</TabItem>
-
-<TabItem label="aube">
-
-```shell
-aube add svelte-advanced-cropper
-```
-
-</TabItem>
-</Tabs>
-
-Then import the `Cropper` component, and the styles once somewhere in your app (for example in your root layout):
+Import the structural stylesheet and default theme once, for example in your root layout:
 
 ```ts
-import { Cropper } from 'svelte-advanced-cropper';
 import 'svelte-advanced-cropper/style.css';
 ```
 
-## Minimal working example
+## Your first cropper
 
-The cropper fills its container, so give it (or its parent) a size. The line under it shows `getCoordinates()`, the crop in the photo's own pixels, updating as you move the crop.
+Supply an image URL and give the cropper a definite height. A `max-height` alone does not establish a height for percentage-sized children. The demo uses a child `RectangleStencil` to set its aspect ratio.
 
-<Example {source} title="GettingStartedExample">
+The same first example is used in the README. `/photo.jpg` is an application-owned public image; the live demo below substitutes a credited local photo through `image()` and uses the stylesheet already loaded by the site layout.
+
+```svelte
+<script lang="ts">
+	import { Cropper, RectangleStencil, type CropperInstance } from 'svelte-advanced-cropper';
+	import 'svelte-advanced-cropper/style.css';
+
+	let cropper: CropperInstance | undefined = $state();
+	const coordinates = $derived(cropper?.getCoordinates());
+</script>
+
+<Cropper bind:this={cropper} src="/photo.jpg" style="height: 360px">
+	<RectangleStencil aspectRatio={16 / 9} />
+</Cropper>
+
+{#if coordinates}
+	<p>{coordinates.width} × {coordinates.height} pixels</p>
+{/if}
+
+<button type="button" disabled={!coordinates} onclick={() => cropper?.rotateImage(90)}>
+	Rotate
+</button>
+```
+
+<Example source={GettingStartedExampleSource} title="GettingStartedExample">
 	<GettingStartedExample />
 </Example>
 
-To build a different kind of cropper, for example a fixed-stencil one for mobile devices, read about [the cropper types](/docs/guides/cropper-types).
+Open **Show code** to see the complete example. `bind:this` exposes methods through `CropperInstance`; a `$derived` read of `getCoordinates()` updates as the user moves the selection. No callback is needed just to display state.
+
+With no children, `Cropper` supplies a rectangle stencil. With children, you choose the stencil yourself. Configure core settings such as `minWidth` directly on `Cropper` and stencil options directly on the child.
+
+## Next steps
+
+- [Choose a cropper](/docs/guides/cropper-types) for movable or fixed selections.
+- [Configure stencils](/docs/guides/stencils) and aspect ratios.
+- [Read and change the crop](/docs/guides/crop-state) through the typed instance.
+- [Preview and export](/docs/guides/preview-and-export) the result.
+- [Upgrade from 0.1.x](/docs/migration/from-0-1) if you already use this package.

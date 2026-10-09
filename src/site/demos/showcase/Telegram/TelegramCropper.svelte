@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { ClassValue } from 'svelte/elements';
 	import {
 		Cropper,
+		RectangleStencil,
 		ImageRestriction,
 		type CropperProps,
 		type ResizeAlgorithm
@@ -15,46 +15,44 @@
 		zoomStencil
 	} from 'advanced-cropper/showcase/mobile';
 	import CropperWrapper from './CropperWrapper.svelte';
-	import type { NavigationClassNames } from './types.ts';
 
 	interface Props extends Omit<
 		CropperProps,
 		'transitions' | 'priority' | 'imageRestriction' | 'stencilConstraints' | 'transformImage'
 	> {
-		spinnerClassName?: ClassValue;
 		navigation?: boolean;
-		navigationProps?: NavigationClassNames;
 	}
 
 	let {
-		class: className,
-		spinnerClassName,
+		class: cssClass,
 		navigation = true,
-		stencilProps = {},
-		navigationProps = {},
-		wrapperComponent = CropperWrapper,
+		children,
+		wrapper: customWrapper,
 		...cropperProps
 	}: Props = $props();
 
-	// The core types this algorithm's `directions` as `ResizeDirections`, while the
-	// `resizeCoordinatesAlgorithm` setting expects `MoveDirections`.
-	const resizeAlgorithm = resizeCoordinates as unknown as ResizeAlgorithm;
+	// The mobile declaration requires unused right/bottom fields; its anchored algorithm
+	// consumes the left/top movement supplied by the cropper.
+	const resizeAlgorithm: ResizeAlgorithm = (state, settings, anchor, directions, options) =>
+		resizeCoordinates(state, settings, anchor, { ...directions, right: 0, bottom: 0 }, options);
 </script>
 
 <Cropper
 	{...cropperProps}
 	{stencilConstraints}
-	stencilProps={{ grid: true, ...stencilProps, movable: false }}
-	{wrapperComponent}
-	wrapperProps={{ navigationProps, navigation, spinnerClassName }}
 	imageRestriction={ImageRestriction.none}
-	class={['telegram-cropper', className]}
+	class={['telegram-cropper', cssClass]}
 	postProcess={[fitStencilToImage, zoomStencil]}
 	{defaultSize}
 	transformImageAlgorithm={transformImage}
 	resizeCoordinatesAlgorithm={resizeAlgorithm}
 	transitions
-/>
+>
+	{#snippet wrapper(p)}
+		{#if customWrapper}{@render customWrapper(p)}{:else}<CropperWrapper {...p} {navigation} />{/if}
+	{/snippet}
+	{#if children}{@render children()}{:else}<RectangleStencil grid movable={false} />{/if}
+</Cropper>
 
 <style lang="scss">
 	// The corners theme, applied to this cropper only, with the accent color it inherits.

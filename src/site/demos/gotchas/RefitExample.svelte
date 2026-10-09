@@ -3,7 +3,7 @@
 		Cropper,
 		ImageRestriction,
 		Priority,
-		type CropperRef,
+		type CropperInstance,
 		type CropperState
 	} from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
@@ -12,7 +12,7 @@
 
 	const src = image('orange-cat-on-table.jpg');
 
-	let cropper: CropperRef | undefined = $state();
+	let cropper: CropperInstance | undefined = $state();
 	let strategy: Strategy = $state('refit');
 	let widthPercent = $state(100);
 	let containerWidth = $state(0);
@@ -31,9 +31,13 @@
 		return { left: 0, top: (imageSize.height - height) / 2, width: imageSize.width, height };
 	}
 
-	async function refit(target: CropperRef) {
+	async function refit(target: CropperInstance, isCurrent: () => boolean) {
 		// Measure the new boundary, then apply the opening view again. The crop is untouched.
 		await target.refresh();
+		if (!isCurrent()) {
+			return;
+		}
+
 		const state = target.getState();
 		if (state) {
 			target.setVisibleArea(fitWholeImage(state), { transitions: false });
@@ -47,11 +51,16 @@
 			return;
 		}
 
+		let current = true;
 		if (strategy === 'refresh') {
 			void cropper.refresh();
 		} else {
-			void refit(cropper);
+			void refit(cropper, () => current);
 		}
+
+		return () => {
+			current = false;
+		};
 	});
 </script>
 

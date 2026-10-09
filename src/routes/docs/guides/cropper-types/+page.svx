@@ -1,126 +1,52 @@
 <script>
-	import { ImageRestriction } from 'svelte-advanced-cropper';
 	import Example from '#site/components/Example.svelte';
 	import CropperTypesExample from '#site/demos/examples/CropperTypesExample.svelte';
-	import cropperTypesSource from '#site/demos/examples/CropperTypesExample.svelte?highlight';
+	import CropperTypesExampleSource from '#site/demos/examples/CropperTypesExample.svelte?highlight';
 	import FixedCropperTypeExample from '#site/demos/examples/FixedCropperTypeExample.svelte';
-	import fixedCropperTypeSource from '#site/demos/examples/FixedCropperTypeExample.svelte?highlight';
+	import FixedCropperTypeExampleSource from '#site/demos/examples/FixedCropperTypeExample.svelte?highlight';
+	import { ImageRestriction, RectangleStencil } from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 </script>
 
-# Cropper Types
+# Choose a cropper
 
-Croppers differ not only in how they look but in how they behave: what the user drags, what stays put, and what snaps back. This library aims to let you build any of them, not just restyle one.
+Choose the interaction first: should the user move the selection, move the photo under a fixed frame, or resize a frame that settles back into place?
 
-Most croppers you will meet fall into one of three groups:
+## Movable selection
 
-- [Classic](/docs/guides/cropper-types#classic-cropper)
-- [Fixed](/docs/guides/cropper-types#fixed-cropper)
-- [Hybrid](/docs/guides/cropper-types#hybrid-cropper)
+`Cropper` supplies a movable, resizable rectangle when you omit children. Use a child stencil to configure its shape and controls.
 
-Once you can build all three, you can build nearly any cropper you are likely to need.
-
-## Classic Cropper
-
-In a classic cropper the user picks the area mainly by moving and resizing the stencil. Some classic croppers also let the user pan or zoom the image, but that is a secondary way to adjust the selection.
-
-<Example source={cropperTypesSource} title="CropperTypesExample">
+<Example source={CropperTypesExampleSource} title="CropperTypesExample">
 	<CropperTypesExample src={image('corgi-lying-down.jpg')} />
 </Example>
 
-Examples: [Yandex](https://www.yandex.com).
+## Fixed selection
 
-### Implementation
+Use `FixedCropper` with a `stencilSize`. Its size is measured in layout pixels; zoom changes how many image pixels are inside that frame. To make the frame inert, explicitly hide and disable the child stencil's controls.
 
-This is what you get with no configuration at all:
-
-```svelte
-<Cropper {src} />
-```
-
-## Fixed Cropper
-
-A fixed cropper has a static stencil: no handles, no dragging, no resizing, and always the same size. The user frames the picture by moving and zooming the image underneath it instead.
-
-<Example source={fixedCropperTypeSource} title="FixedCropperTypeExample">
+<Example source={FixedCropperTypeExampleSource} title="FixedCropperTypeExample">
 	<FixedCropperTypeExample
 		size="medium"
 		src={image('dog-on-grass.jpg')}
-		stencilProps={{
-			handlers: {},
-			lines: {},
-			movable: false,
-			resizable: false
-		}}
-		stencilSize={{
-			width: 400,
-			height: 400
-		}}
+		stencilSize={{ width: 400, height: 400 }}
 		imageRestriction={ImageRestriction.stencil}
-	/>
+	>
+		<RectangleStencil handlers={false} lines={false} movable={false} resizable={false} />
+	</FixedCropperTypeExample>
 </Example>
 
-Examples: [Twitter](https://www.twitter.com), [Instagram](https://www.instagram.com).
+`ImageRestriction.stencil` keeps the photo covering the selection. A stencil-size function can adapt the frame to the boundary, and oversized requests are fitted within it. See [defaults and restrictions](/docs/guides/defaults-and-restrictions#fixed-stencil-size).
 
-<h3 id="implementation-1">Implementation</h3>
+## A frame that settles after interaction
 
-Use the `FixedCropper` component:
+Leave the fixed cropper's stencil interactive when users should be able to resize it before it settles back to its configured size.
 
-```svelte
-<script lang="ts">
-	import { FixedCropper, ImageRestriction } from 'svelte-advanced-cropper';
-</script>
-
-<FixedCropper
-	{src}
-	stencilProps={{
-		handlers: {},
-		lines: {},
-		movable: false,
-		resizable: false
-	}}
-	stencilSize={{
-		width: 300,
-		height: 300
-	}}
-	imageRestriction={ImageRestriction.stencil}
-/>
-```
-
-What each part does:
-
-1. `stencilProps` hides the handles and lines, and stops the user from moving or resizing the stencil.
-2. `stencilSize` sets the stencil's size in on-screen pixels, which keeps its position, size and aspect ratio stable. It can also be a function of the cropper state, for example to follow the boundary size. If the boundary is smaller than the requested size, the stencil is scaled down to fit, so make sure the container is normally larger.
-3. `imageRestriction` is set to `ImageRestriction.stencil` (the string `'stencil'`), so the image only has to cover the stencil and every part of it can be cropped. With the default, `'fitArea'`, the user cannot reach some parts of the image.
-
-## Hybrid Cropper
-
-A hybrid cropper has a semi-fixed stencil. The user can still move and resize it, but it always settles back to a default size and position afterwards.
-
-Examples: [Telegram](https://www.telegram.org).
-
-<h3 id="implementation-2">Implementation</h3>
-
-A hybrid cropper is a fixed cropper whose stencil is left interactive. Take the previous example and remove `stencilProps`:
-
-```svelte
-<FixedCropper
-	{src}
-	stencilSize={{
-		width: 280,
-		height: 280
-	}}
-	imageRestriction={ImageRestriction.stencil}
-/>
-```
-
-<Example source={fixedCropperTypeSource} title="FixedCropperTypeExample">
+<Example source={FixedCropperTypeExampleSource} title="FixedCropperTypeExample">
 	<FixedCropperTypeExample
 		src={image('three-puppies.jpg')}
-		stencilSize={{
-			width: 280,
-			height: 280
-		}}
+		stencilSize={{ width: 280, height: 280 }}
 		imageRestriction={ImageRestriction.stencil}
 	/>
 </Example>
+
+For a more specialized mobile interface, compose a toolbar through a wrapper snippet and supply core algorithms. The [showcase](/docs/showcase) includes a Telegram-style editor and a Twitter-style avatar cropper. The [absolute zoom tutorial](/docs/tutorials/absolute-zoom) explains the fixed-frame slider in detail.

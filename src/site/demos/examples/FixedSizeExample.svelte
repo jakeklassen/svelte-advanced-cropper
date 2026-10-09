@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { FixedCropper, ImageRestriction } from 'svelte-advanced-cropper';
+	import { RectangleStencil, FixedCropper, ImageRestriction } from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 
 	const src = image('house-by-lake.jpg');
@@ -12,14 +12,10 @@
 		width: 300,
 		height: 300
 	}}
-	stencilProps={{
-		handlers: {},
-		lines: {},
-		movable: false,
-		resizable: false
-	}}
 	imageRestriction={ImageRestriction.stencil}
-/>
+>
+	<RectangleStencil handlers={false} lines={false} movable={false} resizable={false} />
+</FixedCropper>
 
 <style>
 	:global(.fixed-size-example) {

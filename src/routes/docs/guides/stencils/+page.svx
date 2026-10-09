@@ -1,0 +1,57 @@
+<script>
+	import Example from '#site/components/Example.svelte';
+	import ChangingStencilExample from '#site/demos/examples/ChangingStencilExample.svelte';
+	import ChangingStencilExampleSource from '#site/demos/examples/ChangingStencilExample.svelte?highlight';
+	import StencilGridExample from '#site/demos/examples/StencilGridExample.svelte';
+	import StencilGridExampleSource from '#site/demos/examples/StencilGridExample.svelte?highlight';
+</script>
+
+# Stencils and aspect ratios
+
+A stencil marks the selected region and supplies its constraints. Put it inside the cropper as an ordinary child.
+
+## Choose a shape
+
+`RectangleStencil` supports free resizing, a fixed ratio, or a ratio range. `CircleStencil` supplies a square ratio and circular bounding-box option. Its circular display does not mask the exported bitmap; apply a mask separately if you need transparent corners.
+
+<Example source={ChangingStencilExampleSource} title="ChangingStencilExample">
+	<ChangingStencilExample />
+</Example>
+
+Conditional children let you switch shapes at runtime. One cropper may have at most one live registered stencil. If you provide children with no stencil, there is no implicit replacement. A cropper without children uses `RectangleStencil`.
+
+## Set the ratio
+
+Pass `aspectRatio={16 / 9}` to a rectangle, or use `minAspectRatio` and `maxAspectRatio` for a range:
+
+```svelte
+<Cropper {src}>
+	<RectangleStencil minAspectRatio={1 / 2} maxAspectRatio={2} />
+</Cropper>
+```
+
+You can also pass `aspectRatio={{ minimum: 1 / 2, maximum: 2 }}`. An explicit rectangle `aspectRatio` takes precedence over its convenience bounds. With the default constraint strategy, a cropper-level `aspectRatio` takes precedence over the stencil's suggested ratio; avoid conflicting values.
+
+## Grid and controls
+
+<Example source={StencilGridExampleSource} title="StencilGridExample">
+	<StencilGridExample />
+</Example>
+
+`grid` enables the built-in grid during interactions. `movable={false}` stops stencil dragging; `resizable={false}` disables resizing. To hide controls too, pass `handlers={false}` and `lines={false}`. Both collections also accept direction maps: only entries set to `true` appear. Omitted collections use the stencil's defaults.
+
+```svelte
+<RectangleStencil
+	aspectRatio={1}
+	handlers={{ eastNorth: true, westSouth: true }}
+	lines={false}
+/>
+```
+
+`disabled` on the cropper disables its children as well. A child cannot override that with `disabled={false}`.
+
+## Add content inside the selection
+
+Both built-in stencils render their children inside the crop region. Add decorative guides there with `pointer-events: none` so the guides do not intercept drags. If you need different geometry or interactions, follow [Custom stencil](/docs/tutorials/custom-stencil) or [Print guides](/docs/tutorials/print-guides).
+
+See [RectangleStencil](/docs/reference/rectangle-stencil), [CircleStencil](/docs/reference/circle-stencil), and [layout and lifecycle](/docs/guides/layout-and-lifecycle) for the full contracts.

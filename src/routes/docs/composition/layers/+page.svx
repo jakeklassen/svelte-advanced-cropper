@@ -1,0 +1,37 @@
+<script>
+	import CropperStructure from '#site/demos/schemes/CropperStructure.svelte';
+	import CodeBlock from '#site/components/CodeBlock.svelte';
+	import source from '#site/demos/examples/BackgroundWrapperWithNotifications.svelte?highlight';
+</script>
+
+# Replace layers with snippets
+
+A layer snippet receives the current cropper, positioning classes and the services that layer needs. Spread its argument into the default building block, then add your own controls. This example wraps image gestures with a scrolling notification. The [snippet contracts](/docs/reference/snippets) list every field.
+
+<CodeBlock highlighted={source.highlighted} code={source.code} />
+
+<CropperStructure />
+
+## Forward children and styling
+
+Render a wrapper's `children` exactly once. Keep descendants mounted while loading: hiding them visually is fine, but delaying their creation also delays stencil registration. Preserve supplied `class` and `style`, adding your own class with an array.
+
+`wrapper` defaults to `CropperWrapper`; `backgroundWrapper` defaults to `CropperBackgroundWrapper`. The latter receives normalized movement, scaling and rotation options. Forward native events from custom gesture controls so modifier keys remain available.
+
+## Register a boundary
+
+`boundary` receives `registerBoundary`, `sizeAlgorithm` and `stretchAlgorithm`. `StretchableBoundary` accepts these directly and handles registration and cleanup. A custom boundary must provide `stretchTo(size): Promise<Size | null>` and `reset(): void`. Return `null` while it cannot measure a usable area.
+
+Registration returns cleanup owned by that registration. Replacing a boundary invalidates pending measurement; cleanup from the old boundary cannot remove the new one.
+
+## Register the actual export source
+
+`background` receives `attachSource`. Apply the returned attachment to the actual displayed image or canvas. For asynchronous canvas drawing, pass a promise that resolves after pixels for the current image have been drawn. Replacing the source invalidates the old export immediately.
+
+```svelte
+<canvas {@attach attachSource(drawingReady)}></canvas>
+```
+
+This is only the registration fragment: a complete background must also load and draw the image, apply transforms and forward styling. The [image editor](/docs/tutorials/image-editor) includes all those pieces and a matching preview.
+
+With canvas export enabled, `onReady` waits for the current source and rendered state. A missing source prevents that readiness guarantee; `canvas={false}` permits a purely visual replacement. A preview background does not register an export source.

@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Cropper, ImageRestriction, type CropperRef } from 'svelte-advanced-cropper';
+	import { Cropper, ImageRestriction, type CropperInstance } from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 
 	const src = image('kitten-yawning.jpg');
 
-	let cropper: CropperRef | undefined = $state();
+	let cropper: CropperInstance | undefined = $state();
 	let imageRestriction = $state(ImageRestriction.none);
 
 	// Open the cropped result in a new tab.

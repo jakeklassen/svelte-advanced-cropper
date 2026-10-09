@@ -26,28 +26,25 @@
 	<figcaption>
 		<dl class="stencil-structure__legend">
 			<dt>Overlay</dt>
-			<dd><code>overlayClassName</code></dd>
+			<dd><code>__overlay</code> selector</dd>
 			<dt>Preview</dt>
-			<dd><code>previewClassName</code></dd>
+			<dd><code>__preview</code> selector</dd>
 			<dt>Line</dt>
-			<dd>
-				<code>lineComponent</code>, <code>lineClassNames</code>,
-				<code>lineWrapperClassNames</code>, <code>lines</code>
-			</dd>
+			<dd><code>line</code> snippet, <code>lines</code> prop</dd>
 			<dt>Handler</dt>
-			<dd>
-				<code>handlerComponent</code>, <code>handlerClassNames</code>,
-				<code>handlerWrapperClassNames</code>, <code>handlers</code>
-			</dd>
+			<dd><code>handler</code> snippet, <code>handlers</code> prop</dd>
 			<dt>Stencil root</dt>
 			<dd>
-				<code>class</code>, <code>movingClassName</code>, <code>resizingClassName</code>,
-				<code>boundingBoxClassName</code>, <code>draggableAreaClassName</code>,
-				<code>gridClassName</code>
+				<code>class</code>, <code>style</code>; <code>--moving</code>,
+				<code>--resizing</code>, <code>--disabled</code> state selectors
 			</dd>
+			<dt>Guides</dt>
+			<dd><code>grid</code> prop or a <code>children</code> snippet</dd>
 		</dl>
 		<p class="stencil-structure__note">
-			All of these are stencil props, passed through the cropper's <code>stencilProps</code>.
+			Set props directly on the child stencil. Scope part selectors under its class: append the
+			suffixes above to <code>.advanced-cropper-rectangle-stencil</code>
+			or <code>.advanced-cropper-circle-stencil</code>.
 		</p>
 	</figcaption>
 </figure>
@@ -194,6 +191,7 @@
 		margin: 0.5rem 0 0;
 		font-size: 0.85rem;
 		color: var(--color-muted);
+		overflow-wrap: anywhere;
 	}
 
 	@media (max-width: 540px) {

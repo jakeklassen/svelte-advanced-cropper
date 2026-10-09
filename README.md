@@ -1,8 +1,8 @@
 # svelte-advanced-cropper
 
-A Svelte 5 image cropper you can shape to your design: custom stencils, handlers and wrappers, fixed or free aspect ratios, zoom, rotate, flip, transitions, and full touch support.
+A Svelte 5 image cropper built on [`advanced-cropper`](https://github.com/advanced-cropper/advanced-cropper). Configure stencils as children, customize layers with snippets and read cropper state reactively. Supports fixed and movable stencils, touch gestures, rotation, zoom, previews and canvas export.
 
-It is a port of [react-advanced-cropper](https://github.com/advanced-cropper/react-advanced-cropper) built on the same framework-agnostic core, [`advanced-cropper`](https://github.com/advanced-cropper/advanced-cropper). The components, props, settings and methods match the React library one-to-one. The implementation is idiomatic Svelte 5: runes, snippets and attachments, not translated hooks. It is an independent community port, not affiliated with the Advanced Cropper project or its author.
+This independent project includes code derived from Norserium's MIT-licensed [`react-advanced-cropper`](https://github.com/advanced-cropper/react-advanced-cropper) and is not affiliated with the Advanced Cropper project.
 
 **Documentation and live examples:** https://jakeklassen.github.io/svelte-advanced-cropper/
 
@@ -17,57 +17,47 @@ bun add svelte-advanced-cropper
 aube add svelte-advanced-cropper
 ```
 
-Requires Svelte 5.
+Requires Svelte `^5.40`.
 
 ## Usage
 
+`/photo.jpg` is an image in your application's public directory. Import the stylesheet once and give the cropper a definite height.
+
 ```svelte
 <script lang="ts">
-	import { Cropper, type CropperRef } from 'svelte-advanced-cropper';
+	import { Cropper, RectangleStencil, type CropperInstance } from 'svelte-advanced-cropper';
 	import 'svelte-advanced-cropper/style.css';
 
-	let cropper: CropperRef | undefined = $state();
-
-	function onChange(cropper: CropperRef) {
-		console.log(cropper.getCoordinates(), cropper.getCanvas());
-	}
+	let cropper: CropperInstance | undefined = $state();
+	const coordinates = $derived(cropper?.getCoordinates());
 </script>
 
-<Cropper
-	bind:this={cropper}
-	src="/photo.jpg"
-	stencilProps={{ aspectRatio: 16 / 9 }}
-	{onChange}
-	style="height: 500px"
-/>
+<Cropper bind:this={cropper} src="/photo.jpg" style="height: 360px">
+	<RectangleStencil aspectRatio={16 / 9} />
+</Cropper>
 
-<button onclick={() => cropper?.rotateImage(90)}>Rotate</button>
+{#if coordinates}
+	<p>{coordinates.width} × {coordinates.height} pixels</p>
+{/if}
+
+<button type="button" disabled={!coordinates} onclick={() => cropper?.rotateImage(90)}>
+	Rotate
+</button>
 ```
 
-- **Croppers:** `Cropper` (free stencil) and `FixedCropper` (fixed stencil, moving image), plus `AbstractCropper` to build your own.
-- **Stencils:** `RectangleStencil` (default) and `CircleStencil`, or pass any component as `stencilComponent`.
-- **Themes:** `svelte-advanced-cropper/themes/{default,classic,compact,bubble,corners}.css`, or the `.scss` sources to customise the variables.
-- **Preview:** `<CropperPreview cropper={cropper} />` mirrors a cropper's result live.
+- **Croppers:** `Cropper` for a movable selection and `FixedCropper` for a fixed stencil with a moving image.
+- **Stencils:** child `RectangleStencil`, `CircleStencil` or custom context-based stencils. With no children, `Cropper` supplies a rectangle.
+- **Composition:** typed layer snippets for wrappers, boundaries, backgrounds and controls; one `class` prop and stable styling selectors.
+- **Preview:** `<CropperPreview {cropper} />` updates reactively as the crop changes. Export a canvas explicitly with `cropper?.getCanvas()`.
+- **Themes:** `svelte-advanced-cropper/style.css` and `svelte-advanced-cropper/themes/{default,classic,compact,bubble,corners}.css`, plus SCSS theme sources.
 
-### Coming from react-advanced-cropper
+### Upgrading to 0.2.0
 
-Most code carries over directly. The differences come from Svelte itself:
-
-| React                                    | Svelte                              |
-| ---------------------------------------- | ----------------------------------- |
-| `ref={cropperRef}`                       | `bind:this={cropper}`               |
-| `className`                              | `class`                             |
-| `style={{ height: 500 }}`                | `style="height: 500px"`             |
-| `children`                               | `children` snippet                  |
-| `<CropperPreview cropper={cropperRef}/>` | `<CropperPreview {cropper} />`      |
-| `useCropperImage({ src })`               | `useCropperImage(() => ({ src }))`  |
-| `react-advanced-cropper/dist/style.css`  | `svelte-advanced-cropper/style.css` |
-
-The [migration guide](https://jakeklassen.github.io/svelte-advanced-cropper/docs/guides/coming-from-react) covers the full list.
+**0.2.0 is a breaking release.** Child stencils, typed snippets and structural instance types replace the 0.1.x composition API; public `use*` helpers and per-part class props are removed. Requires Svelte `^5.40`. See [Upgrade from 0.1.x](https://jakeklassen.github.io/svelte-advanced-cropper/docs/migration/from-0-1) or [Coming from react-advanced-cropper](https://jakeklassen.github.io/svelte-advanced-cropper/docs/migration/from-react) for before/after examples and the complete migration mapping.
 
 ## Development
 
-Tool versions are pinned in `mise.toml` (Node 26, pnpm 12).
+Tool versions are pinned in `mise.toml` (Node 26, pnpm 12). Run the pnpm commands below through `mise x --` when working on the repository.
 
 ```sh
 mise install
@@ -93,7 +83,7 @@ oxlint checks the `<script>` blocks of `.svelte` files. Svelte compiler and temp
 - `src/lib/`: the published package. Everything public is re-exported from `src/lib/index.ts`.
 - `src/routes/`, `src/site/`: the docs site (SvelteKit, mdsvex, prerendered for GitHub Pages). Not published. Demos live in `src/site/demos/`. See `docs/site-authoring.md`.
 - `src/tests/`: library tests. `e2e/`: Playwright tests.
-- `docs/study/`: the upstream study and the React → Svelte mapping (`00-index.md`).
+- `docs/study/`: design log and historical implementation studies; start with `00-index.md`.
 - `tmp/`: git-ignored scratch space. The upstream repos are cloned here for reference:
 
   ```sh

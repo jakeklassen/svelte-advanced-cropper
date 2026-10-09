@@ -1,0 +1,105 @@
+# Snippet contracts
+
+Each replacement is a Svelte `Snippet<[ArgumentType]>`. Import argument types from `svelte-advanced-cropper` and `Snippet` from `svelte`. All visual arguments inherit `PartProps`: optional `class: ClassValue` and `style: string`.
+
+## Cropper snippets
+
+| Prop | Argument | Default renderer |
+| --- | --- | --- |
+| `wrapper` | `CropperWrapperSnippetProps<E>` | `CropperWrapper` |
+| `boundary` | `CropperBoundarySnippetProps<E>` | `StretchableBoundary` |
+| `backgroundWrapper` | `CropperBackgroundWrapperSnippetProps<E>` | `CropperBackgroundWrapper` |
+| `background` | `CropperBackgroundSnippetProps<E>` | `CropperBackgroundImage` |
+
+Wrapper arguments include `cropper`, `disabled` and `children`. Background arguments have no children. Extension typing stays intact through the cropper snippets. Wrappers must render their supplied children exactly once and preserve class/style.
+
+<h2 id="preview-snippets">Preview snippets</h2>
+
+| Prop | Argument | Default renderer |
+| --- | --- | --- |
+| `wrapper` | `CropperPreviewWrapperSnippetProps` | `CropperPreviewWrapper` |
+| `boundary` | `CropperPreviewBoundarySnippetProps` | `StretchableBoundary` |
+| `background` | `CropperPreviewBackgroundSnippetProps` | `CropperPreviewBackground` |
+
+Preview arguments use `preview`, and the background receives the computed `size`. No preview export-source attachment is needed.
+
+## Stencil controls
+
+`handler?: Snippet<[HandlerSnippetProps]>` and `line?: Snippet<[LineSnippetProps]>` default to `SimpleHandler` and `SimpleLine`. The snippet replaces the interactive control; BoundingBox retains the handler's outer placement container. Forward the native event and end callback as well as positioning classes.
+
+## Registration ownership
+
+`registerBoundary` returns cleanup that removes only that registration. `attachSource(ready?)` returns a Svelte attachment for the actual displayed image or canvas. Its cleanup cannot remove a replacement. A readiness promise represents pixels drawn for the current image; stale sources are not export fallbacks. See [layer composition](/docs/composition/layers).
+
+## Exact declarations
+
+`Attachment` comes from `svelte/attachments`. `Normalized*ImageOptions` are the fully populated gesture option types. Other geometry types are available from the package root.
+
+```ts
+interface PartProps {
+	class?: ClassValue;
+	style?: string;
+}
+type CrossOrigin = boolean | 'anonymous' | 'use-credentials';
+interface BoundaryHandle {
+	stretchTo(size: Size | null): Promise<Size | null>;
+	reset(): void;
+}
+type RegisterBoundary = (boundary: BoundaryHandle) => () => void;
+type BackgroundElement = HTMLImageElement | HTMLCanvasElement;
+type AttachBackgroundSource = (ready?: Promise<void>) => Attachment<BackgroundElement>;
+interface CropperWrapperSnippetProps<E extends SettingsExtension = {}> extends PartProps {
+	cropper: CropperInstance<E>;
+	disabled: boolean;
+	children: Snippet;
+}
+interface CropperBoundarySnippetProps<
+	E extends SettingsExtension = {}
+> extends CropperWrapperSnippetProps<E> {
+	registerBoundary: RegisterBoundary;
+	sizeAlgorithm: BoundarySizeAlgorithm;
+	stretchAlgorithm: BoundaryStretchAlgorithm;
+}
+interface CropperBackgroundWrapperSnippetProps<
+	E extends SettingsExtension = {}
+> extends CropperWrapperSnippetProps<E> {
+	moveImage: NormalizedMoveImageOptions;
+	scaleImage: NormalizedScaleImageOptions;
+	rotateImage: NormalizedRotateImageOptions;
+}
+interface CropperBackgroundSnippetProps<E extends SettingsExtension = {}> extends PartProps {
+	cropper: CropperInstance<E>;
+	disabled: boolean;
+	crossOrigin: CrossOrigin;
+	attachSource: AttachBackgroundSource;
+}
+interface CropperPreviewWrapperSnippetProps extends PartProps {
+	preview: CropperPreviewSource;
+	children: Snippet;
+}
+interface CropperPreviewBoundarySnippetProps extends CropperPreviewWrapperSnippetProps {
+	registerBoundary: RegisterBoundary;
+	sizeAlgorithm: BoundarySizeAlgorithm;
+	stretchAlgorithm: BoundaryStretchAlgorithm;
+}
+interface CropperPreviewBackgroundSnippetProps extends PartProps {
+	preview: CropperPreviewSource;
+	size: Size | null;
+	crossOrigin: CrossOrigin;
+}
+type NativeMoveEvent = MouseEvent | TouchEvent;
+interface HandlerSnippetProps extends PartProps {
+	position: OrdinalDirection;
+	horizontalPosition: HorizontalCardinalDirection | null;
+	verticalPosition: VerticalCardinalDirection | null;
+	disabled: boolean;
+	onMove: (shift: MoveDirections, event: NativeMoveEvent) => void;
+	onMoveEnd: () => void;
+}
+interface LineSnippetProps extends PartProps {
+	position: CardinalDirection;
+	disabled: boolean;
+	onMove: (shift: MoveDirections, event: NativeMoveEvent) => void;
+	onMoveEnd: () => void;
+}
+```

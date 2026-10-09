@@ -1,7 +1,12 @@
 <script lang="ts">
 	import { onDestroy } from 'svelte';
 	import { RotateCcw } from '@lucide/svelte';
-	import { Cropper, CropperPreview, type CropperRef } from 'svelte-advanced-cropper';
+	import {
+		Cropper,
+		CropperPreview,
+		RectangleStencil,
+		type CropperInstance
+	} from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 	import AdjustableCropperBackground from './AdjustableCropperBackground.svelte';
 	import AdjustablePreviewBackground from './AdjustablePreviewBackground.svelte';
@@ -17,7 +22,7 @@
 		contrast: 0
 	};
 
-	let cropper: CropperRef | undefined = $state();
+	let cropper: CropperInstance | undefined = $state();
 
 	let src = $state(image('labrador-with-tulip.jpg'));
 
@@ -68,36 +73,22 @@
 
 <div class="image-editor">
 	<div class="image-editor__cropper">
-		<Cropper
-			bind:this={cropper}
-			{src}
-			stencilProps={{
-				movable: cropperEnabled,
-				resizable: cropperEnabled,
-				// `{}` hides every line and handler; `undefined` keeps the default set.
-				lines: cropperEnabled ? undefined : {},
-				handlers: cropperEnabled ? undefined : {},
-				overlayClassName: [
-					'image-editor__cropper-overlay',
-					!cropperEnabled && 'image-editor__cropper-overlay--faded'
-				]
-			}}
-			backgroundWrapperProps={{
-				scaleImage: cropperEnabled,
-				moveImage: cropperEnabled
-			}}
-			backgroundComponent={AdjustableCropperBackground}
-			backgroundProps={adjustments}
-		/>
+		<Cropper bind:this={cropper} {src} moveImage={cropperEnabled} scaleImage={cropperEnabled}>
+			{#snippet background(p)}<AdjustableCropperBackground {...p} {...adjustments} />{/snippet}
+			<RectangleStencil
+				class={['image-editor__stencil', !cropperEnabled && 'image-editor__stencil--faded']}
+				movable={cropperEnabled}
+				resizable={cropperEnabled}
+				lines={cropperEnabled ? undefined : false}
+				handlers={cropperEnabled ? undefined : false}
+			/>
+		</Cropper>
 		{#if mode !== 'crop'}
 			<Slider class="image-editor__slider" label={mode} bind:value={adjustments[mode]} />
 		{/if}
-		<CropperPreview
-			class="image-editor__preview"
-			{cropper}
-			backgroundComponent={AdjustablePreviewBackground}
-			backgroundProps={adjustments}
-		/>
+		<CropperPreview class="image-editor__preview" {cropper}>
+			{#snippet background(p)}<AdjustablePreviewBackground {...p} {...adjustments} />{/snippet}
+		</CropperPreview>
 		<Button
 			class={['image-editor__reset-button', !adjusted && 'image-editor__reset-button--hidden']}
 			aria-label="Reset the adjustments"
@@ -136,10 +127,10 @@
 		border-radius: 50%;
 		background: black;
 	}
-	:global(.image-editor__cropper-overlay) {
+	:global(.image-editor__stencil .advanced-cropper-stencil-overlay) {
 		transition: 0.5s;
 	}
-	:global(.image-editor__cropper-overlay--faded) {
+	:global(.image-editor__stencil--faded .advanced-cropper-stencil-overlay) {
 		color: rgba(0, 0, 0, 0.9);
 	}
 	.image-editor__cropper :global(.image-editor__reset-button) {

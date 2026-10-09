@@ -1,7 +1,7 @@
 {
 	"name": "svelte-advanced-cropper",
 	"version": "0.1.4",
-	"description": "Svelte 5 port of react-advanced-cropper: build croppers exactly suited to your design",
+	"description": "Svelte 5 image cropper with child stencils, typed snippets, reactive previews and canvas export",
 	"keywords": [
 		"advanced-cropper",
 		"cropper",
@@ -60,7 +60,8 @@
 		"test:e2e": "playwright test",
 		"test:e2e:install": "playwright install chromium",
 		"version-packages": "changeset version && oxfmt CHANGELOG.md package.json",
-		"release": "changeset publish"
+		"release": "changeset publish",
+		"lint:svelte": "node scripts/svelte-autofix.ts"
 	},
 	"dependencies": {
 		"advanced-cropper": "~0.17.1"
@@ -73,6 +74,7 @@
 		"@stylistic/eslint-plugin": "^5.10.0",
 		"@sveltejs/adapter-static": "^4.0.0",
 		"@sveltejs/kit": "^3.0.0",
+		"@sveltejs/mcp": "0.1.26",
 		"@sveltejs/package": "^3.0.0",
 		"@sveltejs/vite-plugin-svelte": "^7.2.0",
 		"@types/node": "^26.6.4",
@@ -96,6 +98,6 @@
 		"vitest-browser-svelte": "^3.1.0"
 	},
 	"peerDependencies": {
-		"svelte": "^5.29.0"
+		"svelte": "^5.40"
 	}
 }

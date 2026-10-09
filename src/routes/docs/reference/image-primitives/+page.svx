@@ -1,0 +1,168 @@
+# Image and layout building blocks
+
+All optional props without a default remain `undefined`. `class` accepts Svelte `ClassValue`; `style` is a CSS string.
+
+These primitives require and provide no cropper context. Supply their data and callbacks explicitly. Unless listed, they have no exported instance methods. Container children are optional `Snippet` values rendered without arguments.
+
+<h2 id="cropper-wrapper">CropperWrapper</h2>
+
+Fades its children in when the cropper has state and is loaded. It keeps children mounted while loading. Its optional cropper needs getState, isLoading and isLoaded.
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `cropper` | `CropperWrapperSource` | `undefined` |
+| `class` | `ClassValue` | `undefined` |
+| `style` | `string` | `undefined` |
+| `children` | `Snippet` | `undefined` |
+| `disabled` | `boolean` | `undefined` |
+
+`CropperWrapperSource` is a local name for this exact structural contract, not an exported type:
+
+```ts
+interface CropperWrapperSource {
+	getState: () => CropperState | null;
+	isLoading: () => boolean;
+	isLoaded: () => boolean;
+}
+```
+
+Spread the `Cropper` or `FixedCropper` `wrapper` argument (`CropperWrapperSnippetProps<E>`) into this primitive. For a preview’s `wrapper` snippet, use [CropperPreviewWrapper](/docs/reference/image-primitives#cropper-preview-wrapper), which accepts `preview`.
+
+Selectors are listed in the [complete styling inventory](/docs/reference/styling).
+
+<h2 id="stretchable-boundary">StretchableBoundary</h2>
+
+Registers boundary measurement with the owning cropper or preview. Exposes `reset(): void` and `stretchTo(size: Size | null): Promise<Size | null>` through bind:this, typed as `BoundaryHandle`. Registration cleanup runs on destruction.
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `class` | `ClassValue` | `undefined` |
+| `style` | `string` | `undefined` |
+| `registerBoundary` | `RegisterBoundary` | `undefined` |
+| `stretchAlgorithm` | `BoundaryStretchAlgorithm` | `stretchCropperBoundary` |
+| `sizeAlgorithm` | `BoundarySizeAlgorithm` | `fillLayoutBoundary` |
+| `children` | `Snippet` | `undefined` |
+
+Selectors are listed in the [complete styling inventory](/docs/reference/styling).
+
+<h2 id="cropper-background-wrapper">CropperBackgroundWrapper</h2>
+
+Connects TransformableImage to transformImage and transformImageEnd. The cropper also supplies getTransitions. Active transitions disable gestures. An omitted timeout uses the gesture primitive default of 500 ms.
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `cropper` | `CropperBackgroundWrapperSource` | Required |
+| `rotateImage` | `boolean` \| `RotateImageOptions` | `false` |
+| `scaleImage` | `boolean` \| `ScaleImageOptions` | `true` |
+| `moveImage` | `boolean` \| `MoveImageOptions` | `true` |
+| `children` | `Snippet` | `undefined` |
+| `class` | `ClassValue` | `undefined` |
+| `style` | `string` | `undefined` |
+| `timeout` | `number` | `undefined` |
+| `onEvent` | `TransformableImageProps['onEvent']` | `undefined` |
+| `disabled` | `boolean` | `undefined` |
+
+`CropperBackgroundWrapperSource` is a local name for this exact structural contract, not an exported type:
+
+```ts
+interface CropperBackgroundWrapperSource {
+	transformImage: (transform: ImageTransform) => void;
+	transformImageEnd: () => void;
+	getTransitions: () => CropperTransitions;
+}
+```
+
+Spread the `Cropper` or `FixedCropper` `backgroundWrapper` argument (`CropperBackgroundWrapperSnippetProps<E>`) into this primitive. `CropperPreview` has no `backgroundWrapper` snippet.
+
+Selectors are listed in the [complete styling inventory](/docs/reference/styling).
+
+<h2 id="cropper-background-image">CropperBackgroundImage</h2>
+
+Draws the displayed image using getBackgroundStyle. The cropper supplies getState, getTransitions and getImage. Forward attachSource from a background snippet for canvas export.
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `class` | `ClassValue` | `undefined` |
+| `cropper` | `CropperBackgroundImageSource` | Required |
+| `crossOrigin` | `'anonymous'` \| `'use-credentials'` \| `boolean` | `true` |
+| `style` | `string` | `undefined` |
+| `attachSource` | `AttachBackgroundSource` | `undefined` |
+
+`CropperBackgroundImageSource` is a local name for this exact structural contract, not an exported type:
+
+```ts
+interface CropperBackgroundImageSource {
+	getState: () => CropperState | null;
+	getTransitions: () => CropperTransitions;
+	getImage: () => CropperImage | null;
+}
+```
+
+Spread the `Cropper` or `FixedCropper` `background` argument (`CropperBackgroundSnippetProps<E>`) into this primitive. For a preview’s `background` snippet, use [CropperPreviewBackground](/docs/reference/image-primitives#cropper-preview-background), which accepts `preview` and the fitted `size`.
+
+Selectors are listed in the [complete styling inventory](/docs/reference/styling).
+
+<h2 id="cropper-source">CropperSource</h2>
+
+Hidden source image for custom drawing. bind:element exposes HTMLImageElement or null; changing src replaces the image element. Also accepts HTMLImgAttributes except src and lowercase crossorigin, which are replaced by the props listed here.
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `src` | `string` \| `null` | `undefined` |
+| `crossOrigin` | `'anonymous'` \| `'use-credentials'` \| `boolean` | `true` |
+| `element` | `HTMLImageElement` \| `null` | `null` |
+
+Selectors are listed in the [complete styling inventory](/docs/reference/styling).
+
+<h2 id="cropper-preview-wrapper">CropperPreviewWrapper</h2>
+
+Fades children according to preview.isLoaded(). The optional preview requires only isLoaded and may be null.
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `preview` | `CropperPreviewWrapperSource` \| `null` | `undefined` |
+| `class` | `ClassValue` | `undefined` |
+| `style` | `string` | `undefined` |
+| `children` | `Snippet` | `undefined` |
+
+`CropperPreviewWrapperSource` is a local name for this exact structural contract, not an exported type:
+
+```ts
+interface CropperPreviewWrapperSource {
+	isLoaded: () => boolean;
+}
+```
+
+Spread the `CropperPreview` `wrapper` argument (`CropperPreviewWrapperSnippetProps`) into this primitive. It receives `preview`; cropper wrapper arguments instead receive `cropper` and belong with [CropperWrapper](/docs/reference/image-primitives#cropper-wrapper).
+
+Selectors are listed in the [complete styling inventory](/docs/reference/styling).
+
+<h2 id="cropper-preview-background">CropperPreviewBackground</h2>
+
+Positions the image with getPreviewStyle and the fitted size. The required preview supplies getState, getImage and getTransitions; transitions may be null. No export registration is needed.
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `class` | `ClassValue` | `undefined` |
+| `preview` | `CropperPreviewBackgroundSource` | Required |
+| `crossOrigin` | `'anonymous'` \| `'use-credentials'` \| `boolean` | `true` |
+| `size` | `Size` \| `null` | `undefined` |
+| `style` | `string` | `undefined` |
+
+`CropperPreviewBackgroundSource` is a local name for this exact structural contract, not an exported type:
+
+```ts
+interface CropperPreviewBackgroundSource {
+	getState: () => CropperState | null;
+	getTransitions: () => CropperTransitions | null;
+	getImage: () => CropperImage | null;
+}
+```
+
+Spread the `CropperPreview` `background` argument (`CropperPreviewBackgroundSnippetProps`) into this primitive, including `preview` and `size`. Cropper background arguments belong with [CropperBackgroundImage](/docs/reference/image-primitives#cropper-background-image).
+
+Selectors are listed in the [complete styling inventory](/docs/reference/styling).
+
+## Canvas export
+
+The output and scratch canvases are internal. Use `CropperInstance.getCanvas()` to draw a crop; use the background snippet's `attachSource` to supply custom pixels. The internal canvas and transition elements have stable selectors but are not public component exports.

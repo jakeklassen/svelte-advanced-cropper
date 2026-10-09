@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Diamond, FishingHook, Replace } from '@lucide/svelte';
+	import { Diamond, Network, Replace } from '@lucide/svelte';
 	import { href } from '#site/paths.ts';
 	import type { HierarchyNode } from './hierarchy.ts';
 
@@ -11,9 +11,9 @@
 	let { root, label }: Props = $props();
 
 	const kinds = {
-		hook: { icon: FishingHook, label: 'Hook' },
+		context: { icon: Network, label: 'Context' },
 		component: { icon: Diamond, label: 'Component' },
-		replaceable: { icon: Replace, label: 'Replaceable component' }
+		snippet: { icon: Replace, label: 'Snippet' }
 	} as const;
 </script>
 
@@ -104,11 +104,11 @@
 		color: var(--color-muted);
 	}
 
-	.hierarchy__node--hook .hierarchy__icon {
+	.hierarchy__node--context .hierarchy__icon {
 		color: #d97706;
 	}
 
-	.hierarchy__node--replaceable .hierarchy__icon {
+	.hierarchy__node--snippet .hierarchy__icon {
 		color: var(--color-primary);
 	}
 
