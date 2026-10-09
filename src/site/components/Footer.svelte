@@ -13,7 +13,7 @@
 		<div>
 			<div class="footer__title">Credits</div>
 			<a href="https://github.com/advanced-cropper/react-advanced-cropper">
-				react-advanced-cropper, the original
+				react-advanced-cropper
 			</a>
 			<a href="https://github.com/advanced-cropper/advanced-cropper">advanced-cropper core</a>
 		</div>
@@ -24,8 +24,8 @@
 		</div>
 	</div>
 	<p class="footer__copyright">
-		MIT licensed. A community Svelte port of Norserium's react-advanced-cropper, not affiliated with
-		the Advanced Cropper project. Photos from Unsplash.
+		MIT licensed. Includes code derived from Norserium's MIT-licensed react-advanced-cropper. Not
+		affiliated with the Advanced Cropper project. Photos from Unsplash.
 	</p>
 </footer>
 

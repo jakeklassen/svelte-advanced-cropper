@@ -53,7 +53,7 @@ Requires Svelte `^5.40`.
 
 ### Upgrading to 0.2.0
 
-**0.2.0 is a breaking release.** Child stencils, typed snippets and structural instance types replace the 0.1.x composition API; public `use*` helpers and per-part class props are removed. Requires Svelte `^5.40`. See [Upgrade from 0.1.x](https://jakeklassen.github.io/svelte-advanced-cropper/docs/migration/from-0-1) or [Coming from react-advanced-cropper](https://jakeklassen.github.io/svelte-advanced-cropper/docs/migration/from-react) for before/after examples and the complete migration mapping.
+**0.2.0 is a breaking release.** Child stencils, typed snippets and structural instance types replace the 0.1.x composition API; public `use*` helpers and per-part class props are removed. Requires Svelte `^5.40`. See [Upgrade from 0.1.x](https://jakeklassen.github.io/svelte-advanced-cropper/docs/migration/from-0-1) for before/after examples and the complete migration mapping.
 
 ## Development
 
