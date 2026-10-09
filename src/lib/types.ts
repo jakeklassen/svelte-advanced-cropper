@@ -7,7 +7,9 @@ import type {
 	CardinalDirection,
 	HorizontalCardinalDirection,
 	VerticalCardinalDirection,
-	MoveDirections
+	MoveDirections,
+	Coordinates,
+	DefaultTransforms
 } from 'advanced-cropper';
 import type { NormalizedMoveImageOptions } from './controllers/normalizeMoveImageOptions';
 import type { NormalizedScaleImageOptions } from './controllers/normalizeScaleImageOptions';
@@ -42,18 +44,43 @@ export type CropperSettings<E extends SettingsExtension = {}> = DefaultSettings 
 	E;
 type BuiltinSettingsInput<E extends SettingsExtension> = Omit<
 	Partial<CropperSettings>,
-	keyof DefaultSettingsParams<CropperSettings<E>>
+	keyof DefaultSettingsParams<CropperSettings<E>> | 'defaultTransforms'
 > &
-	DefaultSettingsParams<CropperSettings<E>>;
+	Omit<DefaultSettingsParams<CropperSettings<E>>, 'defaultCoordinates'> & {
+		defaultTransforms?: DefaultTransforms<CropperSettings<E>>;
+		defaultCoordinates?:
+			| Partial<Coordinates>
+			| null
+			| CoordinateUpdate<E>[]
+			| {
+					update(
+						state: CropperState,
+						settings: CropperSettings<E>
+					): CoordinateUpdate<E> | CoordinateUpdate<E>[];
+			  }['update'];
+	};
 export type CropperSettingsInput<E extends SettingsExtension = {}> = BuiltinSettingsInput<E> &
 	Partial<E>;
+type CoordinateUpdate<E extends SettingsExtension> =
+	| Partial<Coordinates>
+	| null
+	| ((state: CropperState, settings: CropperSettings<E>) => Partial<Coordinates> | null);
 type EngineMethods = AbstractCropperInstance<CropperSettings>;
 export interface CropperInstance<E extends SettingsExtension = {}> {
 	reset: () => Promise<void>;
 	refresh: () => Promise<void>;
 	clear: () => void;
-	setCoordinates: EngineMethods['setCoordinates'];
-	setState: EngineMethods['setState'];
+	setCoordinates: (
+		transforms: CoordinateUpdate<E> | CoordinateUpdate<E>[],
+		options?: Parameters<EngineMethods['setCoordinates']>[1]
+	) => void;
+	setState: (
+		modifier:
+			| CropperState
+			| null
+			| ((state: CropperState | null, settings: CropperSettings<E>) => CropperState | null),
+		options?: Parameters<EngineMethods['setState']>[1]
+	) => void;
 	setImage: (image: CropperImage) => void;
 	flipImage: EngineMethods['flipImage'];
 	zoomImage: EngineMethods['zoomImage'];

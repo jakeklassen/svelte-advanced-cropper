@@ -95,12 +95,17 @@ it('restarts an asynchronous stretch when a snippet replaces the boundary', asyn
 	await waitFor(() => pendingStretches.length === 1);
 	await screen.rerender({ boundaryGeneration: 1 });
 	await waitFor(() => pendingStretches.length === 2);
-	pendingStretches[0]();
-	await nextFrame();
 	expect(screen.component.getCropper()?.getState()).toBeNull();
 	pendingStretches[1]();
 	await waitFor(() => ready.mock.calls.length === 1);
 	expect(screen.component.getCropper()?.getState()?.boundary).toEqual({ width: 500, height: 400 });
+	await screen.rerender({ circle: true });
+	await nextFrame();
+	const coordinates = screen.component.getCropper()?.getCoordinates({ round: false });
+	expect(coordinates && coordinates.width / coordinates.height).toBeCloseTo(1);
+	pendingStretches[0]();
+	await nextFrame();
+	expect(ready).toHaveBeenCalledTimes(1);
 });
 
 it('passes the fitted content size to preview backgrounds', async () => {

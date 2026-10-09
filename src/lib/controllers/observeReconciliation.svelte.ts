@@ -45,9 +45,14 @@ export function observeReconciliation(
 		},
 		pause() {
 			untrack(() => pauseCount++);
-		},
-		resume() {
-			untrack(() => pauseCount--);
+			let released = false;
+
+			return () => {
+				if (!released) {
+					released = true;
+					untrack(() => pauseCount--);
+				}
+			};
 		}
 	};
 }

@@ -1,5 +1,10 @@
 import { onDestroy, tick, untrack } from 'svelte';
-import { isConsistentState, type CropperImage, type DrawOptions } from 'advanced-cropper';
+import {
+	isConsistentState,
+	isInitializedState,
+	type CropperImage,
+	type DrawOptions
+} from 'advanced-cropper';
 import type {
 	CropperCanvasMethods,
 	StretchableBoundaryMethods
@@ -143,6 +148,9 @@ export class CropperController<E extends SettingsExtension = {}> {
 		let latestRefresh = 0;
 		let resetActive = false;
 		let refreshQueued = false;
+		let releaseReset: (() => void) | undefined;
+		let releaseRefresh: (() => void) | undefined;
+		let refreshActive = false;
 		const refreshWaiters: { resolve: () => void; reject: (error: unknown) => void }[] = [];
 
 		let imageShownByReset: CropperImage | null = null;
@@ -150,7 +158,12 @@ export class CropperController<E extends SettingsExtension = {}> {
 
 		async function notifyReady(image: CropperImage, isCurrent: () => boolean) {
 			await tick();
-			if (!isCurrent() || displayedImage !== image || lastReadyImage === image) {
+			if (
+				!isCurrent() ||
+				!isInitializedState(cropper.getState()) ||
+				displayedImage !== image ||
+				lastReadyImage === image
+			) {
 				return;
 			}
 
@@ -173,6 +186,9 @@ export class CropperController<E extends SettingsExtension = {}> {
 				return;
 			}
 
+			releaseReset?.();
+			releaseRefresh?.();
+			refreshActive = false;
 			const id = ++latestReset;
 			resetActive = true;
 			const stencilEpoch = registry.epoch;
@@ -184,7 +200,8 @@ export class CropperController<E extends SettingsExtension = {}> {
 				boundary === elements.boundary &&
 				boundaryEpoch === elements.boundarySlot.epoch &&
 				stencilEpoch === registry.epoch;
-			autoReconcile.pause();
+			const release = autoReconcile.pause();
+			releaseReset = release;
 			try {
 				const image = imageLoader.getImage();
 				const boundarySize = await boundary.stretchTo(image);
@@ -230,7 +247,7 @@ export class CropperController<E extends SettingsExtension = {}> {
 					}
 				}
 
-				autoReconcile.resume();
+				release();
 			}
 		};
 
@@ -248,6 +265,8 @@ export class CropperController<E extends SettingsExtension = {}> {
 				return;
 			}
 
+			releaseRefresh?.();
+			refreshActive = true;
 			const id = ++latestRefresh;
 			const stencilEpoch = registry.epoch;
 			const boundaryEpoch = elements.boundarySlot.epoch;
@@ -257,7 +276,8 @@ export class CropperController<E extends SettingsExtension = {}> {
 				boundary === elements.boundary &&
 				boundaryEpoch === elements.boundarySlot.epoch &&
 				stencilEpoch === registry.epoch;
-			autoReconcile.pause();
+			const release = autoReconcile.pause();
+			releaseRefresh = release;
 			try {
 				const image = imageLoader.getImage();
 				const boundarySize = await boundary.stretchTo(image);
@@ -274,6 +294,9 @@ export class CropperController<E extends SettingsExtension = {}> {
 				const state = cropper.getState();
 				if (!state) {
 					cropper.reset(boundarySize, image);
+					if (displayedImage) {
+						await notifyReady(displayedImage, isCurrent);
+					}
 
 					return;
 				}
@@ -286,7 +309,10 @@ export class CropperController<E extends SettingsExtension = {}> {
 					cropper.reconcileState();
 				}
 			} finally {
-				autoReconcile.resume();
+				release();
+				if (id === latestRefresh) {
+					refreshActive = false;
+				}
 			}
 		};
 
@@ -308,10 +334,26 @@ export class CropperController<E extends SettingsExtension = {}> {
 			rotateImage: untracked(cropper.rotateImage),
 			transformImage: untracked(cropper.transformImage),
 			transformImageEnd: untracked(cropper.transformImageEnd),
-			setCoordinates: untracked(cropper.setCoordinates),
+			setCoordinates: untracked((transforms, options) => {
+				cropper.setCoordinates(
+					(Array.isArray(transforms) ? transforms : [transforms]).map((transform) =>
+						typeof transform === 'function'
+							? (state) => transform(state, cropper.getSettings())
+							: transform
+					),
+					options
+				);
+			}),
 			setVisibleArea: untracked(cropper.setVisibleArea),
 			startTransitions: untracked(cropper.startTransitions),
-			setState: untracked(cropper.setState),
+			setState: untracked((modifier, options) => {
+				cropper.setState(
+					typeof modifier === 'function'
+						? (state) => modifier(state, cropper.getSettings())
+						: modifier,
+					options
+				);
+			}),
 			hasInteractions: cropper.hasInteractions,
 			getStencilCoordinates: cropper.getStencilCoordinates,
 			getCoordinates: cropper.getCoordinates,
@@ -378,9 +420,10 @@ export class CropperController<E extends SettingsExtension = {}> {
 		$effect(() => {
 			const source = elements.source.value;
 			const ready = source?.ready;
+			const initialized = isInitializedState(cropper.getState());
 			const image = displayedImage;
 			const enabled = props().canvas !== false;
-			if (image && (!enabled || (ready && source?.image === image))) {
+			if (initialized && image && (!enabled || (ready && source?.image === image))) {
 				untrack(() => {
 					void notifyReady(image, () => mounted && !resetActive && Boolean(cropper.getState()));
 				});
@@ -408,21 +451,30 @@ export class CropperController<E extends SettingsExtension = {}> {
 		$effect(() => {
 			registry.commit();
 			const options = registry.readOptions();
-			if (typeof options.aspectRatio === 'function') {
-				options.aspectRatio();
-			}
+			normalize(
+				untrack(() => ({ ...props(), transformImage: { ...props().transformImage } })),
+				options
+			);
 
 			const boundaryEpoch = elements.boundarySlot.epoch;
 			// Option reads remain tracked even with automatic settings reconciliation disabled.
-			void options;
 			untrack(() => {
 				const boundaryChanged = lastBoundaryEpoch !== boundaryEpoch;
 				lastBoundaryEpoch = boundaryEpoch;
+				if (boundaryChanged || registry.epoch !== lastEpoch) {
+					releaseReset?.();
+					releaseRefresh?.();
+				}
+
 				if ((boundaryChanged || registry.epoch !== lastEpoch) && resetActive) {
 					void resetCropper();
 				}
 
-				if (boundaryChanged && !resetActive && imageLoader.getImage()) {
+				if (
+					(boundaryChanged || (registry.epoch !== lastEpoch && refreshActive)) &&
+					!resetActive &&
+					imageLoader.getImage()
+				) {
 					if (cropper.getState()) {
 						void refreshCropper();
 					} else {
@@ -432,8 +484,14 @@ export class CropperController<E extends SettingsExtension = {}> {
 
 				if (registry.epoch !== lastEpoch) {
 					lastEpoch = registry.epoch;
-					cropper.moveCoordinatesEnd();
-					cropper.resizeCoordinatesEnd();
+					const interactions = cropper.getInteractions();
+					if (interactions.moveCoordinates) {
+						cropper.moveCoordinatesEnd();
+					}
+
+					if (interactions.resizeCoordinates) {
+						cropper.resizeCoordinatesEnd();
+					}
 				}
 
 				autoReconcile.request();
@@ -441,6 +499,8 @@ export class CropperController<E extends SettingsExtension = {}> {
 		});
 		onDestroy(() => {
 			mounted = false;
+			releaseReset?.();
+			releaseRefresh?.();
 			cropper.dispose();
 			for (const waiter of refreshWaiters.splice(0)) {
 				waiter.resolve();

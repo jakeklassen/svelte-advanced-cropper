@@ -78,6 +78,7 @@
 	}
 
 	function processEnd() {
+		lastTouches = [];
 		if (transforming) {
 			transforming = false;
 			onTransformEnd?.();
@@ -202,6 +203,7 @@
 			on(window, 'mousemove', onMouseMove, options),
 			on(window, 'touchmove', onTouchMove, options),
 			on(window, 'touchend', onTouchEnd, options),
+			on(window, 'touchcancel', onMouseUp, options),
 			on(element, 'touchstart', onTouchStart, options),
 			on(element, 'mousedown', onMouseDown, options),
 			on(element, 'wheel', onWheel, options)
@@ -213,9 +215,17 @@
 			}
 
 			debouncedProcessEnd.clear();
+			untrack(processEnd);
 			container = undefined;
 		};
 	}
+
+	$effect(() => {
+		if (disabled) {
+			debouncedProcessEnd.clear();
+			untrack(processEnd);
+		}
+	});
 </script>
 
 <div class={cssClass} {style} {@attach listen}>

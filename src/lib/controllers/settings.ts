@@ -1,7 +1,8 @@
 import {
 	createDefaultSettings,
 	defaultStencilConstraints,
-	ImageRestriction
+	ImageRestriction,
+	type CropperState
 } from 'advanced-cropper';
 import type {
 	CropperProps,
@@ -28,8 +29,23 @@ export function normalizeSettings<E extends SettingsExtension>(
 		...(props.stencilConstraints ?? defaultStencilConstraints)(raw, options)
 	};
 
+	const coordinates = constrained.defaultCoordinates;
+	const defaultCoordinates =
+		coordinates === undefined
+			? undefined
+			: (state: CropperState, settings: CropperSettings<E>) => {
+					const updates =
+						typeof coordinates === 'function' ? coordinates(state, settings) : coordinates;
+
+					return (Array.isArray(updates) ? updates : [updates]).map((update) =>
+						typeof update === 'function'
+							? (current: CropperState) => update(current, settings)
+							: update
+					);
+				};
+
 	return {
 		...constrained,
-		...createDefaultSettings<CropperSettings<E>>(constrained)
+		...createDefaultSettings<CropperSettings<E>>({ ...constrained, defaultCoordinates })
 	} as CropperSettings<E>;
 }

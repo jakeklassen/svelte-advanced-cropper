@@ -20,6 +20,7 @@
 
 <script lang="ts">
 	import { on } from 'svelte/events';
+	import { untrack } from 'svelte';
 	import { distance, type Point, type SimpleTouch } from 'advanced-cropper';
 	import { screenScale } from '../../service/scale';
 
@@ -104,7 +105,10 @@
 	}
 
 	function processEnd() {
-		if (!disabled && lastTouches.length) {
+		const active = lastTouches.length > 0;
+		lastTouches = [];
+		touchActivated = false;
+		if (active) {
 			onMoveEnd?.();
 		}
 
@@ -119,7 +123,7 @@
 	};
 
 	const onTouchStart = (event: TouchEvent) => {
-		if (!event.cancelable) {
+		if (disabled || !event.cancelable) {
 			return;
 		}
 
@@ -202,6 +206,7 @@
 			on(window, 'mousemove', onMouseMove, options),
 			on(window, 'touchmove', onTouchMove, options),
 			on(window, 'touchend', onTouchEnd, options),
+			on(window, 'touchcancel', onTouchEnd, options),
 			on(element, 'touchstart', onTouchStart, options),
 			on(element, 'mousedown', onMouseDown, options)
 		];
@@ -211,6 +216,7 @@
 				cleanup();
 			}
 
+			untrack(processEnd);
 			container = undefined;
 		};
 	}
@@ -218,9 +224,7 @@
 	// Drop the gesture when the element gets disabled.
 	$effect(() => {
 		if (disabled) {
-			leave();
-			touchActivated = false;
-			lastTouches = [];
+			untrack(processEnd);
 		}
 	});
 </script>
