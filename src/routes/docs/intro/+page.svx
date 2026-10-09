@@ -64,4 +64,3 @@ With no children, `Cropper` supplies a rectangle stencil. With children, you cho
 - [Configure stencils](/docs/guides/stencils) and aspect ratios.
 - [Read and change the crop](/docs/guides/crop-state) through the typed instance.
 - [Preview and export](/docs/guides/preview-and-export) the result.
-- [Upgrade from 0.1.x](/docs/migration/from-0-1) if you already use this package.

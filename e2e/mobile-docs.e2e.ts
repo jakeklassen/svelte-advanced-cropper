@@ -5,8 +5,7 @@ const routes = [
 	'/docs/composition/stencil-context',
 	'/docs/tutorials/absolute-zoom',
 	'/docs/intro',
-	...pages.filter((page) => page.href.startsWith('/docs/reference/')).map((page) => page.href),
-	'/docs/migration/from-0-1'
+	...pages.filter((page) => page.href.startsWith('/docs/reference/')).map((page) => page.href)
 ];
 
 for (const fonts of ['default', 'wide']) {

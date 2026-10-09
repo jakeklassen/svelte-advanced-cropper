@@ -2,7 +2,7 @@
 
 This directory records the project's architectural decisions and the studies that informed them. Documents 01–05 describe the historical upstream implementation and earlier port. They are evidence, not the current public API specification.
 
-The 0.2.0 API is defined by the public declarations, executable examples and contract tests. Its design uses Svelte composition while preserving the core's cropping capabilities. Start with [the public exports](../../src/lib/index.ts), [types](../../src/lib/types.ts) and [migration guide](../../src/routes/docs/migration/from-0-1/+page.svx).
+The 0.2.0 API is defined by the public declarations, executable examples and contract tests. Its design uses Svelte composition while preserving the core's cropping capabilities. Start with [the public exports](../../src/lib/index.ts), [types](../../src/lib/types.ts) and [introduction](../../src/routes/docs/intro/+page.svx).
 
 The historical studies examined react-advanced-cropper at commit `a51e293` (package version 0.20.2) and advanced-cropper 0.17.1. Their version and release observations are snapshots from that study, not statements about current upstream releases.
 
@@ -24,11 +24,15 @@ The historical studies examined react-advanced-cropper at commit `a51e293` (pack
 6. **Layer snippets (D6):** croppers expose `wrapper`, `boundary`, `backgroundWrapper`, `background`; preview exposes `wrapper`, `boundary`, `background`; stencils/boxes expose `handler` and `line`. Boundaries use `registerBoundary`; export backgrounds attach their actual drawable with `attachSource(ready?)`. [RegistrationSlot](../../src/lib/controllers/RegistrationSlot.svelte.ts) cleanup owns its token, so stale cleanup cannot remove a replacement or revive an older source. Readiness belongs to the current displayed image; canvas-enabled `onReady` waits for its source.
 7. **Styling (D7):** one `class` (`ClassValue`) and `style` (string) per public visual component. Removed per-part class props are replaced by stable selectors and state modifiers, including bounding-box handler/line groups. The [styling reference](../../src/routes/docs/reference/styling/+page.svx) and contract tests define this surface. Library components have no `<style>` blocks; [build-styles.ts](../../scripts/build-styles.ts) ships global CSS and themes without scoped specificity.
 8. **Instance and callbacks (D8):** preserve all 33 instance methods, including functional/sequential `setCoordinates` and plain-value `setImage`. Callbacks receive the generic instance and run only while mounted; mutation methods and notifications run untracked while getters stay reactive. No public `getInstance` prop. Defer `bind:coordinates`; read with `$derived` and write through constrained methods. Component bindings implement the same interface as the stable callback/context API without promising object identity.
-9. **Documentation (D9):** task-oriented guides, composition, reference and core pages use lowercase kebab-case URLs. No legacy redirects or redirect manifest. The upgrade guide is `/docs/migration/from-0-1`; migration documentation for other libraries was removed by the decision below. The Telegram site demo may import `advanced-cropper/showcase/mobile`; the root/extensions-only rule applies to `src/lib`. Keep supported demos; do not invent unsupported tutorial material.
+9. **Documentation (D9):** task-oriented guides, composition, reference and core pages use lowercase kebab-case URLs. No legacy redirects, redirect manifest or migration pages. The site documents only the current API, as decided below. The Telegram site demo may import `advanced-cropper/showcase/mobile`; the root/extensions-only rule applies to `src/lib`. Keep supported demos; do not invent unsupported tutorial material.
 
 ## Documentation scope decision — 2026-10-09
 
-Do not publish comparisons or migration documentation for other cropper libraries. Document this library's behaviour and our own version upgrades only. Credit code derived from Norserium's MIT-licensed react-advanced-cropper with short, factual attribution. This supersedes the earlier plan for an external-library migration page; the historical studies below remain a record of past research.
+Do not publish comparisons or migration documentation for other cropper libraries. Credit code derived from Norserium's MIT-licensed react-advanced-cropper with short, factual attribution. This supersedes the earlier plan for an external-library migration page; the historical studies below remain a record of past research.
+
+## Current-API documentation decision — 2026-10-09
+
+The project is pre-1.0 and has no external users; the maintainers are its only current consumers. Publish no migration guides, including guides for our own version upgrades. The docs and README describe only the current API; obsolete names and before/after migration examples do not belong there. The changelog records breaking changes. This supersedes the upgrade-guide requirement in D9 and the earlier allowance for documenting our own version upgrades. Historical study content remains unchanged.
 
 ## Preserved bug fixes
 
