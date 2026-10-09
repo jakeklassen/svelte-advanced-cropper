@@ -3,14 +3,14 @@
 		Cropper,
 		ImageRestriction,
 		Priority,
-		type CropperRef,
+		type CropperInstance,
 		type CropperState
 	} from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 
 	const src = image('dog-on-beach.jpg');
 
-	let cropper: CropperRef | undefined = $state();
+	let cropper: CropperInstance | undefined = $state();
 	let adjustStencil = $state(false);
 
 	// Start with a stencil covering 80% of the visible area, centred in it.

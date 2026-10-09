@@ -1,11 +1,6 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import {
-		CircleStencil,
-		Cropper,
-		RectangleStencil,
-		type StencilComponent
-	} from 'svelte-advanced-cropper';
+	import { CircleStencil, Cropper, RectangleStencil } from 'svelte-advanced-cropper';
 	import { Circle, Grid3x3, Square } from '@lucide/svelte';
 	import SquareButton from '#site/demos/shared/SquareButton.svelte';
 	import VerticalButtons from '#site/demos/shared/VerticalButtons.svelte';
@@ -28,26 +23,24 @@
 
 	const src = $derived(image(images[theme]));
 
-	let stencilComponent: StencilComponent = $state(RectangleStencil);
+	let stencil = $state<'rectangle' | 'circle'>('rectangle');
 	// The `grid` prop only sets the initial state; the button toggles it afterwards.
 	let stencilGrid = $state(untrack(() => grid));
 </script>
 
 <div class={['theme-example', `theme-example--${theme}`]}>
-	<Cropper
-		class="theme-example__cropper"
-		{src}
-		{stencilComponent}
-		stencilProps={{ grid: stencilGrid }}
-	/>
+	<Cropper class="theme-example__cropper" {src}>
+		{#if stencil === 'circle'}
+			<CircleStencil grid={stencilGrid} />
+		{:else}
+			<RectangleStencil grid={stencilGrid} />
+		{/if}
+	</Cropper>
 	<VerticalButtons>
-		<SquareButton
-			title="Set Rectangle Stencil"
-			onclick={() => (stencilComponent = RectangleStencil)}
-		>
+		<SquareButton title="Set Rectangle Stencil" onclick={() => (stencil = 'rectangle')}>
 			<Square size={20} />
 		</SquareButton>
-		<SquareButton title="Set Circle Stencil" onclick={() => (stencilComponent = CircleStencil)}>
+		<SquareButton title="Set Circle Stencil" onclick={() => (stencil = 'circle')}>
 			<Circle size={20} />
 		</SquareButton>
 		<SquareButton

@@ -1,9 +1,9 @@
 <script lang="ts">
 	import {
+		RectangleStencil,
 		Cropper,
 		CropperPreview,
-		type CropperPreviewRef,
-		type CropperRef
+		type CropperInstance
 	} from 'svelte-advanced-cropper';
 	import { RotateCcw, Upload } from '@lucide/svelte';
 	import SquareButton from '#site/demos/shared/SquareButton.svelte';
@@ -11,15 +11,8 @@
 
 	let src = $state(image('schnauzer.jpg'));
 
-	let cropper: CropperRef | undefined = $state();
-	let largePreview: CropperPreviewRef | undefined = $state();
-	let smallPreview: CropperPreviewRef | undefined = $state();
+	let cropper: CropperInstance | undefined = $state();
 	let input: HTMLInputElement | undefined = $state();
-
-	function onUpdate(instance: CropperRef) {
-		largePreview?.update(instance);
-		smallPreview?.update(instance);
-	}
 
 	function loadImage(event: Event & { currentTarget: HTMLInputElement }) {
 		const file = event.currentTarget.files?.[0];
@@ -44,17 +37,13 @@
 </script>
 
 <div class="preview-result-example">
-	<Cropper
-		bind:this={cropper}
-		{src}
-		stencilProps={{ aspectRatio: 1 }}
-		class="preview-result-example__cropper"
-		{onUpdate}
-	/>
+	<Cropper bind:this={cropper} {src} class="preview-result-example__cropper">
+		<RectangleStencil aspectRatio={1} />
+	</Cropper>
 	<div class="preview-result-example__previews">
-		<CropperPreview bind:this={largePreview} class="preview-result-example__preview" />
+		<CropperPreview {cropper} class="preview-result-example__preview" />
 		<CropperPreview
-			bind:this={smallPreview}
+			{cropper}
 			class="preview-result-example__preview preview-result-example__preview--small"
 		/>
 	</div>

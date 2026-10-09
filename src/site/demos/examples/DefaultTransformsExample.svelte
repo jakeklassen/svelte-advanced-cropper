@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Cropper, type CropperRef, type PartialTransforms } from 'svelte-advanced-cropper';
+	import { Cropper, type CropperInstance, type PartialTransforms } from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 
-	let cropper: CropperRef | undefined = $state();
+	let cropper: CropperInstance | undefined = $state();
 	let input: HTMLInputElement | undefined = $state();
 	let src = $state(image('tabby-cat-on-stairs.jpg'));
 

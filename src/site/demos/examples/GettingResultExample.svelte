@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { onDestroy } from 'svelte';
-	import { Cropper, type Coordinates, type CropperRef } from 'svelte-advanced-cropper';
+	import { RectangleStencil, Cropper, type CropperInstance } from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 	import PreviewResults from './PreviewResults.svelte';
 
 	const src = image('dogs-running.jpg');
 
-	let coordinates: Coordinates | null = $state(null);
+	let cropper: CropperInstance | undefined = $state();
+	const coordinates = $derived(cropper?.getCoordinates());
 	let preview: string | undefined = $state();
 
 	// Drawing the canvas on every change is expensive, so wait until the user
@@ -15,22 +16,18 @@
 
 	onDestroy(() => clearTimeout(timeout));
 
-	function onChange(cropper: CropperRef) {
+	function onChange(instance: CropperInstance) {
 		clearTimeout(timeout);
 		timeout = setTimeout(() => {
-			coordinates = cropper.getCoordinates();
-			preview = cropper.getCanvas()?.toDataURL();
+			preview = instance.getCanvas()?.toDataURL();
 		}, 500);
 	}
 </script>
 
 <div class="getting-result-example">
-	<Cropper
-		class="getting-result-example__cropper"
-		stencilProps={{ aspectRatio: 1 }}
-		{src}
-		{onChange}
-	/>
+	<Cropper bind:this={cropper} class="getting-result-example__cropper" {src} {onChange}>
+		<RectangleStencil aspectRatio={1} />
+	</Cropper>
 	{#if coordinates && preview}
 		<PreviewResults {coordinates} {preview} />
 	{/if}

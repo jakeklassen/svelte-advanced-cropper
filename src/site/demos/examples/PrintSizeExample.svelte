@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Cropper, type CropperRef } from 'svelte-advanced-cropper';
+	import { RectangleStencil, Cropper, type CropperInstance } from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 
 	// Square print sizes in inches, and the resolution print shops usually ask for.
@@ -8,7 +8,7 @@
 
 	const src = image('chocolate-labrador.jpg');
 
-	let cropper: CropperRef | undefined = $state();
+	let cropper: CropperInstance | undefined = $state();
 	let inches = $state(4);
 
 	// The cropper's getters are reactive: this follows the crop as it's moved and resized.
@@ -19,12 +19,9 @@
 </script>
 
 <div class="print-size-example">
-	<Cropper
-		bind:this={cropper}
-		class="print-size-example__cropper"
-		{src}
-		stencilProps={{ aspectRatio: 1 }}
-	/>
+	<Cropper bind:this={cropper} class="print-size-example__cropper" {src}>
+		<RectangleStencil aspectRatio={1} />
+	</Cropper>
 </div>
 
 <div class="demo-buttons print-size-example__sizes" role="group" aria-label="Print size">

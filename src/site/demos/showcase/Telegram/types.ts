@@ -1,12 +1,6 @@
 import type { ClassValue } from 'svelte/elements';
 
-/** Class names a TelegramCropper user can pass down to its navigation. */
-export interface NavigationClassNames {
+/** Navigation styling uses its root class and stable descendant selectors. */
+export interface NavigationStyle {
 	class?: ClassValue;
-	buttonClassName?: ClassValue;
-	rotateComponentClassName?: ClassValue;
-	barClassName?: ClassValue;
-	highlightedBarClassName?: ClassValue;
-	zeroBarClassName?: ClassValue;
-	valueBarClassName?: ClassValue;
 }

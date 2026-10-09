@@ -6,7 +6,7 @@
 	const src = image('chocolate-labrador.jpg');
 </script>
 
-<Cropper class="custom-stencil-example" stencilComponent={CircleStencil} {src} />
+<Cropper class="custom-stencil-example" {src}><CircleStencil /></Cropper>
 
 <style>
 	:global(.custom-stencil-example) {

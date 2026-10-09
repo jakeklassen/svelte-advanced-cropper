@@ -3,58 +3,46 @@
 	import type { HierarchyNode } from './hierarchy.ts';
 
 	const root: HierarchyNode = {
-		title: 'Cropper',
+		title: 'Cropper / FixedCropper',
 		kind: 'component',
 		to: '/docs/components/Cropper',
 		children: [
 			{
-				title: 'AbstractCropper',
-				kind: 'component',
+				title: 'getCropperContext()',
+				kind: 'context',
+				note: 'cropper, disabled, image, registerStencil'
+			},
+			{
+				title: 'wrapper',
+				kind: 'snippet',
+				note: 'CropperWrapper by default',
 				children: [
 					{
-						title: 'useAbstractCropper',
-						kind: 'hook',
-						to: '/docs/hooks/useAbstractCropper',
-						children: [
-							{ title: 'useCropperInstance', kind: 'hook', to: '/docs/hooks/useCropperInstance' },
-							{ title: 'useCropperImage', kind: 'hook', to: '/docs/hooks/useCropperImage' }
-						]
-					},
-					{
-						title: 'CropperWrapper',
-						kind: 'replaceable',
-						to: '/docs/components/CropperWrapper',
-						note: 'wrapperComponent',
+						title: 'boundary',
+						kind: 'snippet',
+						note: 'StretchableBoundary · registerBoundary',
 						children: [
 							{
-								title: 'StretchableBoundary',
-								kind: 'replaceable',
-								to: '/docs/components/StretchableBoundary',
-								note: 'boundaryComponent',
+								title: 'backgroundWrapper',
+								kind: 'snippet',
+								note: 'CropperBackgroundWrapper by default',
 								children: [
 									{
-										title: 'CropperBackgroundWrapper',
-										kind: 'replaceable',
-										to: '/docs/components/CropperBackgroundWrapper',
-										note: 'backgroundWrapperComponent',
-										children: [
-											{
-												title: 'CropperBackgroundImage',
-												kind: 'replaceable',
-												to: '/docs/components/CropperBackgroundImage',
-												note: 'backgroundComponent'
-											},
-											{
-												title: 'Stencil',
-												kind: 'replaceable',
-												note: 'stencilComponent'
-											}
-										]
+										title: 'background',
+										kind: 'snippet',
+										note: 'CropperBackgroundImage · attachSource'
 									},
 									{
-										title: 'CropperCanvas',
-										kind: 'component',
-										to: '/docs/components/CropperCanvas'
+										title: 'children',
+										kind: 'snippet',
+										note: 'default RectangleStencil when omitted',
+										children: [
+											{
+												title: 'RectangleStencil / CircleStencil / custom stencil',
+												kind: 'component',
+												note: 'registers options through context'
+											}
+										]
 									}
 								]
 							}
@@ -66,4 +54,4 @@
 	};
 </script>
 
-<HierarchyTree {root} label="Cropper component and hook hierarchy" />
+<HierarchyTree {root} label="Cropper composition: components, context, and snippets" />

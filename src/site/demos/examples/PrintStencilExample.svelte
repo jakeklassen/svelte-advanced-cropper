@@ -19,30 +19,24 @@
 	};
 
 	type Product = keyof typeof products;
+	const productNames: Product[] = ['magnet', 'print', 'puzzle'];
 
 	const src = image('corgi-lying-down.jpg');
 
 	let product: Product = $state('print');
-	let { label, ...stencilProps } = $derived(products[product]);
+	let { label, ...productOptions } = $derived(products[product]);
 </script>
 
 <div class="print-stencil-example">
-	<Cropper
-		class="print-stencil-example__cropper"
-		{src}
-		stencilComponent={PrintStencil}
-		{stencilProps}
-	/>
+	<Cropper class="print-stencil-example__cropper" {src}>
+		<PrintStencil {...productOptions} />
+	</Cropper>
 </div>
 
 <div class="demo-buttons print-stencil-example__products" role="group" aria-label="Product">
-	{#each Object.entries(products) as [key, option] (key)}
-		<button
-			class="demo-button"
-			aria-pressed={product === key}
-			onclick={() => (product = key as Product)}
-		>
-			{option.label}
+	{#each productNames as key (key)}
+		<button class="demo-button" aria-pressed={product === key} onclick={() => (product = key)}>
+			{products[key].label}
 		</button>
 	{/each}
 </div>

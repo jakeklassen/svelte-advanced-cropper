@@ -1,39 +1,19 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
-	import type { ClassValue } from 'svelte/elements';
 	import { LoaderCircle } from '@lucide/svelte';
-	import { CropperFade, type CropperRef } from 'svelte-advanced-cropper';
+	import { CropperFade, type CropperWrapperSnippetProps } from 'svelte-advanced-cropper';
 	import Navigation from './Navigation.svelte';
-	import type { NavigationClassNames } from './types.ts';
 
-	interface Props {
-		cropper: CropperRef;
-		class?: ClassValue;
-		style?: string;
-		children?: Snippet;
-		spinnerClassName?: ClassValue;
+	interface Props extends CropperWrapperSnippetProps {
 		navigation?: boolean;
-		navigationProps?: NavigationClassNames;
 	}
-
-	let {
-		cropper,
-		class: className,
-		style,
-		children,
-		spinnerClassName,
-		navigation = true,
-		navigationProps = {}
-	}: Props = $props();
-
-	const { class: navigationClassName, ...navigationClassNames } = $derived(navigationProps);
+	let { cropper, class: cssClass, style, children, disabled, navigation = true }: Props = $props();
 </script>
 
 <div
 	class={[
 		'telegram-cropper-wrapper',
 		navigation && 'telegram-cropper-wrapper--with-navigation',
-		className
+		cssClass
 	]}
 	{style}
 >
@@ -41,21 +21,19 @@
 		{@render children?.()}
 		{#if navigation}
 			<Navigation
-				{...navigationClassNames}
-				class={['telegram-cropper-wrapper__navigation', navigationClassName]}
+				class="telegram-cropper-wrapper__navigation"
 				value={cropper.getTransforms().rotate}
 				onRotate={cropper.rotateImage}
 				onRotateEnd={cropper.transformImageEnd}
 				onFlip={cropper.flipImage}
-				disabled={cropper.getTransitions().active}
+				disabled={disabled || cropper.getTransitions().active}
 			/>
 		{/if}
 	</CropperFade>
 	<div
 		class={[
 			'telegram-cropper-wrapper__spinner',
-			cropper.isLoading() && 'telegram-cropper-wrapper__spinner--visible',
-			spinnerClassName
+			cropper.isLoading() && 'telegram-cropper-wrapper__spinner--visible'
 		]}
 	>
 		<LoaderCircle size={38} />

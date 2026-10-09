@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onDestroy } from 'svelte';
-	import { Cropper, type CropperRef } from 'svelte-advanced-cropper';
+	import { Cropper, type CropperInstance } from 'svelte-advanced-cropper';
 	import { getMimeType } from 'advanced-cropper/extensions/mimes';
 	import { X } from '@lucide/svelte';
 
@@ -9,7 +9,7 @@
 		src: string;
 	}
 
-	let cropper: CropperRef | undefined = $state();
+	let cropper: CropperInstance | undefined = $state();
 	let input: HTMLInputElement | undefined = $state();
 	let image: Image | null = $state(null);
 
@@ -86,12 +86,7 @@
 
 <div class="load-image-example">
 	<div class="load-image-example__cropper-wrapper">
-		<Cropper
-			bind:this={cropper}
-			class="load-image-example__cropper"
-			backgroundClassName="load-image-example__cropper-background"
-			src={image?.src}
-		/>
+		<Cropper bind:this={cropper} class="load-image-example__cropper" src={image?.src} />
 		<button
 			type="button"
 			class="load-image-example__reset-button"
@@ -136,7 +131,7 @@
 		max-height: 500px;
 		background: var(--color-surface);
 	}
-	:global(.load-image-example__cropper-background) {
+	:global(.load-image-example__cropper .advanced-cropper__background) {
 		background: black;
 	}
 	.load-image-example__reset-button {

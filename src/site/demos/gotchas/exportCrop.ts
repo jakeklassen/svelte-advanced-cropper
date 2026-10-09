@@ -1,4 +1,4 @@
-import type { CropperRef } from 'svelte-advanced-cropper';
+import type { CropperInstance } from 'svelte-advanced-cropper';
 
 // The longest side to export at, largest first. A phone that can't make the first may manage
 // the second.
@@ -22,7 +22,7 @@ function toJpeg(canvas: HTMLCanvasElement): Promise<Blob | null> {
  * null when neither size works, or when no photo is loaded.
  */
 export async function exportCrop(
-	cropper: CropperRef,
+	cropper: CropperInstance,
 	{ fillColor = 'white' }: { fillColor?: string } = {}
 ): Promise<ExportedCrop | null> {
 	for (const maxSide of MAX_SIDES) {

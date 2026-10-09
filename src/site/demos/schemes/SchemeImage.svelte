@@ -6,11 +6,11 @@
 		style?: string;
 	}
 
-	let { class: className, style }: Props = $props();
+	let { class: cssClass, style }: Props = $props();
 </script>
 
 <!-- A stand-in "photo" drawn with gradients: sky, sun and two hills. -->
-<div class={['scheme-image', className]} {style} aria-hidden="true"></div>
+<div class={['scheme-image', cssClass]} {style} aria-hidden="true"></div>
 
 <style>
 	.scheme-image {

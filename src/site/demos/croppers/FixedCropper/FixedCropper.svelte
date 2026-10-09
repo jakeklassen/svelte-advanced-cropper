@@ -6,17 +6,25 @@
 		RectangleStencil,
 		type CropperState,
 		type FixedCropperProps,
-		type FixedCropperRef
+		type FixedCropperInstance
 	} from 'svelte-advanced-cropper';
 	import Wrapper from './Wrapper.svelte';
+
+	const StandardFixedCropper = FixedCropper<{}>;
 
 	type Props = Omit<FixedCropperProps, 'stencilSize'> & {
 		stencilType?: 'circle' | 'rectangle';
 	};
 
-	let { class: className, stencilProps, stencilType = 'rectangle', ...props }: Props = $props();
+	let {
+		class: cssClass,
+		children,
+		wrapper: customWrapper,
+		stencilType = 'rectangle',
+		...props
+	}: Props = $props();
 
-	let cropper: FixedCropperRef | undefined = $state();
+	let cropper: FixedCropperInstance | undefined = $state();
 
 	// The stencil starts as large as the visible area allows.
 	function defaultSize({ imageSize, visibleArea }: CropperState) {
@@ -33,40 +41,25 @@
 
 		return { width: size, height: size };
 	}
-
-	// The stencil's aspect ratio depends on its type, so recompute the state when
-	// `stencilType` changes.
-	$effect(() => {
-		void stencilType;
-		cropper?.refresh();
-	});
 </script>
 
-<FixedCropper
+<StandardFixedCropper
 	bind:this={cropper}
-	class={['fixed-cropper', className]}
+	class={['fixed-cropper', cssClass]}
 	{stencilSize}
 	{defaultSize}
 	imageRestriction={ImageRestriction.stencil}
-	stencilProps={{
-		previewClassName: [
-			'fixed-cropper-stencil__preview',
-			stencilType === 'circle' && 'fixed-cropper-stencil__preview--circle'
-		],
-		overlayClassName: [
-			'fixed-cropper-stencil__overlay',
-			stencilType === 'circle' && 'fixed-cropper-stencil__overlay--circle'
-		],
-		handlers: {},
-		lines: {},
-		movable: false,
-		resizable: false,
-		...stencilProps
-	}}
-	stencilComponent={stencilType === 'circle' ? CircleStencil : RectangleStencil}
-	wrapperComponent={Wrapper}
 	{...props}
-/>
+>
+	{#snippet wrapper(p)}
+		{#if customWrapper}{@render customWrapper(p)}{:else}<Wrapper {...p} />{/if}
+	{/snippet}
+	{#if children}{@render children()}{:else if stencilType === 'circle'}
+		<CircleStencil handlers={false} lines={false} movable={false} resizable={false} />
+	{:else}
+		<RectangleStencil handlers={false} lines={false} movable={false} resizable={false} />
+	{/if}
+</StandardFixedCropper>
 
 <style>
 	:global(.fixed-cropper.advanced-cropper) {
@@ -75,15 +68,15 @@
 		height: 100%;
 		background: black;
 	}
-	:global(.fixed-cropper-stencil__overlay),
-	:global(.fixed-cropper-stencil__preview) {
+	:global(.fixed-cropper .advanced-cropper-stencil-overlay),
+	:global(.fixed-cropper [class$='-stencil__preview']) {
 		border-radius: 10px;
 	}
-	:global(.fixed-cropper-stencil__overlay--circle),
-	:global(.fixed-cropper-stencil__preview--circle) {
+	:global(.fixed-cropper .advanced-cropper-circle-stencil__overlay),
+	:global(.fixed-cropper .advanced-cropper-circle-stencil__preview) {
 		border-radius: 50%;
 	}
-	:global(.fixed-cropper-stencil__preview) {
+	:global(.fixed-cropper [class$='-stencil__preview']) {
 		border: solid 2px rgba(255, 255, 255, 0.5);
 	}
 </style>

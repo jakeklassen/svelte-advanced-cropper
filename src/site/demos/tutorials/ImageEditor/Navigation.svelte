@@ -17,7 +17,7 @@
 		onUpload?: (file: File) => void;
 	}
 
-	let { class: className, mode = $bindable('crop'), onDownload, onUpload }: Props = $props();
+	let { class: cssClass, mode = $bindable('crop'), onDownload, onUpload }: Props = $props();
 
 	const modes: { mode: Mode; label: string; icon: Component }[] = [
 		{ mode: 'crop', label: 'Crop', icon: Crop },
@@ -40,7 +40,7 @@
 	}
 </script>
 
-<div class={['image-editor-navigation', className]}>
+<div class={['image-editor-navigation', cssClass]}>
 	<Button aria-label="Upload an image" onclick={() => input?.click()}>
 		<Upload size={20} />
 	</Button>

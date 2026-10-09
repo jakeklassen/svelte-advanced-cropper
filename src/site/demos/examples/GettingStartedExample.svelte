@@ -1,17 +1,19 @@
 <script lang="ts">
-	import { Cropper, type CropperRef } from 'svelte-advanced-cropper';
+	import { RectangleStencil, Cropper, type CropperInstance } from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 
 	const src = image('siamese-cat.jpg');
 
-	let cropper: CropperRef | undefined = $state();
+	let cropper: CropperInstance | undefined = $state();
 
 	// The crop in the photo's own pixels. The cropper's getters are reactive, so this
 	// updates as the crop moves.
 	let coordinates = $derived(cropper?.getCoordinates());
 </script>
 
-<Cropper bind:this={cropper} {src} class="getting-started-example" />
+<Cropper bind:this={cropper} {src} class="getting-started-example">
+	<RectangleStencil aspectRatio={16 / 9} />
+</Cropper>
 
 {#if coordinates}
 	<p class="getting-started-example__coordinates">

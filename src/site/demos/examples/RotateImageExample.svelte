@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Cropper, type CropperRef } from 'svelte-advanced-cropper';
+	import { Cropper, type CropperInstance } from 'svelte-advanced-cropper';
 	import {
 		RotateCcw,
 		RotateCw,
@@ -14,7 +14,7 @@
 
 	const src = image('golden-puppy.jpg');
 
-	let cropper: CropperRef | undefined = $state();
+	let cropper: CropperInstance | undefined = $state();
 
 	// Open the cropped result in a new tab.
 	function openResultInNewTab() {

@@ -6,13 +6,12 @@
 		approximateSize,
 		createAspectRatio,
 		moveToPositionRestrictions,
-		useWindowResize,
 		type Coordinates,
 		type MoveDirections,
 		type ResizeAnchor,
 		type ResizeOptions
 	} from 'svelte-advanced-cropper';
-	import { coordinatesToStyle } from './utils';
+	import { coordinatesToStyle } from './utils.ts';
 
 	const aspectRatio = 1;
 
@@ -70,8 +69,6 @@
 		);
 	}
 
-	useWindowResize(updateBoundary);
-
 	onMount(() => {
 		if (container) {
 			coordinates = {
@@ -85,6 +82,8 @@
 	});
 </script>
 
+<svelte:window onresize={updateBoundary} onorientationchange={updateBoundary} />
+
 <div class="resize-algorithm" bind:this={container}>
 	<div
 		class="resize-algorithm__boundary"
@@ -97,7 +96,6 @@
 			class="resize-algorithm__stencil"
 			{onResize}
 			{onResizeEnd}
-			lineClassNames={{ default: 'resize-algorithm__stencil-line' }}
 		/>
 		{#if reference}
 			<div class="resize-algorithm__reference" style={coordinatesToStyle(reference)}></div>
@@ -117,7 +115,7 @@
 		position: absolute;
 		color: var(--color-primary);
 	}
-	.resize-algorithm :global(.resize-algorithm__stencil-line) {
+	.resize-algorithm :global(.resize-algorithm__stencil .advanced-cropper-simple-line) {
 		border-color: var(--color-primary);
 	}
 	.resize-algorithm__reference {

@@ -1,11 +1,13 @@
 <script lang="ts">
-	import { Cropper } from 'svelte-advanced-cropper';
+	import { RectangleStencil, Cropper } from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 
 	const src = image('cat-on-green.jpg');
 </script>
 
-<Cropper class="stencil-grid-example" stencilProps={{ grid: true }} {src} />
+<Cropper class="stencil-grid-example" {src}>
+	<RectangleStencil grid />
+</Cropper>
 
 <style>
 	:global(.stencil-grid-example) {

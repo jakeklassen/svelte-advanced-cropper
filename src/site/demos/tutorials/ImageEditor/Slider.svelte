@@ -26,7 +26,7 @@
 		value?: number;
 	}
 
-	let { class: className, label, value = $bindable(0) }: Props = $props();
+	let { class: cssClass, label, value = $bindable(0) }: Props = $props();
 
 	let track: HTMLDivElement | undefined = $state();
 	let width = $state(0);
@@ -78,7 +78,7 @@
 <div
 	bind:this={track}
 	bind:clientWidth={width}
-	class={['image-editor-slider', className]}
+	class={['image-editor-slider', cssClass]}
 	role="slider"
 	tabindex="0"
 	aria-label={label}

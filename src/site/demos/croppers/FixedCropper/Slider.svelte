@@ -27,7 +27,7 @@
 		label?: string;
 	}
 
-	let { value = 0, onChange, class: className, label = 'Zoom' }: Props = $props();
+	let { value = 0, onChange, class: cssClass, label = 'Zoom' }: Props = $props();
 
 	let track: HTMLDivElement | undefined = $state();
 	let dragging = $state(false);
@@ -66,7 +66,7 @@
 </script>
 
 <div
-	class={['slider', className]}
+	class={['slider', cssClass]}
 	bind:this={track}
 	role="slider"
 	tabindex="0"

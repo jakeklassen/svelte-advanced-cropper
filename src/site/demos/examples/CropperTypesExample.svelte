@@ -5,12 +5,12 @@
 		size?: 'small' | 'medium';
 	}
 
-	let { size, class: className, ...props }: Props = $props();
+	let { size, class: cssClass, ...props }: Props = $props();
 </script>
 
 <Cropper
 	{...props}
-	class={['cropper-types-example', size && `cropper-types-example--${size}`, className]}
+	class={['cropper-types-example', size && `cropper-types-example--${size}`, cssClass]}
 />
 
 <style>

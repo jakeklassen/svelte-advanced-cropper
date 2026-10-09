@@ -1,10 +1,11 @@
 <script lang="ts">
 	import {
+		RectangleStencil,
 		BoundingBox,
 		Cropper,
 		ImageRestriction,
 		anchorMoveToResizeDirections,
-		type CropperRef,
+		type CropperInstance,
 		type MoveDirections,
 		type ResizeAnchor
 	} from 'svelte-advanced-cropper';
@@ -12,7 +13,7 @@
 
 	const src = image('orange-cat-on-table.jpg');
 
-	let cropper: CropperRef | undefined = $state();
+	let cropper: CropperInstance | undefined = $state();
 
 	// The container's inner size, kept up to date by Svelte (also on window resizes).
 	let containerWidth = $state(0);
@@ -50,20 +51,17 @@
 		class="refresh-example__wrapper"
 		style="width: {width}px; height: {height}px; left: {left}px; top: {top}px;"
 		{onResize}
-		lineClassNames={{ default: 'refresh-example__line' }}
-		handlerClassNames={{ default: 'refresh-example__handler' }}
 	>
 		<Cropper
 			bind:this={cropper}
 			class="refresh-example__cropper"
 			{src}
-			stencilProps={{
-				aspectRatio: 1
-			}}
 			minWidth={200}
 			minHeight={300}
 			imageRestriction={ImageRestriction.fillArea}
-		/>
+		>
+			<RectangleStencil aspectRatio={1} />
+		</Cropper>
 	</BoundingBox>
 </div>
 
@@ -81,10 +79,21 @@
 		width: 100%;
 		height: 100%;
 	}
-	:global(.refresh-example__line) {
+	:global(
+		.refresh-example__wrapper
+			> .advanced-cropper-bounding-box__lines
+			> .advanced-cropper-line-wrapper
+			.advanced-cropper-simple-line
+	) {
 		border-color: rgba(97, 218, 251, 0.5);
 	}
-	:global(.refresh-example__handler) {
+	:global(
+		.refresh-example__wrapper
+			> .advanced-cropper-bounding-box__handlers
+			> .advanced-cropper-bounding-box__handler-wrapper
+			> .advanced-cropper-handler-wrapper
+			.advanced-cropper-simple-handler
+	) {
 		background: #61dafb;
 	}
 </style>

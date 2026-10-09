@@ -11,10 +11,10 @@
 		NormalizeOptions,
 		TransitionOptions
 	} from 'svelte-advanced-cropper';
-	import RotateComponent from './RotateComponent.svelte';
-	import type { NavigationClassNames } from './types.ts';
+	import RotationDial from './RotateComponent.svelte';
+	import type { NavigationStyle } from './types.ts';
 
-	interface Props extends NavigationClassNames {
+	interface Props extends NavigationStyle {
 		/** The image rotation, in degrees. */
 		value: number;
 		onRotate?: (
@@ -30,20 +30,7 @@
 		disabled?: boolean;
 	}
 
-	let {
-		value,
-		onRotate,
-		onRotateEnd,
-		onFlip,
-		disabled = false,
-		class: className,
-		buttonClassName,
-		rotateComponentClassName,
-		barClassName,
-		highlightedBarClassName,
-		zeroBarClassName,
-		valueBarClassName
-	}: Props = $props();
+	let { value, onRotate, onRotateEnd, onFlip, disabled = false, class: cssClass }: Props = $props();
 
 	// The quarter the previous rotation was closest to. Deliberately not `$state`: it is the
 	// memory of the derived below, not something to react to. Exactly 45° past a quarter is
@@ -102,10 +89,10 @@
 	}
 </script>
 
-<div class={['telegram-navigation', className]}>
+<div class={['telegram-navigation', cssClass]}>
 	<button
 		type="button"
-		class={['button', buttonClassName]}
+		class="telegram-navigation__button"
 		aria-label="Flip horizontally"
 		onclick={() => flip(true, false)}
 	>
@@ -113,18 +100,14 @@
 	</button>
 	<button
 		type="button"
-		class={['button', buttonClassName]}
+		class="telegram-navigation__button"
 		aria-label="Rotate right"
 		onclick={() => rotateToQuarter(1)}
 	>
 		<RotateCw size={22} />
 	</button>
-	<RotateComponent
-		class={['rotator', rotateComponentClassName]}
-		{barClassName}
-		{zeroBarClassName}
-		{valueBarClassName}
-		{highlightedBarClassName}
+	<RotationDial
+		class="telegram-navigation__dial"
 		onChange={rotateBy}
 		onChangeEnd={onRotateEnd}
 		from={-45}
@@ -133,7 +116,7 @@
 	/>
 	<button
 		type="button"
-		class={['button', buttonClassName]}
+		class="telegram-navigation__button"
 		aria-label="Rotate left"
 		onclick={() => rotateToQuarter(-1)}
 	>
@@ -141,7 +124,7 @@
 	</button>
 	<button
 		type="button"
-		class={['button', buttonClassName]}
+		class="telegram-navigation__button"
 		aria-label="Flip vertically"
 		onclick={() => flip(false, true)}
 	>
@@ -155,13 +138,13 @@
 		align-items: center;
 		padding: 20px 15px;
 	}
-	.telegram-navigation :global(.rotator) {
+	.telegram-navigation :global(.telegram-navigation__dial) {
 		width: 100%;
 		min-width: 0;
 		margin-left: 10px;
 		margin-right: 10px;
 	}
-	.button {
+	.telegram-navigation__button {
 		cursor: pointer;
 		width: 24px;
 		height: 24px;
@@ -177,8 +160,8 @@
 		transition: transform 0.5s;
 		padding: 0;
 	}
-	.button:hover,
-	.button:focus-visible {
+	.telegram-navigation__button:hover,
+	.telegram-navigation__button:focus-visible {
 		transform: scale(1.1);
 	}
 </style>

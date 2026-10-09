@@ -16,10 +16,6 @@
 		/** Called when a drag ends. */
 		onChangeEnd?: () => void;
 		class?: ClassValue;
-		barClassName?: ClassValue;
-		highlightedBarClassName?: ClassValue;
-		valueBarClassName?: ClassValue;
-		zeroBarClassName?: ClassValue;
 	}
 
 	let {
@@ -31,11 +27,7 @@
 		density = 10,
 		onChange,
 		onChangeEnd,
-		class: className,
-		barClassName,
-		highlightedBarClassName,
-		valueBarClassName,
-		zeroBarClassName
+		class: cssClass
 	}: Props = $props();
 
 	let width = $state(0);
@@ -118,25 +110,18 @@
 	}
 </script>
 
-<div class={['telegram-rotate-component', className]}>
+<div class={['telegram-rotation-dial', cssClass]}>
 	<DraggableArea {onMoveStart} {onMove} {onMoveEnd} useAnchor={false}>
 		<div class={['bars', dragging && 'bars--dragging']} bind:clientWidth={width}>
 			{#each bars as bar (bar.value)}
 				<div
-					class={[
-						'bar',
-						bar.zero && 'bar--zero',
-						bar.highlighted && 'bar--highlighted',
-						barClassName,
-						bar.highlighted && highlightedBarClassName,
-						bar.zero && zeroBarClassName
-					]}
+					class={['bar', bar.zero && 'bar--zero', bar.highlighted && 'bar--highlighted']}
 					style:width="{bar.opacity ? thickness : 0}px"
 					style:opacity={bar.opacity}
 					style:transform="translate({bar.translate}px, -50%)"
 				></div>
 			{/each}
-			<div class={['value', valueBarClassName]}>
+			<div class={['value']}>
 				<div class="value-number">{value.toFixed(1)}°</div>
 			</div>
 		</div>

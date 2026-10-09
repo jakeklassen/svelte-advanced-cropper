@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Cropper, ImageRestriction } from 'svelte-advanced-cropper';
+	import { RectangleStencil, Cropper, ImageRestriction } from 'svelte-advanced-cropper';
 	import BackgroundWrapperWithNotifications from './BackgroundWrapperWithNotifications.svelte';
 	import { image } from '#site/paths.ts';
 
@@ -8,19 +8,17 @@
 
 <Cropper
 	class="cropper-scroll-example"
-	stencilProps={{
-		movable: false,
-		resizable: false,
-		handlers: {},
-		lines: {}
-	}}
 	transformImage={{
 		adjustStencil: false
 	}}
 	imageRestriction={ImageRestriction.stencil}
-	backgroundWrapperComponent={BackgroundWrapperWithNotifications}
 	{src}
-/>
+>
+	{#snippet backgroundWrapper(props)}
+		<BackgroundWrapperWithNotifications {...props} />
+	{/snippet}
+	<RectangleStencil handlers={false} lines={false} movable={false} resizable={false} />
+</Cropper>
 
 <style>
 	:global(.cropper-scroll-example) {

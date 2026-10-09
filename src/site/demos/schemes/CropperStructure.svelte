@@ -13,13 +13,20 @@
 	<figcaption>
 		<dl class="cropper-structure__legend">
 			<dt>Wrapper</dt>
-			<dd><code>class</code>, <code>wrapperComponent</code>, <code>wrapperProps</code></dd>
-			<dt>Background image</dt>
+			<dd><code>wrapper</code> snippet; cropper <code>class</code> and <code>style</code></dd>
+			<dt>Boundary</dt>
+			<dd><code>boundary</code> snippet; <code>.advanced-cropper__boundary</code></dd>
+			<dt>Image gestures</dt>
 			<dd>
-				<code>backgroundClassName</code>, <code>backgroundComponent</code>,
-				<code>backgroundProps</code>
+				<code>backgroundWrapper</code> snippet; <code>.advanced-cropper__background-wrapper</code>
 			</dd>
+			<dt>Background image</dt>
+			<dd><code>background</code> snippet; <code>.advanced-cropper__background</code></dd>
 		</dl>
+		<p>
+			Layer snippets receive typed arguments. Render their children, register a replacement
+			boundary, and attach a replacement image or canvas as the export source.
+		</p>
 	</figcaption>
 </figure>
 
@@ -82,6 +89,8 @@
 
 	.cropper-structure__legend dd {
 		margin: 0;
+		overflow-wrap: anywhere;
+		min-width: 0;
 	}
 
 	@media (max-width: 540px) {

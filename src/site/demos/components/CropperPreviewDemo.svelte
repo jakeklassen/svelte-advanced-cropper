@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Cropper, CropperPreview, type CropperRef } from 'svelte-advanced-cropper';
+	import { Cropper, CropperPreview, type CropperInstance } from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 
-	let cropper: CropperRef | undefined = $state();
+	let cropper: CropperInstance | undefined = $state();
 </script>
 
 <div class="cropper-preview-demo">

@@ -5,14 +5,9 @@
 	const src = image('three-puppies.jpg');
 </script>
 
-<Cropper
-	{src}
-	class="overlay-color-example"
-	stencilComponent={CircleStencil}
-	stencilProps={{
-		overlayClassName: 'overlay-color-example__overlay'
-	}}
-/>
+<Cropper {src} class="overlay-color-example">
+	<CircleStencil />
+</Cropper>
 
 <style>
 	:global(.overlay-color-example) {
@@ -20,7 +15,7 @@
 		max-height: 70vh;
 	}
 
-	:global(.overlay-color-example__overlay) {
+	:global(.overlay-color-example .advanced-cropper-circle-stencil__overlay) {
 		color: #601f55eb;
 	}
 </style>

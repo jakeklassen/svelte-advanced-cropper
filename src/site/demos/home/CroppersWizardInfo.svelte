@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { CropperDescription } from './wizard';
+	import type { CropperDescription } from './wizard.ts';
 
 	interface Props {
 		cropper: CropperDescription;

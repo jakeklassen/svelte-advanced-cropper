@@ -1,10 +1,10 @@
-/** A node in a component / hook hierarchy diagram. */
+/** A node in a component / context / snippet hierarchy diagram. */
 export interface HierarchyNode {
 	title: string;
-	kind: 'hook' | 'component' | 'replaceable';
+	kind: 'component' | 'context' | 'snippet';
 	/** Docs path, e.g. `/docs/components/Cropper`. Omit when the item has no page. */
 	to?: string;
-	/** A short annotation, e.g. the prop that replaces this component. */
+	/** A short annotation, e.g. the snippet that renders this layer. */
 	note?: string;
 	children?: HierarchyNode[];
 }

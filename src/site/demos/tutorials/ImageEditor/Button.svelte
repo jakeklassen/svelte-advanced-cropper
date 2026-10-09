@@ -5,12 +5,12 @@
 		active?: boolean;
 	}
 
-	let { class: className, active, children, ...props }: Props = $props();
+	let { class: cssClass, active, children, ...props }: Props = $props();
 </script>
 
 <button
 	type="button"
-	class={['image-editor-button', active && 'image-editor-button--active', className]}
+	class={['image-editor-button', active && 'image-editor-button--active', cssClass]}
 	{...props}
 >
 	{@render children?.()}

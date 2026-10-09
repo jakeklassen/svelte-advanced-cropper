@@ -2,24 +2,22 @@
 	import { MoveDiagonal } from '@lucide/svelte';
 	import {
 		DraggableArea,
-		DraggableElement,
+		getCropperContext,
 		StencilOverlay,
 		StencilWrapper,
-		type CropperRef,
 		type MoveDirections
 	} from 'svelte-advanced-cropper';
 
-	interface Props {
-		cropper: CropperRef;
-	}
+	import { BoundingBoxType } from 'advanced-cropper/extensions/fit-to-image';
 
-	let { cropper }: Props = $props();
+	const context = getCropperContext();
+	const cropper = context.cropper;
+	context.registerStencil(() => ({ aspectRatio: 1, boundingBox: BoundingBoxType.Circle }));
+	const disabled = $derived(context.disabled);
+	const state = $derived(cropper.getState());
 
 	const coordinates = $derived(cropper.getStencilCoordinates());
 	const transitions = $derived(cropper.getTransitions());
-
-	// Read by the cropper through `bind:this` and passed to `stencilConstraints`.
-	export const aspectRatio = 1;
 
 	function resize(shift: MoveDirections) {
 		// Only the horizontal shift is used, on both axes: the square stencil grows evenly.
@@ -30,22 +28,26 @@
 	}
 </script>
 
-<StencilWrapper class="circle-stencil" {transitions} {...coordinates}>
-	<DraggableElement
-		class="circle-stencil__handler"
-		onMove={resize}
-		onMoveEnd={cropper.resizeCoordinatesEnd}
-	>
-		<MoveDiagonal color="white" size={22} />
-	</DraggableElement>
-	<DraggableArea
-		class="circle-stencil__draggable-area"
-		onMove={(directions) => cropper.moveCoordinates(directions)}
-		onMoveEnd={cropper.moveCoordinatesEnd}
-	>
-		<StencilOverlay class="circle-stencil__overlay" />
-	</DraggableArea>
-</StencilWrapper>
+{#if state}
+	<StencilWrapper class="circle-stencil" {transitions} {...coordinates}>
+		<DraggableArea
+			{disabled}
+			class="circle-stencil__handler"
+			onMove={resize}
+			onMoveEnd={cropper.resizeCoordinatesEnd}
+		>
+			<MoveDiagonal color="white" size={22} />
+		</DraggableArea>
+		<DraggableArea
+			{disabled}
+			class="circle-stencil__draggable-area"
+			onMove={(directions) => cropper.moveCoordinates(directions)}
+			onMoveEnd={cropper.moveCoordinatesEnd}
+		>
+			<StencilOverlay class="circle-stencil__overlay" />
+		</DraggableArea>
+	</StencilWrapper>
+{/if}
 
 <style>
 	:global(.circle-stencil) {
