@@ -1,6 +1,6 @@
 import type { CropperState, DrawOptions, Size } from 'advanced-cropper';
 
-/** What `StretchableBoundary` (or a custom `boundaryComponent`) exports. */
+/** What `StretchableBoundary` (or a registered boundary) exports. */
 export interface StretchableBoundaryMethods {
 	stretchTo: (size: Size | null) => Promise<Size | null>;
 	reset: () => void;
@@ -10,7 +10,7 @@ export interface StretchableBoundaryMethods {
 export interface CropperCanvasMethods {
 	draw: (
 		state: CropperState,
-		image: HTMLElement,
+		image: HTMLImageElement | HTMLCanvasElement,
 		options?: DrawOptions
 	) => HTMLCanvasElement | null;
 }

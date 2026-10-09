@@ -1,5 +1,7 @@
 <script lang="ts">
 	import 'advanced-cropper/styles/index.scss';
+	import AsyncBoundary from './AsyncBoundary.svelte';
+	import StretchableBoundary from '../lib/components/service/StretchableBoundary.svelte';
 	import 'advanced-cropper/themes/default.scss';
 	import {
 		Cropper,
@@ -13,6 +15,7 @@
 	interface Props extends CropperProps {
 		component?: typeof Cropper | typeof FixedCropper;
 		circle?: boolean;
+		asyncBoundary?: boolean;
 		ratio?: number;
 		stencilSize?: { width: number; height: number };
 		width?: number;
@@ -24,6 +27,7 @@
 	let {
 		component = Cropper,
 		circle,
+		asyncBoundary,
 		ratio,
 		stencilConstraints,
 		stencilSize = { width: 200, height: 100 },
@@ -49,10 +53,16 @@
 >
 	{#if component === FixedCropper}
 		<FixedCropper bind:this={cropper} style="width: 100%; height: 100%;" {stencilSize} {...rest}>
+			{#snippet boundary(p)}
+				{#if asyncBoundary}<AsyncBoundary {...p} />{:else}<StretchableBoundary {...p} />{/if}
+			{/snippet}
 			{#if circle}<CircleStencil />{:else}<RectangleStencil aspectRatio={ratio} />{/if}
 		</FixedCropper>
 	{:else}
 		<Cropper {stencilConstraints} bind:this={cropper} style="width: 100%; height: 100%;" {...rest}>
+			{#snippet boundary(p)}
+				{#if asyncBoundary}<AsyncBoundary {...p} />{:else}<StretchableBoundary {...p} />{/if}
+			{/snippet}
 			{#if circle}<CircleStencil />{:else}<RectangleStencil aspectRatio={ratio} />{/if}
 		</Cropper>
 	{/if}

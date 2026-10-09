@@ -10,32 +10,17 @@
 		RawAspectRatio,
 		ResizeAnchor
 	} from 'advanced-cropper';
-	import type {
-		HandlerClassNames,
-		HandlerComponent,
-		LineClassNames,
-		LineComponent
-	} from '../service/BoundingBox.svelte';
+	import type { HandlerSnippetProps, LineSnippetProps } from '../../types';
 
 	export interface RectangleStencilProps {
 		children?: Snippet;
 		coordinates?: Coordinates | ((state: CropperState | null) => Coordinates);
-		handlerComponent?: HandlerComponent;
+		handler?: Snippet<[HandlerSnippetProps]>;
 		handlers?: boolean | Partial<Record<OrdinalDirection, boolean>>;
-		handlerClassNames?: HandlerClassNames;
-		handlerWrapperClassNames?: HandlerClassNames;
 		lines?: boolean | Partial<Record<CardinalDirection, boolean>>;
-		lineComponent?: LineComponent;
-		lineClassNames?: LineClassNames;
-		lineWrapperClassNames?: LineClassNames;
+		line?: Snippet<[LineSnippetProps]>;
 		class?: ClassValue;
-		movingClassName?: ClassValue;
-		resizingClassName?: ClassValue;
-		gridClassName?: ClassValue;
-		previewClassName?: ClassValue;
-		boundingBoxClassName?: ClassValue;
-		overlayClassName?: ClassValue;
-		draggableAreaClassName?: ClassValue;
+		style?: string;
 		minAspectRatio?: number;
 		maxAspectRatio?: number;
 		aspectRatio?: RawAspectRatio;
@@ -54,8 +39,6 @@
 		isFunction,
 		type ResizeOptions
 	} from 'advanced-cropper';
-	import SimpleHandler from '../handlers/SimpleHandler.svelte';
-	import SimpleLine from '../lines/SimpleLine.svelte';
 	import BoundingBox from '../service/BoundingBox.svelte';
 	import DraggableArea from '../service/DraggableElement.svelte';
 	import StencilGrid from '../service/StencilGrid.svelte';
@@ -68,7 +51,7 @@
 		aspectRatio,
 		minAspectRatio,
 		maxAspectRatio,
-		handlerComponent = SimpleHandler,
+		handler,
 		handlers = {
 			eastNorth: true,
 			north: true,
@@ -79,28 +62,18 @@
 			eastSouth: true,
 			east: true
 		},
-		handlerClassNames = {},
-		handlerWrapperClassNames = {},
 		lines = {
 			west: true,
 			north: true,
 			east: true,
 			south: true
 		},
-		lineComponent = SimpleLine,
-		lineClassNames = {},
-		lineWrapperClassNames = {},
+		line,
 		resizable = true,
 		movable = true,
 		grid,
-		gridClassName,
 		class: cssClass,
-		movingClassName,
-		resizingClassName,
-		previewClassName,
-		boundingBoxClassName,
-		overlayClassName,
-		draggableAreaClassName,
+		style,
 		disabled: ownDisabled
 	}: RectangleStencilProps = $props();
 
@@ -151,11 +124,10 @@
 
 {#if state}
 	<StencilWrapper
+		{style}
 		class={[
 			'advanced-cropper-rectangle-stencil',
 			cssClass,
-			interactions.moveCoordinates && movingClassName,
-			interactions.resizeCoordinates && resizingClassName,
 			moveAllowed && 'advanced-cropper-rectangle-stencil--movable',
 			interactions.moveCoordinates && 'advanced-cropper-rectangle-stencil--moving',
 			resizeAllowed && 'advanced-cropper-rectangle-stencil--resizable',
@@ -170,15 +142,11 @@
 	>
 		<BoundingBox
 			reference={state.coordinates}
-			class={[boundingBoxClassName, 'advanced-cropper-rectangle-stencil__bounding-box']}
+			class={'advanced-cropper-rectangle-stencil__bounding-box'}
 			{handlers}
-			{handlerComponent}
-			{handlerClassNames}
-			{handlerWrapperClassNames}
+			{handler}
 			{lines}
-			{lineComponent}
-			{lineClassNames}
-			{lineWrapperClassNames}
+			{line}
 			{onResize}
 			onResizeEnd={cropper.resizeCoordinatesEnd}
 			disabled={!resizeAllowed}
@@ -187,18 +155,18 @@
 				disabled={!moveAllowed}
 				{onMove}
 				onMoveEnd={cropper.moveCoordinatesEnd}
-				class={['advanced-cropper-rectangle-stencil__draggable-area', draggableAreaClassName]}
+				class={'advanced-cropper-rectangle-stencil__draggable-area'}
 			>
-				<StencilOverlay class={['advanced-cropper-rectangle-stencil__overlay', overlayClassName]}>
+				<StencilOverlay class={'advanced-cropper-rectangle-stencil__overlay'}>
 					{#if grid}
 						<StencilGrid
 							visible={cropper.hasInteractions()}
 							columns={gridSize}
 							rows={gridSize}
-							class={['advanced-cropper-rectangle-stencil__grid', gridClassName]}
+							class={'advanced-cropper-rectangle-stencil__grid'}
 						/>
 					{/if}
-					<div class={['advanced-cropper-rectangle-stencil__preview', previewClassName]}></div>
+					<div class={'advanced-cropper-rectangle-stencil__preview'}></div>
 				</StencilOverlay>
 				{@render children?.()}
 			</DraggableArea>

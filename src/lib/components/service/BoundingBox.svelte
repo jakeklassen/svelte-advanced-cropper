@@ -1,5 +1,5 @@
 <script lang="ts" module>
-	import type { Component, Snippet } from 'svelte';
+	import type { Snippet } from 'svelte';
 	import { getDirectionNames, isCardinalDirection, isObject } from 'advanced-cropper';
 	import type { ClassValue } from 'svelte/elements';
 	import type {
@@ -13,56 +13,15 @@
 		VerticalCardinalDirection
 	} from 'advanced-cropper';
 
-	/** Props a custom `handlerComponent` receives. */
-	export interface HandlerComponentProps {
-		defaultClassName?: ClassValue;
-		hoverClassName?: ClassValue;
-		wrapperClassName?: ClassValue;
-		wrapperStyle?: string;
-		horizontalPosition?: HorizontalCardinalDirection | null;
-		verticalPosition?: VerticalCardinalDirection | null;
-		disabled?: boolean;
-		onMove?: (shift: MoveDirections, event: TouchEvent | MouseEvent) => void;
-		onMoveEnd?: () => void;
-	}
-
-	/** Props a custom `lineComponent` receives. */
-	export interface LineComponentProps {
-		defaultClassName?: ClassValue;
-		hoverClassName?: ClassValue;
-		wrapperClassName?: ClassValue;
-		position?: CardinalDirection;
-		disabled?: boolean;
-		onMove?: (directions: MoveDirections, event: TouchEvent | MouseEvent) => void;
-		onMoveEnd?: () => void;
-	}
-
-	export type HandlerComponent = Component<HandlerComponentProps>;
-	export type LineComponent = Component<LineComponentProps>;
-
-	export interface HandlerClassNames extends Partial<Record<OrdinalDirection, ClassValue>> {
-		default?: ClassValue;
-		disabled?: ClassValue;
-		hover?: ClassValue;
-	}
-
-	export interface LineClassNames extends Partial<Record<CardinalDirection, ClassValue>> {
-		default?: ClassValue;
-		disabled?: ClassValue;
-		hover?: ClassValue;
-	}
+	import type { HandlerSnippetProps, LineSnippetProps } from '../../types';
 
 	export interface BoundingBoxProps {
 		style?: string;
 		class?: ClassValue;
-		handlerComponent?: HandlerComponent;
+		handler?: Snippet<[HandlerSnippetProps]>;
 		handlers?: boolean | Partial<Record<OrdinalDirection, boolean>>;
-		handlerClassNames?: HandlerClassNames;
-		handlerWrapperClassNames?: HandlerClassNames;
 		lines?: boolean | Partial<Record<CardinalDirection, boolean>>;
-		lineComponent?: LineComponent;
-		lineClassNames?: LineClassNames;
-		lineWrapperClassNames?: LineClassNames;
+		line?: Snippet<[LineSnippetProps]>;
 		disabled?: boolean;
 		onResize?: (anchor: ResizeAnchor, directions: MoveDirections, options: ResizeOptions) => void;
 		onResizeEnd?: () => void;
@@ -113,7 +72,7 @@
 		children,
 		onResize,
 		onResizeEnd,
-		handlerComponent: Handler = SimpleHandler,
+		handler,
 		handlers = {
 			eastNorth: true,
 			north: true,
@@ -124,17 +83,13 @@
 			eastSouth: true,
 			east: true
 		},
-		handlerClassNames = {},
-		handlerWrapperClassNames = {},
 		lines = {
 			west: true,
 			north: true,
 			east: true,
 			south: true
 		},
-		lineComponent: Line = SimpleLine,
-		lineClassNames = {},
-		lineWrapperClassNames = {},
+		line,
 		disabled = false,
 		reference = null
 	}: BoundingBoxProps = $props();
@@ -143,49 +98,10 @@
 	let lastReference: Coordinates | null = null;
 
 	const lineNodes = $derived(
-		linePoints
-			.filter((point) => (isObject(lines) ? lines[point.name] : lines))
-			.map((point) => ({
-				name: point.name,
-				cssClass: [
-					lineClassNames.default,
-					lineClassNames[point.name],
-					disabled && lineClassNames.disabled
-				],
-				wrapperClassName: [
-					'advanced-cropper-bounding-box__line',
-					`advanced-cropper-bounding-box__line--${point.name}`,
-					lineWrapperClassNames.default,
-					lineWrapperClassNames[point.name],
-					disabled && lineWrapperClassNames.disabled
-				],
-				hoverClassName: lineClassNames.hover,
-				verticalPosition: point.verticalPosition,
-				horizontalPosition: point.horizontalPosition
-			}))
+		linePoints.filter((point) => (isObject(lines) ? Boolean(lines[point.name]) : lines))
 	);
-
-	// Like upstream, handlers never get `handlerClassNames.disabled` (lines do).
 	const handlerNodes = $derived(
-		points
-			.filter((point) => (isObject(handlers) ? handlers[point.name] : handlers))
-			.map((point) => ({
-				name: point.name,
-				cssClass: [handlerClassNames.default, handlerClassNames[point.name]],
-				containerClassName: [
-					'advanced-cropper-bounding-box__handler-wrapper',
-					`advanced-cropper-bounding-box__handler-wrapper--${point.modifier}`
-				],
-				wrapperClassName: [
-					'advanced-cropper-bounding-box__handler',
-					`advanced-cropper-bounding-box__handler--${point.modifier}`,
-					handlerWrapperClassNames.default,
-					handlerWrapperClassNames[point.name]
-				],
-				hoverClassName: handlerClassNames.hover,
-				verticalPosition: point.verticalPosition,
-				horizontalPosition: point.horizontalPosition
-			}))
+		points.filter((point) => (isObject(handlers) ? Boolean(handlers[point.name]) : handlers))
 	);
 
 	// Builds the onMove handler of the handler or line at the given position.
@@ -241,34 +157,51 @@
 	};
 </script>
 
-<div class={['advanced-cropper-bounding-box', cssClass]} {style}>
+<div
+	class={[
+		'advanced-cropper-bounding-box',
+		disabled && 'advanced-cropper-bounding-box--disabled',
+		cssClass
+	]}
+	{style}
+>
 	{@render children?.()}
-	<div>
-		{#each lineNodes as line (line.name)}
-			<Line
-				defaultClassName={line.cssClass}
-				hoverClassName={line.hoverClassName}
-				wrapperClassName={line.wrapperClassName}
-				position={line.name}
-				{disabled}
-				onMove={createResizeHandler(line.horizontalPosition, line.verticalPosition)}
-				onMoveEnd={onResizeGestureEnd}
-			/>
+	<div class="advanced-cropper-bounding-box__lines">
+		{#each lineNodes as point (point.name)}
+			{@const p = {
+				position: point.name,
+				disabled,
+				class: [
+					'advanced-cropper-bounding-box__line',
+					`advanced-cropper-bounding-box__line--${point.name}`
+				],
+				onMove: createResizeHandler(point.horizontalPosition, point.verticalPosition),
+				onMoveEnd: onResizeGestureEnd
+			}}
+			{#if line}{@render line(p)}{:else}<SimpleLine {...p} />{/if}
 		{/each}
 	</div>
-	<div>
-		{#each handlerNodes as handler (handler.name)}
-			<div class={handler.containerClassName}>
-				<Handler
-					defaultClassName={handler.cssClass}
-					hoverClassName={handler.hoverClassName}
-					wrapperClassName={handler.wrapperClassName}
-					horizontalPosition={handler.horizontalPosition}
-					verticalPosition={handler.verticalPosition}
-					{disabled}
-					onMove={createResizeHandler(handler.horizontalPosition, handler.verticalPosition)}
-					onMoveEnd={onResizeGestureEnd}
-				/>
+	<div class="advanced-cropper-bounding-box__handlers">
+		{#each handlerNodes as point (point.name)}
+			{@const p = {
+				position: point.name,
+				horizontalPosition: point.horizontalPosition,
+				verticalPosition: point.verticalPosition,
+				disabled,
+				class: [
+					'advanced-cropper-bounding-box__handler',
+					`advanced-cropper-bounding-box__handler--${point.modifier}`
+				],
+				onMove: createResizeHandler(point.horizontalPosition, point.verticalPosition),
+				onMoveEnd: onResizeGestureEnd
+			}}
+			<div
+				class={[
+					'advanced-cropper-bounding-box__handler-wrapper',
+					`advanced-cropper-bounding-box__handler-wrapper--${point.modifier}`
+				]}
+			>
+				{#if handler}{@render handler(p)}{:else}<SimpleHandler {...p} />{/if}
 			</div>
 		{/each}
 	</div>

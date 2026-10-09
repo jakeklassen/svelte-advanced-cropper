@@ -9,7 +9,9 @@ import type {
 	CropperProps,
 	CropperSettings,
 	SettingsExtension,
-	StencilOptions
+	StencilOptions,
+	AttachBackgroundSource,
+	BackgroundElement
 } from '../types';
 import { ReactiveCropperEngine } from './ReactiveCropperEngine.svelte';
 import { ImageLoader } from './ImageLoader.svelte';
@@ -21,25 +23,19 @@ import { provideCropperContext } from '../context/cropper';
 import { RegistrationSlot } from './RegistrationSlot.svelte';
 import { normalizeSettings } from './settings';
 
+class ExportSource {
+	ready = $state(false);
+	constructor(
+		readonly element: BackgroundElement,
+		readonly image: CropperImage | null
+	) {}
+}
 class CropperElements {
-	readonly source = new RegistrationSlot<HTMLImageElement | HTMLCanvasElement>();
+	readonly source = new RegistrationSlot<ExportSource>();
 	readonly boundarySlot = new RegistrationSlot<StretchableBoundaryMethods>();
 	canvas: CropperCanvasMethods | null = $state.raw(null);
-	private releaseSource: (() => void) | undefined;
-	private releaseBoundary: (() => void) | undefined;
-	get image() {
-		return this.source.value;
-	}
-	set image(value: HTMLImageElement | HTMLCanvasElement | null) {
-		this.releaseSource?.();
-		this.releaseSource = value ? this.source.register(value) : undefined;
-	}
 	get boundary() {
 		return this.boundarySlot.value;
-	}
-	set boundary(value: StretchableBoundaryMethods | null) {
-		this.releaseBoundary?.();
-		this.releaseBoundary = value ? this.boundarySlot.register(value) : undefined;
 	}
 }
 
@@ -51,6 +47,7 @@ export class CropperController<E extends SettingsExtension = {}> {
 	readonly api: CropperInstance<E>;
 	readonly elements = new CropperElements();
 	readonly stencils = new StencilRegistry();
+	readonly attachSource: AttachBackgroundSource;
 	constructor(
 		props: () => CropperProps<E>,
 		normalize: (
@@ -64,6 +61,30 @@ export class CropperController<E extends SettingsExtension = {}> {
 		const elements = this.elements;
 
 		let displayedImage = $state.raw<CropperImage | null>(null);
+
+		this.attachSource = (ready) => {
+			const image = displayedImage;
+
+			return (element) => {
+				const source = new ExportSource(element, image);
+				const cleanup = elements.source.register(source);
+				let active = true;
+				const loaded = element instanceof HTMLImageElement ? element.decode() : Promise.resolve();
+				void Promise.all([loaded, ready]).then(
+					() => {
+						if (active && displayedImage === image) {
+							source.ready = true;
+						}
+					},
+					() => {}
+				);
+
+				return () => {
+					active = false;
+					cleanup();
+				};
+			};
+		};
 
 		let mounted = false;
 		$effect(() => {
@@ -134,21 +155,8 @@ export class CropperController<E extends SettingsExtension = {}> {
 			}
 
 			if (props().canvas !== false) {
-				const source = elements.image;
-				const sourceEpoch = elements.source.epoch;
-				if (!source) {
-					return;
-				}
-
-				if (source instanceof HTMLImageElement) {
-					try {
-						await source.decode();
-					} catch {
-						return;
-					}
-				}
-
-				if (source !== elements.image || sourceEpoch !== elements.source.epoch) {
+				const source = elements.source.value;
+				if (!source?.ready || source.image !== image) {
 					return;
 				}
 			}
@@ -324,11 +332,18 @@ export class CropperController<E extends SettingsExtension = {}> {
 			},
 			getCanvas: (options?: DrawOptions) => {
 				const state = cropper.getState();
-				if (!elements.image || !elements.canvas || !state) {
+				const source = elements.source.value;
+				if (
+					!source?.ready ||
+					source.image !== displayedImage ||
+					!elements.canvas ||
+					!state ||
+					props().canvas === false
+				) {
 					return null;
 				}
 
-				return elements.canvas.draw(state, elements.image, options);
+				return elements.canvas.draw(state, source.element, options);
 			},
 			getImage: () => (displayedImage ? { ...displayedImage } : null),
 			isLoading: () => imageLoader.isLoading(),
@@ -360,6 +375,18 @@ export class CropperController<E extends SettingsExtension = {}> {
 			() => [imageLoader.isLoaded(), imageLoader.isLoading()]
 		);
 
+		$effect(() => {
+			const source = elements.source.value;
+			const ready = source?.ready;
+			const image = displayedImage;
+			const enabled = props().canvas !== false;
+			if (image && (!enabled || (ready && source?.image === image))) {
+				untrack(() => {
+					void notifyReady(image, () => mounted && !resetActive && Boolean(cropper.getState()));
+				});
+			}
+		});
+
 		this.api = cropperInterface;
 		provideCropperContext({
 			cropper: cropperInterface,
@@ -377,7 +404,7 @@ export class CropperController<E extends SettingsExtension = {}> {
 			}
 		});
 		let lastEpoch = registry.epoch;
-		let lastBoundary: StretchableBoundaryMethods | null = null;
+		let lastBoundaryEpoch = -1;
 		$effect(() => {
 			registry.commit();
 			const options = registry.readOptions();
@@ -385,18 +412,22 @@ export class CropperController<E extends SettingsExtension = {}> {
 				options.aspectRatio();
 			}
 
-			const currentBoundary = elements.boundary;
+			const boundaryEpoch = elements.boundarySlot.epoch;
 			// Option reads remain tracked even with automatic settings reconciliation disabled.
 			void options;
 			untrack(() => {
-				const boundaryChanged = lastBoundary !== currentBoundary;
-				lastBoundary = currentBoundary;
+				const boundaryChanged = lastBoundaryEpoch !== boundaryEpoch;
+				lastBoundaryEpoch = boundaryEpoch;
 				if ((boundaryChanged || registry.epoch !== lastEpoch) && resetActive) {
 					void resetCropper();
 				}
 
 				if (boundaryChanged && !resetActive && imageLoader.getImage()) {
-					void refreshCropper();
+					if (cropper.getState()) {
+						void refreshCropper();
+					} else {
+						void resetCropper();
+					}
 				}
 
 				if (registry.epoch !== lastEpoch) {

@@ -1,5 +1,11 @@
 <script lang="ts">
-	import { Cropper, FixedCropper, type CropperInstance, type FixedCropperInstance } from '#lib';
+	import {
+		Cropper,
+		FixedCropper,
+		CropperWrapper,
+		type CropperInstance,
+		type FixedCropperInstance
+	} from '#lib';
 
 	interface PrintSettings {
 		dpi: number;
@@ -21,6 +27,11 @@
 		void dpi;
 		void wrong;
 	}}
-/>
+>
+	{#snippet wrapper(p)}
+		{@const dpi = p.cropper.getSettings().dpi}
+		<CropperWrapper {...p} class={['print', `dpi-${dpi}`]} />
+	{/snippet}
+</Cropper>
 <FixedCropper {settings} bind:this={fixed} stencilSize={{ width: 200, height: 100 }} />
 <p>{dpi}</p>

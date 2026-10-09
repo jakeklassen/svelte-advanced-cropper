@@ -4,6 +4,7 @@
 </script>
 
 <script lang="ts">
+	import { onDestroy, untrack } from 'svelte';
 	import type { Size } from 'advanced-cropper';
 	import {
 		StretchableBoundary,
@@ -11,7 +12,7 @@
 		type StretchableBoundaryProps
 	} from '#lib';
 
-	let { children, ...props }: StretchableBoundaryProps = $props();
+	let { children, registerBoundary, ...props }: StretchableBoundaryProps = $props();
 
 	let boundary: StretchableBoundaryMethods | undefined = $state.raw();
 
@@ -26,6 +27,8 @@
 	export function reset() {
 		boundary?.reset();
 	}
+
+	onDestroy(untrack(() => registerBoundary?.({ stretchTo, reset })) ?? (() => {}));
 </script>
 
 <StretchableBoundary bind:this={boundary} {...props}>

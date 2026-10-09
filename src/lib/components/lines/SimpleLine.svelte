@@ -1,24 +1,26 @@
 <script lang="ts">
 	import LineWrapper from '../service/LineWrapper.svelte';
-	import type { LineComponentProps } from '../service/BoundingBox.svelte';
+	import type { LineWrapperProps } from '../service/LineWrapper.svelte';
 
 	let {
+		class: cssClass,
+		style,
 		position,
-		hoverClassName,
-		wrapperClassName,
-		defaultClassName,
 		disabled,
 		onMove,
 		onMoveEnd
-	}: LineComponentProps = $props();
+	}: LineWrapperProps = $props();
 
 	let hovered = $state(false);
 </script>
 
 <LineWrapper
+	{style}
 	class={[
 		'advanced-cropper-simple-line-wrapper',
-		wrapperClassName,
+		cssClass,
+		hovered && 'advanced-cropper-simple-line-wrapper--hover',
+		disabled && 'advanced-cropper-simple-line-wrapper--disabled',
 		position && `advanced-cropper-simple-line-wrapper--${position}`
 	]}
 	{position}
@@ -31,9 +33,9 @@
 	<div
 		class={[
 			'advanced-cropper-simple-line',
+			disabled && 'advanced-cropper-simple-line--disabled',
 			hovered && 'advanced-cropper-simple-line--hover',
-			defaultClassName,
-			hovered && hoverClassName,
+
 			position && `advanced-cropper-simple-line--${position}`
 		]}
 	></div>

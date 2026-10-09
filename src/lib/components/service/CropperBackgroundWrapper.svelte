@@ -1,4 +1,5 @@
 <script lang="ts" module>
+	import type { TransformableImageProps } from './TransformableImage.svelte';
 	import type { Snippet } from 'svelte';
 	import type { ClassValue } from 'svelte/elements';
 	import type { CropperTransitions, ImageTransform } from 'advanced-cropper';
@@ -19,6 +20,7 @@
 		class?: ClassValue;
 		style?: string;
 		timeout?: number;
+		onEvent?: TransformableImageProps['onEvent'];
 		disabled?: boolean;
 	}
 </script>
@@ -38,6 +40,7 @@
 		style,
 		cropper,
 		timeout,
+		onEvent,
 		disabled
 	}: CropperBackgroundWrapperProps = $props();
 
@@ -60,6 +63,7 @@
 	disabled={transitionsActive || disabled}
 	preventDefault={!disabled}
 	{timeout}
+	{onEvent}
 >
 	{@render children?.()}
 </TransformableImage>

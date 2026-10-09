@@ -5,6 +5,7 @@
 
 	export interface DraggableElementProps {
 		class?: ClassValue;
+		style?: string;
 		children?: Snippet;
 		disabled?: boolean;
 		onMove?: (directions: MoveDirections, nativeEvent: MouseEvent | TouchEvent) => void;
@@ -24,6 +25,7 @@
 
 	let {
 		class: cssClass,
+		style,
 		children,
 		disabled = false,
 		onMove,
@@ -140,7 +142,7 @@
 	};
 
 	const onTouchMove = (event: TouchEvent) => {
-		if (!lastTouches.length) {
+		if (disabled || !lastTouches.length) {
 			return;
 		}
 
@@ -213,9 +215,11 @@
 		};
 	}
 
-	// Upstream's componentDidUpdate: drop the gesture when the element gets disabled.
+	// Drop the gesture when the element gets disabled.
 	$effect(() => {
 		if (disabled) {
+			leave();
+			touchActivated = false;
 			lastTouches = [];
 		}
 	});
@@ -223,7 +227,12 @@
 
 <!-- svelte-ignore a11y_mouse_events_have_key_events -->
 <div
-	class={['advanced-cropper-draggable-element', cssClass]}
+	{style}
+	class={[
+		'advanced-cropper-draggable-element',
+		disabled && 'advanced-cropper-draggable-element--disabled',
+		cssClass
+	]}
 	{@attach listen}
 	onmouseover={enter}
 	onmouseleave={onMouseLeave}

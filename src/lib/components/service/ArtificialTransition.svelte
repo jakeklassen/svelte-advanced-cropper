@@ -5,6 +5,7 @@
 
 	export interface ArtificialTransitionProps {
 		class?: ClassValue;
+		style?: string;
 		transitions?: CropperTransitions;
 		width?: number;
 		height?: number;
@@ -25,6 +26,7 @@
 
 	let {
 		class: cssClass,
+		style,
 		transitions,
 		children,
 		width,
@@ -36,7 +38,7 @@
 	let root: HTMLDivElement | undefined = $state();
 
 	// The box drawn by the current animation frame. Deliberately not reactive: each
-	// frame writes it straight to the DOM, as upstream does.
+	// frame writes it straight to the DOM.
 	const frameBox: Box = untrack(() => ({ width, height, left, top }));
 	// The box the last animation was heading for.
 	let targetBox: Box = untrack(() => ({ width, height, left, top }));
@@ -75,6 +77,7 @@
 </script>
 
 <div
+	{style}
 	bind:this={root}
 	class={['advanced-cropper-artificial-transition', cssClass]}
 	style:left="0px"

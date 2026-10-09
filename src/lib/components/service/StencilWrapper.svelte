@@ -7,6 +7,7 @@
 	interface Props {
 		children?: Snippet;
 		class?: ClassValue;
+		style?: string;
 		transitions?: CropperTransitions;
 		width?: number;
 		height?: number;
@@ -14,10 +15,11 @@
 		top: number;
 	}
 
-	let { class: cssClass, transitions, width, height, left, top, children }: Props = $props();
+	let { class: cssClass, style, transitions, width, height, left, top, children }: Props = $props();
 </script>
 
 <ArtificialTransition
+	{style}
 	class={['advanced-cropper-stencil-wrapper', cssClass]}
 	{transitions}
 	{width}

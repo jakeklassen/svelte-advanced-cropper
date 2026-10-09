@@ -7,7 +7,7 @@
 	}
 
 	export interface CropperPreviewWrapperProps {
-		cropper?: DesiredCropperInstance | null;
+		preview?: DesiredCropperInstance | null;
 		class?: ClassValue;
 		style?: string;
 		children?: Snippet;
@@ -17,11 +17,11 @@
 <script lang="ts">
 	import CropperFade from '../service/CropperFade.svelte';
 
-	let { children, cropper, class: cssClass, style }: CropperPreviewWrapperProps = $props();
+	let { children, preview, class: cssClass, style }: CropperPreviewWrapperProps = $props();
 </script>
 
 <div class={[cssClass, 'cropper-preview-wrapper']} {style}>
-	<CropperFade visible={cropper?.isLoaded()} class="cropper-preview-wrapper__fade">
+	<CropperFade visible={preview?.isLoaded()} class="cropper-preview-wrapper__fade">
 		{@render children?.()}
 	</CropperFade>
 </div>

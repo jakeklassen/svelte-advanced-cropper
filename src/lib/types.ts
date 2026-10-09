@@ -1,4 +1,20 @@
-import type { Component, Snippet } from 'svelte';
+import type { Attachment } from 'svelte/attachments';
+import type {
+	BoundarySizeAlgorithm,
+	BoundaryStretchAlgorithm,
+	Size,
+	OrdinalDirection,
+	CardinalDirection,
+	HorizontalCardinalDirection,
+	VerticalCardinalDirection,
+	MoveDirections
+} from 'advanced-cropper';
+import type { NormalizedMoveImageOptions } from './controllers/normalizeMoveImageOptions';
+import type { NormalizedScaleImageOptions } from './controllers/normalizeScaleImageOptions';
+import type { NormalizedRotateImageOptions } from './controllers/normalizeRotateImageOptions';
+import type { CropperPreviewSource } from './components/helpers/CropperPreview.svelte';
+
+import type { Snippet } from 'svelte';
 import type { ClassValue } from 'svelte/elements';
 import type {
 	AbstractCropperInstance,
@@ -17,10 +33,6 @@ import type {
 } from 'advanced-cropper';
 import type { BoundingBoxType } from 'advanced-cropper/extensions/fit-to-image';
 import type { StencilSize } from 'advanced-cropper/extensions/stencil-size';
-import type { StretchableBoundaryProps } from './components/service/StretchableBoundary.svelte';
-import type { StretchableBoundaryMethods } from './components/service/methods';
-import type { CropperBackgroundImageProps } from './components/service/CropperBackgroundImage.svelte';
-import type { CropperBackgroundWrapperProps } from './components/service/CropperBackgroundWrapper.svelte';
 
 export type SettingsExtension = object;
 export type CropperSettings<E extends SettingsExtension = {}> = DefaultSettings &
@@ -152,17 +164,10 @@ export interface CropperProps<E extends SettingsExtension = {}>
 	scaleImage?: boolean | ScaleImageOptions;
 	rotateImage?: boolean | RotateImageOptions;
 	stencilConstraints?: StencilConstraints<E>;
-	wrapperComponent?: CropperWrapperComponent;
-	wrapperProps?: Partial<CropperWrapperComponentProps>;
-	backgroundComponent?: Component<CropperBackgroundImageProps>;
-	backgroundProps?: Partial<CropperBackgroundImageProps>;
-	backgroundClassName?: ClassValue;
-	backgroundWrapperComponent?: Component<CropperBackgroundWrapperProps>;
-	backgroundWrapperProps?: Partial<CropperBackgroundWrapperProps>;
-	backgroundWrapperClassName?: ClassValue;
-	boundaryComponent?: Component<StretchableBoundaryProps, StretchableBoundaryMethods>;
-	boundaryProps?: Partial<StretchableBoundaryProps>;
-	boundaryClassName?: ClassValue;
+	wrapper?: Snippet<[CropperWrapperSnippetProps<E>]>;
+	boundary?: Snippet<[CropperBoundarySnippetProps<E>]>;
+	backgroundWrapper?: Snippet<[CropperBackgroundWrapperSnippetProps<E>]>;
+	background?: Snippet<[CropperBackgroundSnippetProps<E>]>;
 }
 export interface FixedCropperSettings {
 	stencilSize: StencilSize<this>;
@@ -177,22 +182,6 @@ export type FixedCropperProps<E extends SettingsExtension = {}> = Omit<
 	settings?: E & { [K in keyof CropperSettingProps | 'stencilSize']?: never };
 	stencilSize: StencilSize<CropperSettings<E & FixedCropperSettings>>;
 };
-export interface CropperWrapperComponentProps {
-	cropper: CropperInstance;
-	class?: ClassValue;
-	style?: string;
-	children?: Snippet;
-	disabled?: boolean;
-}
-export type CropperWrapperComponent = Component<CropperWrapperComponentProps>;
-export interface CropperBackgroundWrapperComponentProps {
-	cropper: CropperInstance;
-	children?: Snippet;
-	class?: ClassValue;
-	style?: string;
-	disabled?: boolean;
-}
-export type ArbitraryProps = Record<string, unknown>;
 export interface ScaleImageOptions {
 	touch?: boolean;
 	wheel?:
@@ -211,7 +200,69 @@ export interface MoveImageOptions {
 	mouse?: boolean;
 }
 
-export type CropperBoundaryComponent = Component<
-	StretchableBoundaryProps,
-	StretchableBoundaryMethods
->;
+export interface PartProps {
+	class?: ClassValue;
+	style?: string;
+}
+export type CrossOrigin = boolean | 'anonymous' | 'use-credentials';
+export interface BoundaryHandle {
+	stretchTo(size: Size | null): Promise<Size | null>;
+	reset(): void;
+}
+export type RegisterBoundary = (boundary: BoundaryHandle) => () => void;
+export type BackgroundElement = HTMLImageElement | HTMLCanvasElement;
+export type AttachBackgroundSource = (ready?: Promise<void>) => Attachment<BackgroundElement>;
+export interface CropperWrapperSnippetProps<E extends SettingsExtension = {}> extends PartProps {
+	cropper: CropperInstance<E>;
+	disabled: boolean;
+	children: Snippet;
+}
+export interface CropperBoundarySnippetProps<
+	E extends SettingsExtension = {}
+> extends CropperWrapperSnippetProps<E> {
+	registerBoundary: RegisterBoundary;
+	sizeAlgorithm: BoundarySizeAlgorithm;
+	stretchAlgorithm: BoundaryStretchAlgorithm;
+}
+export interface CropperBackgroundWrapperSnippetProps<
+	E extends SettingsExtension = {}
+> extends CropperWrapperSnippetProps<E> {
+	moveImage: NormalizedMoveImageOptions;
+	scaleImage: NormalizedScaleImageOptions;
+	rotateImage: NormalizedRotateImageOptions;
+}
+export interface CropperBackgroundSnippetProps<E extends SettingsExtension = {}> extends PartProps {
+	cropper: CropperInstance<E>;
+	disabled: boolean;
+	crossOrigin: CrossOrigin;
+	attachSource: AttachBackgroundSource;
+}
+export interface CropperPreviewWrapperSnippetProps extends PartProps {
+	preview: CropperPreviewSource;
+	children: Snippet;
+}
+export interface CropperPreviewBoundarySnippetProps extends CropperPreviewWrapperSnippetProps {
+	registerBoundary: RegisterBoundary;
+	sizeAlgorithm: BoundarySizeAlgorithm;
+	stretchAlgorithm: BoundaryStretchAlgorithm;
+}
+export interface CropperPreviewBackgroundSnippetProps extends PartProps {
+	preview: CropperPreviewSource;
+	size: Size | null;
+	crossOrigin: CrossOrigin;
+}
+export type NativeMoveEvent = MouseEvent | TouchEvent;
+export interface HandlerSnippetProps extends PartProps {
+	position: OrdinalDirection;
+	horizontalPosition: HorizontalCardinalDirection | null;
+	verticalPosition: VerticalCardinalDirection | null;
+	disabled: boolean;
+	onMove: (shift: MoveDirections, event: NativeMoveEvent) => void;
+	onMoveEnd: () => void;
+}
+export interface LineSnippetProps extends PartProps {
+	position: CardinalDirection;
+	disabled: boolean;
+	onMove: (shift: MoveDirections, event: NativeMoveEvent) => void;
+	onMoveEnd: () => void;
+}

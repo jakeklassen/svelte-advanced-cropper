@@ -11,9 +11,7 @@ export {
 // Service components
 export {
 	default as BoundingBox,
-	type BoundingBoxProps,
-	type HandlerClassNames,
-	type LineClassNames
+	type BoundingBoxProps
 } from './components/service/BoundingBox.svelte';
 export {
 	default as CropperSource,
@@ -117,3 +115,22 @@ export {
 	normalizeRotateImageOptions,
 	type NormalizedRotateImageOptions
 } from './controllers/normalizeRotateImageOptions';
+
+export type {
+	PartProps,
+	CrossOrigin,
+	BoundaryHandle,
+	RegisterBoundary,
+	BackgroundElement,
+	AttachBackgroundSource,
+	CropperWrapperSnippetProps,
+	CropperBoundarySnippetProps,
+	CropperBackgroundWrapperSnippetProps,
+	CropperBackgroundSnippetProps,
+	CropperPreviewWrapperSnippetProps,
+	CropperPreviewBoundarySnippetProps,
+	CropperPreviewBackgroundSnippetProps,
+	HandlerSnippetProps,
+	LineSnippetProps,
+	NativeMoveEvent
+} from './types';

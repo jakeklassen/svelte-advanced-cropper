@@ -1,8 +1,13 @@
 <script lang="ts" module>
-	import type { Component, Snippet } from 'svelte';
+	import type { Snippet } from 'svelte';
 	import type { ClassValue } from 'svelte/elements';
 	import type { CropperImage, CropperState, CropperTransitions, Size } from 'advanced-cropper';
-	import type { ArbitraryProps, CropperBoundaryComponent } from '../../types';
+	import type {
+		CropperPreviewWrapperSnippetProps,
+		CropperPreviewBoundarySnippetProps,
+		CropperPreviewBackgroundSnippetProps,
+		CrossOrigin
+	} from '../../types';
 
 	export interface CropperPreviewSource {
 		getState: () => CropperState | null;
@@ -17,21 +22,6 @@
 		update: (cropper?: CropperPreviewSource | null) => void;
 	}
 
-	export type PreviewWrapperComponent = Component<{
-		cropper: CropperPreviewSource;
-		class?: ClassValue;
-		style?: string;
-		loading?: boolean;
-		loaded?: boolean;
-		children?: Snippet;
-	}>;
-
-	export type PreviewBackgroundComponent = Component<{
-		cropper: CropperPreviewSource;
-		size: Size | null;
-		class?: ClassValue;
-	}>;
-
 	export interface CropperPreviewProps {
 		state?: CropperState | null;
 		image?: CropperImage | null;
@@ -39,15 +29,10 @@
 		loading?: boolean;
 		loaded?: boolean;
 		class?: ClassValue;
-		contentClassName?: ClassValue;
-		backgroundClassName?: ClassValue;
-		backgroundComponent?: PreviewBackgroundComponent;
-		backgroundProps?: ArbitraryProps;
-		boundaryComponent?: CropperBoundaryComponent;
-		boundaryProps?: ArbitraryProps;
-		boundaryClassName?: ClassValue;
-		wrapperComponent?: PreviewWrapperComponent;
-		wrapperProps?: ArbitraryProps;
+		wrapper?: Snippet<[CropperPreviewWrapperSnippetProps]>;
+		boundary?: Snippet<[CropperPreviewBoundarySnippetProps]>;
+		background?: Snippet<[CropperPreviewBackgroundSnippetProps]>;
+		crossOrigin?: CrossOrigin;
 		style?: string;
 		/**
 		 * The cropper to mirror: the value bound with `bind:this` on a cropper.
@@ -63,32 +48,29 @@
 	import { isGreater, ratio, stretchPreviewBoundary } from 'advanced-cropper';
 	import { listenForWindowResize } from '../../controllers/listenForWindowResize.svelte';
 	import StretchableBoundary from '../service/StretchableBoundary.svelte';
-	import type { StretchableBoundaryMethods } from '../service/methods';
+	import { RegistrationSlot } from '../../controllers/RegistrationSlot.svelte';
+	import type { BoundaryHandle } from '../../types';
+	import { fillLayoutBoundary } from '../../service/boundary';
 	import CropperPreviewBackground from './CropperPreviewBackground.svelte';
 	import CropperPreviewWrapper from './CropperPreviewWrapper.svelte';
 
 	let {
 		class: cssClass,
-		contentClassName,
 		// Renamed: a local `state` would clash with the `$state` rune.
 		state: stateProp = null,
 		image = null,
 		transitions = null,
-		backgroundComponent: BackgroundComponent = CropperPreviewBackground,
-		backgroundProps,
-		backgroundClassName,
-		boundaryComponent: BoundaryComponent = StretchableBoundary,
-		boundaryProps,
-		boundaryClassName,
-		wrapperComponent: WrapperComponent = CropperPreviewWrapper,
-		wrapperProps,
+		wrapper,
+		boundary,
+		background,
+		crossOrigin = true,
 		loaded = true,
 		loading = false,
 		style,
 		cropper
 	}: CropperPreviewProps = $props();
 
-	let boundary: StretchableBoundaryMethods | undefined = $state.raw();
+	const boundaries = new RegistrationSlot<BoundaryHandle>();
 
 	// Set through the exported `update()`; takes priority over the props-based instance.
 	let internalInstance: CropperPreviewSource | null = $state.raw(null);
@@ -101,9 +83,7 @@
 		isLoading: () => loading
 	};
 
-	// Bumped by refresh()/update(). Upstream force-renders there, so that a cropper
-	// object whose getters are not reactive is still re-read. A new wrapper object per
-	// revision does the same: everything that reads `instance` re-evaluates.
+	// Refresh invalidates reads from adapters whose getters are not reactive.
 	let revision = $state(0);
 
 	const instance: CropperPreviewSource = $derived.by(() => {
@@ -135,13 +115,21 @@
 	// Fits the content box to the boundary, keeping the crop's aspect ratio.
 	function stretch() {
 		const coordinates = instance.getState()?.coordinates;
-		if (!boundary || !coordinates) {
+		const currentBoundary = boundaries.value;
+		const epoch = boundaries.epoch;
+		const id = ++latestStretch;
+		if (!currentBoundary || !coordinates) {
+			size = null;
+
 			return;
 		}
 
-		const id = ++latestStretch;
-		void boundary.stretchTo(coordinates).then((stretched) => {
-			if (id !== latestStretch) {
+		void currentBoundary.stretchTo(coordinates).then((stretched) => {
+			if (
+				id !== latestStretch ||
+				currentBoundary !== boundaries.value ||
+				epoch !== boundaries.epoch
+			) {
 				return;
 			}
 
@@ -170,43 +158,52 @@
 
 	listenForWindowResize(refresh);
 
-	// Upstream: useLayoutEffect(refresh, [coordinates?.height, coordinates?.width]). Here
-	// also once the boundary is bound, since bindings arrive after the first effect run.
+	// Recompute fitted size when dimensions or boundary ownership change.
 	$effect(() => {
 		void width;
 		void height;
-		void boundary;
+		void boundaries.value;
+		void boundaries.epoch;
 		untrack(stretch);
+	});
+	const wrapperArguments = $derived({
+		preview: instance,
+		class: [cssClass, 'advanced-cropper-preview'],
+		style,
+		children: boundaryLayer
+	});
+	const boundaryArguments = $derived({
+		preview: instance,
+		class: 'advanced-cropper-preview__boundary',
+		registerBoundary: boundaries.register,
+		sizeAlgorithm: fillLayoutBoundary,
+		stretchAlgorithm: stretchPreviewBoundary,
+		children: content
+	});
+	const backgroundArguments = $derived({
+		preview: instance,
+		size,
+		crossOrigin,
+		class: ['advanced-cropper-preview__image', src && 'advanced-cropper-preview__image--visible']
 	});
 </script>
 
-<WrapperComponent
-	{...wrapperProps}
-	class={[cssClass, 'advanced-cropper-preview']}
-	cropper={instance}
-	{style}
->
-	<BoundaryComponent
-		bind:this={boundary}
-		stretchAlgorithm={stretchPreviewBoundary}
-		{...boundaryProps}
-		class={['advanced-cropper-preview__boundary', boundaryClassName]}
+{#snippet content()}
+	<div
+		class="advanced-cropper-preview__content"
+		style:width={size ? `${size.width}px` : undefined}
+		style:height={size ? `${size.height}px` : undefined}
 	>
-		<div
-			class={[contentClassName, 'advanced-cropper-preview__content']}
-			style:width={size ? `${size.width}px` : undefined}
-			style:height={size ? `${size.height}px` : undefined}
-		>
-			<BackgroundComponent
-				{...backgroundProps}
-				cropper={instance}
-				{size}
-				class={[
-					backgroundClassName,
-					'advanced-cropper-preview__image',
-					src && 'advanced-cropper-preview__image--visible'
-				]}
-			/>
-		</div>
-	</BoundaryComponent>
-</WrapperComponent>
+		{#if background}{@render background(backgroundArguments)}{:else}<CropperPreviewBackground
+				{...backgroundArguments}
+			/>{/if}
+	</div>
+{/snippet}
+{#snippet boundaryLayer()}
+	{#if boundary}{@render boundary(boundaryArguments)}{:else}<StretchableBoundary
+			{...boundaryArguments}
+		/>{/if}
+{/snippet}
+{#if wrapper}{@render wrapper(wrapperArguments)}{:else}<CropperPreviewWrapper
+		{...wrapperArguments}
+	/>{/if}

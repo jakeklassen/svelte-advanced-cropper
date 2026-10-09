@@ -6,13 +6,20 @@
 		columns?: number;
 		rows?: number;
 		class?: ClassValue;
+		style?: string;
 	}
 </script>
 
 <script lang="ts">
 	import { untrack } from 'svelte';
 
-	let { columns = 3, rows = 3, visible = false, class: cssClass }: StencilGridProps = $props();
+	let {
+		columns = 3,
+		rows = 3,
+		visible = false,
+		class: cssClass,
+		style
+	}: StencilGridProps = $props();
 
 	// The grid keeps its size while hidden, so that it does not jump between 3x3 and
 	// 9x9 while fading out.
@@ -28,6 +35,7 @@
 </script>
 
 <div
+	{style}
 	class={[
 		'advanced-cropper-stencil-grid',
 		visible && 'advanced-cropper-stencil-grid--visible',

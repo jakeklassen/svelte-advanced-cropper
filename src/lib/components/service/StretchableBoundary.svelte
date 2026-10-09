@@ -1,5 +1,6 @@
 <script lang="ts" module>
-	import type { Snippet } from 'svelte';
+	import { onDestroy, untrack, type Snippet } from 'svelte';
+	import type { RegisterBoundary } from '../../types';
 	import type { ClassValue } from 'svelte/elements';
 	import type { BoundarySizeAlgorithm, BoundaryStretchAlgorithm, Size } from 'advanced-cropper';
 
@@ -8,8 +9,7 @@
 	export interface StretchableBoundaryProps {
 		class?: ClassValue;
 		style?: string;
-		stretcherClassName?: ClassValue;
-		contentClassName?: ClassValue;
+		registerBoundary?: RegisterBoundary;
 		stretchAlgorithm?: BoundaryStretchAlgorithm;
 		sizeAlgorithm?: BoundarySizeAlgorithm;
 		children?: Snippet;
@@ -23,10 +23,8 @@
 	let {
 		class: cssClass,
 		style,
-		stretcherClassName,
-		contentClassName,
+		registerBoundary,
 		stretchAlgorithm = stretchCropperBoundary,
-		// Not upstream's fillBoundary: see fillLayoutBoundary for why.
 		sizeAlgorithm = fillLayoutBoundary,
 		children
 	}: StretchableBoundaryProps = $props();
@@ -53,14 +51,13 @@
 
 		return Promise.resolve(result.width && result.height ? result : null);
 	}
+
+	onDestroy(untrack(() => registerBoundary?.({ stretchTo, reset })) ?? (() => {}));
 </script>
 
 <div bind:this={boundary} {style} class={['advanced-cropper-boundary', cssClass]}>
-	<div
-		bind:this={stretcher}
-		class={['advanced-cropper-boundary__stretcher', stretcherClassName]}
-	></div>
-	<div class={['advanced-cropper-boundary__content', contentClassName]}>
+	<div bind:this={stretcher} class="advanced-cropper-boundary__stretcher"></div>
+	<div class="advanced-cropper-boundary__content">
 		{@render children?.()}
 	</div>
 </div>

@@ -1,4 +1,5 @@
 <script lang="ts" module>
+	import type { AttachBackgroundSource } from '../../types';
 	import type { ClassValue } from 'svelte/elements';
 	import type { CropperImage, CropperState, CropperTransitions } from 'advanced-cropper';
 
@@ -13,8 +14,7 @@
 		cropper: DesiredCropperInstance;
 		crossOrigin?: 'anonymous' | 'use-credentials' | boolean;
 		style?: string;
-		/** The rendered export source. */
-		element?: HTMLImageElement | HTMLCanvasElement | null;
+		attachSource?: AttachBackgroundSource;
 	}
 </script>
 
@@ -29,7 +29,7 @@
 		style,
 		cropper,
 		crossOrigin = true,
-		element = $bindable(null)
+		attachSource
 	}: CropperBackgroundImageProps = $props();
 
 	const state = $derived(cropper.getState());
@@ -44,12 +44,12 @@
 </script>
 
 {#if src}
-	<!-- A new element per image, as upstream keys the <img> by src. -->
+	<!-- Each image owns its element. -->
 	{#key src}
 		<!-- The mousedown handler only blocks the browser's native image drag. -->
 		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 		<img
-			bind:this={element}
+			{@attach attachSource?.()}
 			class={['advanced-cropper-background-image', cssClass]}
 			{src}
 			alt=""

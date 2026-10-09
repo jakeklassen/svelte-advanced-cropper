@@ -59,6 +59,11 @@ function highlightImports(): Plugin {
 // server starts faster, and a request for a missing file gets a plain 404 instead of booting
 // the site's server renderer (about 10 seconds the first time).
 const libraryTestConfig = {
+	resolve: {
+		alias: {
+			'svelte-advanced-cropper': fileURLToPath(new URL('./src/lib/index.ts', import.meta.url))
+		}
+	},
 	plugins: [svelte({ compilerOptions: { runes: true } })],
 	css: { preprocessorOptions: { scss: { silenceDeprecations: coreScssDeprecations } } }
 };

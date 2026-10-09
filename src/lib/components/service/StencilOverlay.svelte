@@ -4,12 +4,13 @@
 
 	interface Props {
 		class?: ClassValue;
+		style?: string;
 		children?: Snippet;
 	}
 
-	let { class: cssClass, children }: Props = $props();
+	let { class: cssClass, style, children }: Props = $props();
 </script>
 
-<div class={['advanced-cropper-stencil-overlay', cssClass]}>
+<div {style} class={['advanced-cropper-stencil-overlay', cssClass]}>
 	{@render children?.()}
 </div>

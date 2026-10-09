@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import { Cropper, FixedCropper, type CropperInstance } from '#lib';
 import { cropperInstanceMethods } from './instanceMethods';
-import AsyncBoundary, { pendingStretches } from './AsyncBoundary.svelte';
+import { pendingStretches } from './AsyncBoundary.svelte';
 import EffectHarness from './EffectHarness.svelte';
 import Harness from './Harness.svelte';
 import { createTestImage, mountCropper, nextFrame, waitFor } from './fixtures';
@@ -41,7 +41,7 @@ describe('cropper instance', () => {
 		const readyWithState: boolean[] = [];
 		const screen = await render(Harness, {
 			src: createTestImage(),
-			boundaryComponent: AsyncBoundary,
+			asyncBoundary: true,
 			onReady: (ref: CropperInstance) => readyWithState.push(ref.getState() !== null)
 		});
 		const cropper = () => screen.component.getCropper();
@@ -77,7 +77,7 @@ it('restarts a pending initial reset when its stencil is replaced', async () => 
 	const screen = await render(Harness, {
 		src: createTestImage(),
 		circle: true,
-		boundaryComponent: AsyncBoundary,
+		asyncBoundary: true,
 		onReady: ready
 	});
 	await waitFor(() => pendingStretches.length === 1);

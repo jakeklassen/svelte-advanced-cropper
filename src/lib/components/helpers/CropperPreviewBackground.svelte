@@ -10,7 +10,7 @@
 
 	export interface CropperPreviewBackgroundProps {
 		class?: ClassValue;
-		cropper: DesiredCropperInstance;
+		preview: DesiredCropperInstance;
 		crossOrigin?: 'anonymous' | 'use-credentials' | boolean;
 		size?: Size | null;
 		style?: string;
@@ -25,15 +25,15 @@
 
 	let {
 		class: cssClass,
-		cropper,
+		preview,
 		crossOrigin = true,
 		size,
 		style
 	}: CropperPreviewBackgroundProps = $props();
 
-	const state = $derived(cropper.getState());
-	const transitions = $derived(cropper.getTransitions());
-	const image = $derived(cropper.getImage());
+	const state = $derived(preview.getState());
+	const transitions = $derived(preview.getTransitions());
+	const image = $derived(preview.getImage());
 
 	const transformStyles = $derived(
 		size && image && state?.coordinates
@@ -45,7 +45,7 @@
 </script>
 
 {#if src}
-	<!-- A new element per image, as upstream keys the <img> by src. -->
+	<!-- Each image owns its element. -->
 	{#key src}
 		<!-- The mousedown handler only blocks the browser's native image drag. -->
 		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->

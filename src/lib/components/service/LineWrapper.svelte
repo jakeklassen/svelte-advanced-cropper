@@ -9,6 +9,7 @@
 
 	export interface LineWrapperProps {
 		class?: ClassValue;
+		style?: string;
 		children?: Snippet;
 		onMove?: (directions: MoveDirections, event: TouchEvent | MouseEvent) => void;
 		onMoveEnd?: () => void;
@@ -20,11 +21,12 @@
 </script>
 
 <script lang="ts">
-	import DraggableElement from './DraggableElement.svelte';
+	import DraggableArea from './DraggableElement.svelte';
 
 	let {
 		position,
 		class: cssClass,
+		style,
 		disabled,
 		onMove,
 		onMoveEnd,
@@ -32,11 +34,14 @@
 		onEnter,
 		children
 	}: LineWrapperProps = $props();
+	let hovered = $state(false);
 </script>
 
-<DraggableElement
+<DraggableArea
+	{style}
 	class={[
 		'advanced-cropper-line-wrapper',
+		hovered && 'advanced-cropper-line-wrapper--hover',
 		position && `advanced-cropper-line-wrapper--${position}`,
 		disabled && 'advanced-cropper-line-wrapper--disabled',
 		cssClass
@@ -44,8 +49,14 @@
 	{disabled}
 	{onMove}
 	{onMoveEnd}
-	{onLeave}
-	{onEnter}
+	onLeave={() => {
+		hovered = false;
+		onLeave?.();
+	}}
+	onEnter={() => {
+		hovered = true;
+		onEnter?.();
+	}}
 	activationDistance={0}
 >
 	<div
@@ -56,4 +67,4 @@
 	>
 		{@render children?.()}
 	</div>
-</DraggableElement>
+</DraggableArea>

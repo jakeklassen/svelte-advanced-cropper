@@ -192,7 +192,7 @@
 		processEnd();
 	};
 
-	// Native, non-passive listeners, as upstream registers them (wheel and touch must
+	// Native, non-passive listeners (wheel and touch must
 	// be able to call preventDefault).
 	function listen(element: HTMLDivElement) {
 		container = element;

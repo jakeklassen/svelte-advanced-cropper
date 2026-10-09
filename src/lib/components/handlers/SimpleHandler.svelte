@@ -1,27 +1,31 @@
 <script lang="ts">
+	import { handlerDirections } from '../../service/directions';
 	import HandlerWrapper from '../service/HandlerWrapper.svelte';
-	import type { HandlerComponentProps } from '../service/BoundingBox.svelte';
+	import type { HandlerWrapperProps } from '../service/HandlerWrapper.svelte';
 
 	let {
-		verticalPosition,
-		horizontalPosition,
-		hoverClassName,
-		wrapperClassName,
-		defaultClassName,
-		wrapperStyle,
+		class: cssClass,
+		style,
+		verticalPosition: vertical,
+		position,
+		horizontalPosition: horizontal,
 		disabled,
 		onMove,
 		onMoveEnd
-	}: HandlerComponentProps = $props();
+	}: HandlerWrapperProps = $props();
 
+	const directions = $derived(position ? handlerDirections(position) : { horizontal, vertical });
+	const horizontalPosition = $derived(directions.horizontal);
+	const verticalPosition = $derived(directions.vertical);
 	let hovered = $state(false);
 </script>
 
 <HandlerWrapper
-	style={wrapperStyle}
+	{style}
 	class={[
 		'advanced-cropper-simple-handler-wrapper',
-		wrapperClassName,
+		cssClass,
+		disabled && 'advanced-cropper-simple-handler-wrapper--disabled',
 		verticalPosition && `advanced-cropper-simple-handler-wrapper--${verticalPosition}`,
 		horizontalPosition && `advanced-cropper-simple-handler-wrapper--${horizontalPosition}`,
 		horizontalPosition &&
@@ -30,6 +34,7 @@
 		hovered && 'advanced-cropper-simple-handler-wrapper--hover'
 	]}
 	{verticalPosition}
+	{position}
 	{horizontalPosition}
 	{disabled}
 	{onMove}
@@ -40,9 +45,9 @@
 	<div
 		class={[
 			'advanced-cropper-simple-handler',
+			disabled && 'advanced-cropper-simple-handler--disabled',
 			hovered && 'advanced-cropper-simple-handler--hover',
-			defaultClassName,
-			hovered && hoverClassName,
+
 			verticalPosition && `advanced-cropper-simple-handler--${verticalPosition}`,
 			horizontalPosition && `advanced-cropper-simple-handler--${horizontalPosition}`,
 			horizontalPosition &&
