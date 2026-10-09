@@ -47,7 +47,7 @@ Use Svelte dimension bindings and an effect to synchronize the cropper with a re
 
 ## Keep the opening view
 
-A refresh preserves zoom where restrictions allow; it does not reapply `defaultVisibleArea`. To keep a whole-image view after a resize, await `refresh()`, then apply your fitted visible area with `setVisibleArea`. Avoid resetting merely to remeasure, since that also discards transforms and the user's selection.
+A refresh preserves zoom where restrictions allow; it does not reapply `defaultVisibleArea`. To keep a whole-image view after a resize, await `refresh()`, then apply your fitted visible area with `setVisibleArea`. Return cleanup from the effect to invalidate its pending refit, and check that the run is still current after awaiting `refresh()`. This prevents an older refit from overriding a later strategy or container size. Avoid resetting merely to remeasure, since that also discards transforms and the user's selection.
 
 <Example source={RefitExampleSource} title="RefitExample">
 	<RefitExample />

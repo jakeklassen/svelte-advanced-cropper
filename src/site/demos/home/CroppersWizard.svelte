@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount, type Component } from 'svelte';
+	import { onDestroy, onMount, type Component } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { Crop, Frame, Info, Plus, Settings, Smartphone, X } from '@lucide/svelte';
 	import {
@@ -96,15 +96,19 @@
 	let photoStatus: 'ok' | 'preparing' | 'error' = $state('ok');
 	let latestPick = 0;
 
-	// Free an uploaded image's object URL once it is replaced (a no-op for the photos).
-	$effect(() => {
-		const current = src;
+	// Own upload URLs separately from preset sources.
+	let uploadedUrl: string | undefined;
 
-		return () => {
-			if (current.startsWith('blob:')) {
-				URL.revokeObjectURL(current);
-			}
-		};
+	function revokeUploadedUrl() {
+		if (uploadedUrl) {
+			URL.revokeObjectURL(uploadedUrl);
+			uploadedUrl = undefined;
+		}
+	}
+
+	onDestroy(() => {
+		latestPick++;
+		revokeUploadedUrl();
 	});
 
 	function readHash() {
@@ -119,7 +123,10 @@
 		void goto(`#${key}`, { shallow: true, replace: true });
 	}
 
-	function showPhoto(next: string) {
+	function showPhoto(next: string, owned = false) {
+		latestPick++;
+		revokeUploadedUrl();
+		uploadedUrl = owned ? next : undefined;
 		src = next;
 		photoStatus = 'ok';
 	}
@@ -145,7 +152,7 @@
 				return;
 			}
 
-			showPhoto(url);
+			showPhoto(url, true);
 		} catch {
 			if (id === latestPick) {
 				photoStatus = 'error';

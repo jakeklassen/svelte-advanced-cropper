@@ -100,7 +100,7 @@ describe('ImageLoader', () => {
 	});
 });
 
-describe('observeChanges', () => {
+describe('scalar change effects', () => {
 	it('skips the mount run and runs only when a dependency changes', async () => {
 		const log: string[] = [];
 		const screen = await render(UpdateEffectHarness, { log });

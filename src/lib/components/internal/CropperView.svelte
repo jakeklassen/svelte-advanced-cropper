@@ -64,6 +64,15 @@
 	});
 </script>
 
+<svelte:window
+	onresize={() => {
+		void cropper.refresh();
+	}}
+	onorientationchange={() => {
+		void cropper.refresh();
+	}}
+/>
+
 {#snippet imageContent()}
 	{#if cropper.getState()}
 		{#if background}{@render background(backgroundArguments)}{:else}<CropperBackgroundImage

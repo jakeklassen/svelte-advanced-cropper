@@ -1,4 +1,4 @@
-import { onDestroy, tick, untrack } from 'svelte';
+import { onDestroy, onMount, tick, untrack } from 'svelte';
 import {
 	isConsistentState,
 	isInitializedState,
@@ -18,8 +18,6 @@ import type {
 } from '../types';
 import { ReactiveCropperEngine } from './ReactiveCropperEngine.svelte';
 import { ImageLoader } from './ImageLoader.svelte';
-import { listenForWindowResize } from './listenForWindowResize.svelte';
-import { observeChanges } from './observeChanges.svelte';
 import { observeReconciliation } from './observeReconciliation.svelte';
 import { StencilRegistry } from './StencilRegistry.svelte';
 import { provideCropperContext } from '../context/cropper';
@@ -90,7 +88,7 @@ export class CropperController<E extends SettingsExtension = {}> {
 		};
 
 		let mounted = false;
-		$effect(() => {
+		onMount(() => {
 			mounted = true;
 
 			return () => {
@@ -134,7 +132,7 @@ export class CropperController<E extends SettingsExtension = {}> {
 
 		const autoReconcile = observeReconciliation(
 			cropper,
-			untrack(props).autoReconcileState ?? true,
+			() => props().autoReconcileState ?? true,
 			() => {
 				const state = cropper.getState();
 
@@ -391,30 +389,48 @@ export class CropperController<E extends SettingsExtension = {}> {
 			isLoaded: () => imageLoader.isLoaded()
 		};
 
-		listenForWindowResize(() => {
-			void refreshCropper();
-		});
+		const loadedImage = $derived(imageLoader.getImage());
+		const currentImage = $derived(displayedImage);
+		const loadingStatus = $derived(
+			Number(imageLoader.isLoaded()) + 2 * Number(imageLoader.isLoading())
+		);
+		// Compare the first run against initialization too: mount callbacks may change values.
+		let previousLoadedImage = untrack(() => loadedImage);
+		let previousImage = untrack(() => currentImage);
+		let previousStatus = untrack(() => loadingStatus);
+		$effect(() => {
+			const image = loadedImage;
+			if (image === previousLoadedImage) {
+				return;
+			}
 
-		observeChanges(
-			() => {
+			previousLoadedImage = image;
+			untrack(() => {
 				void resetCropper();
-			},
-			() => imageLoader.getImage()
-		);
+			});
+		});
+		$effect(() => {
+			const image = currentImage;
+			if (image === previousImage) {
+				return;
+			}
 
-		observeChanges(
-			() => {
-				if (displayedImage && displayedImage !== imageShownByReset) {
-					void notifyReady(displayedImage, () => mounted);
+			previousImage = image;
+			untrack(() => {
+				if (image && image !== imageShownByReset) {
+					void notifyReady(image, () => mounted);
 				}
-			},
-			() => displayedImage
-		);
+			});
+		});
+		$effect(() => {
+			const status = loadingStatus;
+			if (status === previousStatus) {
+				return;
+			}
 
-		observeChanges(
-			() => fire('onUpdate'),
-			() => [imageLoader.isLoaded(), imageLoader.isLoading()]
-		);
+			previousStatus = status;
+			untrack(() => fire('onUpdate'));
+		});
 
 		$effect(() => {
 			const source = elements.source.value;

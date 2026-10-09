@@ -5,16 +5,17 @@
 	interface Props {
 		src: string | null;
 		log: string[];
+		unloadTime?: number;
 	}
 
-	let { src: srcProp, log }: Props = $props();
+	let { src: srcProp, log, unloadTime = 0 }: Props = $props();
 
 	// Follows the prop, but `setImageAndSrc` can also change it.
 	let src = $derived(srcProp);
 
 	const loader = new ImageLoader(() => ({
 		src,
-		unloadTime: 0,
+		unloadTime,
 		onLoadingStart: () => log.push('start'),
 		onLoadingEnd: () => log.push(`end:${loader.isLoading()}`),
 		onLoad: () => log.push(`load:${loader.isLoading()}`),

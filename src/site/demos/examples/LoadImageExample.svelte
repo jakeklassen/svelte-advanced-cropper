@@ -17,7 +17,20 @@
 	// request (or after the demo is destroyed) is ignored.
 	let request = 0;
 
-	onDestroy(() => request++);
+	// Own upload URLs separately from preset sources.
+	let uploadedUrl: string | undefined;
+
+	function revokeUploadedUrl() {
+		if (uploadedUrl) {
+			URL.revokeObjectURL(uploadedUrl);
+			uploadedUrl = undefined;
+		}
+	}
+
+	onDestroy(() => {
+		request++;
+		revokeUploadedUrl();
+	});
 
 	async function loadImage(event: Event & { currentTarget: HTMLInputElement }) {
 		const file = event.currentTarget.files?.[0];
@@ -36,28 +49,20 @@
 			return;
 		}
 
+		revokeUploadedUrl();
+		uploadedUrl = URL.createObjectURL(file);
 		image = {
 			// An object URL points at the file without copying it into memory as a string.
-			src: URL.createObjectURL(file),
+			src: uploadedUrl,
 			type: getMimeType(header, file.type)
 		};
 	}
 
 	function clear() {
 		request++;
+		revokeUploadedUrl();
 		image = null;
 	}
-
-	// Revoke the previous object URL when the image changes, so the browser can free the file.
-	$effect(() => {
-		const src = image?.src;
-
-		return () => {
-			if (src) {
-				URL.revokeObjectURL(src);
-			}
-		};
-	});
 
 	function download(blob: Blob, name: string) {
 		const url = URL.createObjectURL(blob);

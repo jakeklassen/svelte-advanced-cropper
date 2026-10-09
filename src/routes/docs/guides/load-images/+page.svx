@@ -17,7 +17,7 @@ Pass a browser-readable URL as `src`. A new source loads and resets the cropper;
 
 ## Local files and URL ownership
 
-A file input can create an object URL for the selected file. The application owns that URL: revoke it after replacement, clearing, or destruction, once no consumer needs it. Do not revoke it immediately after assigning `src`.
+A file input can create an object URL for the selected file. The application owns that URL: revoke it after replacement, clearing, or destruction, once no consumer needs it. Store the owned URL separately from `src`. Revoke the previous upload in the replacement or clear handler, and revoke the last upload in `onDestroy`; an effect can miss URLs replaced within the same update. Keep file-input resets in the change handler. Do not revoke the new URL immediately after assigning `src`.
 
 <Example source={LoadImageExampleSource} title="LoadImageExample">
 	<LoadImageExample />
@@ -47,6 +47,6 @@ The cropper uses the browser's decoder; it does not convert HEIC itself. This he
 	<HeicUploadExample />
 </Example>
 
-A picked `File` can become unreadable if its underlying file changes or access expires. If cropping happens later, copy the bytes immediately while access is available. The helper above does that for unconverted files too. The copy uses memory until its object URL is released.
+A picked `File` can become unreadable if its underlying file changes or access expires. If cropping happens later, copy the bytes immediately while access is available. The helper above does that for unconverted files too. The copy uses memory until its object URL is released. Invalidate pending preparation when the demo is destroyed or a preset is selected. If an older preparation finishes later, revoke its URL immediately instead of displaying it.
 
 Image replacement can race with asynchronous conversion. Keep ownership of each request and release results that arrive after a newer selection; the example includes that cleanup.

@@ -51,10 +51,15 @@ export class ImageLoader implements LoadedImage {
 		// releases what it loaded itself.
 		let lastLoadedImage: CropperImage | null = null;
 
+		function commit(next: CropperImage | null) {
+			image = next;
+			loaded = Boolean(next);
+		}
+
 		function show(loadedImage: CropperImage | null) {
 			release(lastLoadedImage);
 			lastLoadedImage = loadedImage;
-			image = loadedImage;
+			commit(loadedImage);
 		}
 
 		// `options()` may read many reactive values, but a derived only notifies when its own
@@ -137,8 +142,8 @@ export class ImageLoader implements LoadedImage {
 		// Registered before the src effect, so it runs first when both change in one flush:
 		// a src change must then clear `loaded` and supersede this image's onLoad.
 		//
-		// The core reacts to the committed image: when it changes to a new image, mark it
-		// loaded and fire onLoad after it renders. Several setImage calls in a row, or
+		// The core reacts to the committed image: when it changes to a new image,
+		// fire onLoad after it renders. Several setImage calls in a row, or
 		// setting the same image again, produce one onLoad (for the latest image) or none.
 		$effect(() => {
 			const committed = image;
@@ -146,7 +151,6 @@ export class ImageLoader implements LoadedImage {
 				return;
 			}
 
-			loaded = true;
 			const id = request;
 			void tick().then(() => {
 				if (id === request && image === committed) {
@@ -183,7 +187,7 @@ export class ImageLoader implements LoadedImage {
 				return image;
 			},
 			setImage(update) {
-				image = typeof update === 'function' ? update(image) : update;
+				commit(typeof update === 'function' ? update(image) : update);
 			}
 		};
 		this.isLoading = api.isLoading;

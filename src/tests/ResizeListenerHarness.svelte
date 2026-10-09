@@ -1,6 +1,10 @@
 <script lang="ts">
-	import { listenForWindowResize } from '#lib/controllers/listenForWindowResize.svelte.ts';
+	import { untrack } from 'svelte';
 
 	let { callback }: { callback: (...args: unknown[]) => void } = $props();
-	listenForWindowResize((...args) => callback(...args));
+	function resized() {
+		untrack(() => callback());
+	}
 </script>
+
+<svelte:window onresize={resized} onorientationchange={resized} />

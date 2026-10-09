@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { observeChanges } from '#lib/controllers/observeChanges.svelte.ts';
+	import { onMount, untrack } from 'svelte';
 
 	interface Props {
 		log: string[];
@@ -17,17 +16,24 @@
 		}
 	});
 
-	observeChanges(
-		() => {
-			log.push(`run:${data.value}`);
+	const value = $derived(data.value);
+	let previous = untrack(() => value);
+	$effect(() => {
+		const current = value;
+		if (current === previous) {
+			return;
+		}
 
-			return () => log.push('cleanup');
-		},
-		() => [data.value]
-	);
+		previous = current;
+		untrack(() => log.push(`run:${current}`));
 
-	export function setValue(value: number) {
-		data = { ...data, value };
+		return () => {
+			untrack(() => log.push('cleanup'));
+		};
+	});
+
+	export function setValue(next: number) {
+		data = { ...data, value: next };
 	}
 
 	export function setOther(other: number) {

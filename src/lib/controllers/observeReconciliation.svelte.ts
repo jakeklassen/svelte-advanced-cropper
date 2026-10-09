@@ -8,7 +8,7 @@ interface ReconcilableCropper {
 /** Keeps settings consistent, deferring work until geometry operations and gestures finish. */
 export function observeReconciliation(
 	cropper: ReconcilableCropper,
-	enabled: boolean,
+	enabled: () => boolean,
 	isConsistent: () => boolean
 ) {
 	let pauseCount = $state(0);
@@ -21,7 +21,7 @@ export function observeReconciliation(
 
 		const revision = requested;
 		const forced = revision !== applied;
-		if (!enabled && !forced) {
+		if (!enabled() && !forced) {
 			return;
 		}
 

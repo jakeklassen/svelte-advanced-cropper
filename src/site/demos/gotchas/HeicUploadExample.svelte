@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onDestroy } from 'svelte';
 	import { Cropper } from 'svelte-advanced-cropper';
 	import { image } from '#site/paths.ts';
 	import { croppablePhotoUrl } from './croppablePhoto.ts';
@@ -9,15 +10,19 @@
 	let status: Status = $state('loading');
 	let latestPick = 0;
 
-	// Free an uploaded photo's object URL once it is replaced.
-	$effect(() => {
-		const current = src;
+	// Own upload URLs separately from preset sources.
+	let uploadedUrl: string | undefined;
 
-		return () => {
-			if (current.startsWith('blob:')) {
-				URL.revokeObjectURL(current);
-			}
-		};
+	function revokeUploadedUrl() {
+		if (uploadedUrl) {
+			URL.revokeObjectURL(uploadedUrl);
+			uploadedUrl = undefined;
+		}
+	}
+
+	onDestroy(() => {
+		latestPick++;
+		revokeUploadedUrl();
 	});
 
 	async function upload(event: Event & { currentTarget: HTMLInputElement }) {
@@ -40,7 +45,9 @@
 				return;
 			}
 
-			src = url;
+			revokeUploadedUrl();
+			uploadedUrl = url;
+			src = uploadedUrl;
 			status = 'loading';
 		} catch {
 			if (id === latestPick) {

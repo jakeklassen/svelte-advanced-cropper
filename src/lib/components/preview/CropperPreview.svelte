@@ -46,7 +46,6 @@
 <script lang="ts">
 	import { onDestroy, untrack } from 'svelte';
 	import { isGreater, ratio, stretchPreviewBoundary } from 'advanced-cropper';
-	import { listenForWindowResize } from '../../controllers/listenForWindowResize.svelte';
 	import StretchableBoundary from '../layers/StretchableBoundary.svelte';
 	import { RegistrationSlot } from '../../controllers/RegistrationSlot.svelte';
 	import type { BoundaryHandle } from '../../types';
@@ -156,8 +155,6 @@
 		refresh();
 	}
 
-	listenForWindowResize(refresh);
-
 	// Recompute fitted size when dimensions or boundary ownership change.
 	$effect(() => {
 		void width;
@@ -187,6 +184,8 @@
 		class: ['advanced-cropper-preview__image', src && 'advanced-cropper-preview__image--visible']
 	});
 </script>
+
+<svelte:window onresize={() => untrack(refresh)} onorientationchange={() => untrack(refresh)} />
 
 {#snippet content()}
 	<div

@@ -30,7 +30,6 @@
 	import { untrack } from 'svelte';
 	import { on } from 'svelte/events';
 	import {
-		debounce,
 		touchesToImageTransform,
 		wheelEventToImageTransform,
 		type SimpleTouch
@@ -85,15 +84,15 @@
 		}
 	}
 
-	// Keep one debounced function using the initial timeout.
-	const debouncedProcessEnd = debounce(
-		processEnd,
-		untrack(() => timeout)
-	);
+	let endTimer: ReturnType<typeof setTimeout> | undefined;
+	function clearEndTimer() {
+		clearTimeout(endTimer);
+		endTimer = undefined;
+	}
 
 	function processStart() {
 		transforming = true;
-		debouncedProcessEnd.clear();
+		clearEndTimer();
 	}
 
 	/**
@@ -126,7 +125,7 @@
 
 		// A wheel gesture has no end event: it ends after `timeout` ms without wheeling.
 		if (!lastTouches.length) {
-			debouncedProcessEnd();
+			endTimer = setTimeout(processEnd, timeout);
 		}
 	};
 
@@ -214,20 +213,13 @@
 				cleanup();
 			}
 
-			debouncedProcessEnd.clear();
+			clearEndTimer();
 			untrack(processEnd);
 			container = undefined;
 		};
 	}
-
-	$effect(() => {
-		if (disabled) {
-			debouncedProcessEnd.clear();
-			untrack(processEnd);
-		}
-	});
 </script>
 
-<div class={cssClass} {style} {@attach listen}>
+<div class={cssClass} {style} {@attach !disabled && listen}>
 	{@render children?.()}
 </div>

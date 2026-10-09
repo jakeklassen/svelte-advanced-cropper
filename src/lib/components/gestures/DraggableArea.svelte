@@ -220,13 +220,6 @@
 			container = undefined;
 		};
 	}
-
-	// Drop the gesture when the element gets disabled.
-	$effect(() => {
-		if (disabled) {
-			untrack(processEnd);
-		}
-	});
 </script>
 
 <!-- svelte-ignore a11y_mouse_events_have_key_events -->
@@ -237,7 +230,7 @@
 		disabled && 'advanced-cropper-draggable-element--disabled',
 		cssClass
 	]}
-	{@attach listen}
+	{@attach !disabled && listen}
 	onmouseover={enter}
 	onmouseleave={onMouseLeave}
 	role="presentation"
