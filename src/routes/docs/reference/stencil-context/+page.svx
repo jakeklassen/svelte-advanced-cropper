@@ -1,8 +1,3 @@
----
-title: "Stencil context"
-description: "CropperContext, registration options and constraint strategy."
----
-
 # Stencil context
 
 `getCropperContext(): CropperContext` reads the nearest cropper's Svelte `createContext` value. Call it during initialization. Outside `Cropper` or `FixedCropper`, it throws a descriptive error. Nested croppers shadow the outer provider.

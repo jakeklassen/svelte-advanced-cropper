@@ -1,16 +1,11 @@
----
-title: "Cropper instance"
-description: "All 33 methods exposed by Cropper and FixedCropper."
----
-
-# Cropper instance
-
-`CropperInstance<E>` is a structural type for `bind:this` and callback arguments. It is not a constructor. `FixedCropperInstance<E>` adds `FixedCropperSettings` to the extension. Use a `$state` binding and `$derived` reads:
-
 <script>
 	import CodeBlock from '#site/components/CodeBlock.svelte';
 	import source from '#site/demos/examples/SetCoordinatesExample.svelte?highlight';
 </script>
+
+# Cropper instance
+
+`CropperInstance<E>` is a structural type for `bind:this` and callback arguments. It is not a constructor. `FixedCropperInstance<E>` adds `FixedCropperSettings` to the extension. Use a `$state` binding and `$derived` reads:
 
 <CodeBlock html={source.html} code={source.code} />
 

@@ -1,17 +1,12 @@
----
-title: "FixedCropper"
-description: "Fixed stencil size, inherited props, and typed instance."
----
-
-# FixedCropper
-
-Keeps a configured stencil size while the image moves and zooms underneath it.
-
 <script>
 	import Example from '#site/components/Example.svelte';
 	import Demo from '#site/demos/components/FixedCropperDemo.svelte';
 	import source from '#site/demos/components/FixedCropperDemo.svelte?highlight';
 </script>
+
+# FixedCropper
+
+Keeps a configured stencil size while the image moves and zooms underneath it.
 
 <Example {source} title="FixedCropper">
 	<Demo />

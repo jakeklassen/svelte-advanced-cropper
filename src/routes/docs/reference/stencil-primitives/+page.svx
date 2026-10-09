@@ -1,8 +1,3 @@
----
-title: "Stencil building blocks"
-description: "Public primitive props, callbacks, methods and styling."
----
-
 # Stencil building blocks
 
 All optional props without a default remain `undefined`. `class` accepts Svelte `ClassValue`; `style` is a CSS string.
@@ -114,17 +109,14 @@ Selectors are listed in the [complete styling inventory](/docs/reference/styling
 
 <h2 id="simple-handler">SimpleHandler</h2>
 
-Default handle appearance using HandlerWrapper. `class` and `style` land on the outer hit target. It consumes position, horizontalPosition, verticalPosition, disabled, onMove and onMoveEnd; wrapper children and hover callbacks are not forwarded.
+Default handle appearance using HandlerWrapper. Its props type is `SimpleHandlerProps`. `class` and `style` land on the outer hit target. It consumes position, horizontalPosition, verticalPosition, disabled, onMove and onMoveEnd; wrapper children and hover callbacks are not forwarded.
 
 | Prop | Type | Default |
 | --- | --- | --- |
 | `class` | `ClassValue` | `undefined` |
 | `style` | `string` | `undefined` |
-| `children` | `Snippet` | `undefined` |
 | `onMove` | `(shift: MoveDirections, event: MouseEvent` \| `TouchEvent) => void` | `undefined` |
 | `onMoveEnd` | `() => void` | `undefined` |
-| `onLeave` | `() => void` | `undefined` |
-| `onEnter` | `() => void` | `undefined` |
 | `disabled` | `boolean` | `undefined` |
 | `position` | `OrdinalDirection` | `undefined` |
 | `horizontalPosition` | `HorizontalCardinalDirection` \| `null` | `undefined` |
@@ -134,17 +126,14 @@ Selectors are listed in the [complete styling inventory](/docs/reference/styling
 
 <h2 id="simple-line">SimpleLine</h2>
 
-Default edge appearance using LineWrapper. `class` and `style` land on the outer hit target. It consumes position, disabled, onMove and onMoveEnd; wrapper children and hover callbacks are not forwarded.
+Default edge appearance using LineWrapper. Its props type is `SimpleLineProps`. `class` and `style` land on the outer hit target. It consumes position, disabled, onMove and onMoveEnd; wrapper children and hover callbacks are not forwarded.
 
 | Prop | Type | Default |
 | --- | --- | --- |
 | `class` | `ClassValue` | `undefined` |
 | `style` | `string` | `undefined` |
-| `children` | `Snippet` | `undefined` |
 | `onMove` | `(directions: MoveDirections, event: TouchEvent` \| `MouseEvent) => void` | `undefined` |
 | `onMoveEnd` | `() => void` | `undefined` |
-| `onLeave` | `() => void` | `undefined` |
-| `onEnter` | `() => void` | `undefined` |
 | `disabled` | `boolean` | `undefined` |
 | `position` | `HorizontalCardinalDirection` \| `VerticalCardinalDirection` | `undefined` |
 

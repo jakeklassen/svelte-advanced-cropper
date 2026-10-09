@@ -1,8 +1,3 @@
----
-title: "State and coordinate spaces"
-description: "Core state and coordinate spaces with Svelte integration."
----
-
 <script>
 	import StateDiagram from '#site/demos/concept/StateDiagram.svelte';
 	import StateGeometry from '#site/demos/concept/StateGeometry.svelte';

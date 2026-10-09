@@ -1,17 +1,12 @@
----
-title: "Replace layers with snippets"
-description: "Forward children and register boundary and export sources."
----
-
-# Replace layers with snippets
-
-A layer snippet receives the current cropper, positioning classes and the services that layer needs. Spread its argument into the default building block, then add your own controls. This example wraps image gestures with a scrolling notification. The [snippet contracts](/docs/reference/snippets) list every field.
-
 <script>
 	import CropperStructure from '#site/demos/schemes/CropperStructure.svelte';
 	import CodeBlock from '#site/components/CodeBlock.svelte';
 	import source from '#site/demos/examples/BackgroundWrapperWithNotifications.svelte?highlight';
 </script>
+
+# Replace layers with snippets
+
+A layer snippet receives the current cropper, positioning classes and the services that layer needs. Spread its argument into the default building block, then add your own controls. This example wraps image gestures with a scrolling notification. The [snippet contracts](/docs/reference/snippets) list every field.
 
 <CodeBlock html={source.html} code={source.code} />
 

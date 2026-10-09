@@ -1,8 +1,3 @@
----
-title: "Styling contract"
-description: "Complete tested selector inventory and ownership rules."
----
-
 # Styling contract
 
 Import `svelte-advanced-cropper/style.css` once. Public visual components accept one `class` and a CSS `style` string. In application-scoped Svelte styles, use `:global(...)` for library-owned descendants. Theme entry points are described in [Themes](/docs/guides/themes).

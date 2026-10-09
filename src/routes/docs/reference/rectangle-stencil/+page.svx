@@ -1,8 +1,3 @@
----
-title: "RectangleStencil"
-description: "RectangleStencil props, snippets, context and selectors."
----
-
 # RectangleStencil
 
 A rectangle crop region registered through its ancestor cropper context.

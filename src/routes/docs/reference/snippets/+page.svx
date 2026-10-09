@@ -1,8 +1,3 @@
----
-title: "Snippet contracts"
-description: "Typed arguments for cropper, stencil and preview snippets."
----
-
 # Snippet contracts
 
 Each replacement is a Svelte `Snippet<[ArgumentType]>`. Import argument types from `svelte-advanced-cropper` and `Snippet` from `svelte`. All visual arguments inherit `PartProps`: optional `class: ClassValue` and `style: string`.

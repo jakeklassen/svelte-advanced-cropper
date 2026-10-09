@@ -1,8 +1,3 @@
----
-title: "Settings and defaults"
-description: "Core settings and defaults with Svelte integration."
----
-
 <script>
 	import SettingsDiagram from '#site/demos/concept/SettingsDiagram.svelte';
 	import Admonition from '#site/components/Admonition.svelte';

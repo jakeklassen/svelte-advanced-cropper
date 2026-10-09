@@ -1,8 +1,3 @@
----
-title: "Gesture and transition building blocks"
-description: "Public primitive props, callbacks, methods and styling."
----
-
 # Gesture and transition building blocks
 
 All optional props without a default remain `undefined`. `class` accepts Svelte `ClassValue`; `style` is a CSS string.

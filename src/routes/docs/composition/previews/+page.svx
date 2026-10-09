@@ -1,17 +1,12 @@
----
-title: "Customize previews"
-description: "Reactive sources, snapshots, and preview layers."
----
-
-# Customize previews
-
-Pass the value from `bind:this` directly to `CropperPreview`. The source getters are reactive; there is no need to copy state in an update callback.
-
 <script>
 	import Example from '#site/components/Example.svelte';
 	import Demo from '#site/demos/components/CropperPreviewDemo.svelte';
 	import source from '#site/demos/components/CropperPreviewDemo.svelte?highlight';
 </script>
+
+# Customize previews
+
+Pass the value from `bind:this` directly to `CropperPreview`. The source getters are reactive; there is no need to copy state in an update callback.
 
 <Example {source} title="Reactive preview">
 	<Demo />

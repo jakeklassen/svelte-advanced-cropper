@@ -1,8 +1,3 @@
----
-title: "Core utilities"
-description: "Core utilities with Svelte integration."
----
-
 <script>
 	import Admonition from '#site/components/Admonition.svelte';
 </script>

@@ -1,17 +1,12 @@
----
-title: "CropperPreview"
-description: "Preview inputs, layer snippets, and adapter methods."
----
-
-# CropperPreview
-
-Displays the current crop without creating a second cropper.
-
 <script>
 	import Example from '#site/components/Example.svelte';
 	import Demo from '#site/demos/components/CropperPreviewDemo.svelte';
 	import source from '#site/demos/components/CropperPreviewDemo.svelte?highlight';
 </script>
+
+# CropperPreview
+
+Displays the current crop without creating a second cropper.
 
 <Example {source} title="CropperPreview">
 	<Demo />

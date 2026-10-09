@@ -1,17 +1,12 @@
----
-title: "Cropper"
-description: "Cropper props, callbacks, context, and exported methods."
----
-
-# Cropper
-
-A movable, resizable crop region with image gestures and canvas export.
-
 <script>
 	import Example from '#site/components/Example.svelte';
 	import Demo from '#site/demos/examples/GettingStartedExample.svelte';
 	import source from '#site/demos/examples/GettingStartedExample.svelte?highlight';
 </script>
+
+# Cropper
+
+A movable, resizable crop region with image gestures and canvas export.
 
 <Example {source} title="Cropper">
 	<Demo />

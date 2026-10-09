@@ -1,8 +1,3 @@
----
-title: "Types and utilities"
-description: "Public type exports and Svelte integration utilities."
----
-
 # Types and utilities
 
 The package root re-exports the `advanced-cropper` root. Import geometry types such as `Coordinates`, `CropperState`, `CropperImage`, `DrawOptions`, `ImageRestriction` and core functions from `svelte-advanced-cropper`. [Core utilities](/docs/core/utilities) cover the geometry helpers; [extensions](/docs/core/extensions) lists separate entry points.
@@ -14,14 +9,14 @@ The package root re-exports the `advanced-cropper` root. Import geometry types s
 | Cropper configuration | `CropperProps<E>`, `FixedCropperProps<E>`, `CropperSettings<E>`, `CropperSettingsInput<E>`, `SettingsExtension`, `FixedCropperSettings` |
 | Instances | `CropperInstance<E>`, `FixedCropperInstance<E>`, `CropperPreviewInstance`, `CropperPreviewSource` |
 | Callbacks and stencils | `CropperCallback<E>`, `CropperCallbacks<E>`, `CropperContext`, `StencilOptions`, `StencilConstraints<E>`, `StencilSize` |
-| Component props | `RectangleStencilProps`, `CircleStencilProps`, `BoundingBoxProps`, `CropperSourceProps`, `StretchableBoundaryProps`, `CropperWrapperProps`, `StencilGridProps`, `DraggableAreaProps`, `TransformableImageProps`, `CropperBackgroundWrapperProps`, `CropperBackgroundImageProps`, `HandlerWrapperProps`, `LineWrapperProps`, `CropperPreviewProps`, `CropperPreviewWrapperProps`, `CropperPreviewBackgroundProps` |
+| Component props | `RectangleStencilProps`, `CircleStencilProps`, `BoundingBoxProps`, `CropperSourceProps`, `StretchableBoundaryProps`, `CropperWrapperProps`, `StencilGridProps`, `DraggableAreaProps`, `TransformableImageProps`, `CropperBackgroundWrapperProps`, `CropperBackgroundImageProps`, `HandlerWrapperProps`, `LineWrapperProps`, `SimpleHandlerProps`, `SimpleLineProps`, `CropperPreviewProps`, `CropperPreviewWrapperProps`, `CropperPreviewBackgroundProps` |
 | Gesture options | `MoveImageOptions`, `ScaleImageOptions`, `RotateImageOptions`, `NormalizedMoveImageOptions`, `NormalizedScaleImageOptions`, `NormalizedRotateImageOptions`, `NativeMoveEvent` |
-| Layer services | `PartProps`, `CrossOrigin`, `BoundaryHandle`, `RegisterBoundary`, `StretchableBoundaryMethods`, `BackgroundElement`, `AttachBackgroundSource` |
+| Layer services | `PartProps`, `CrossOrigin`, `BoundaryHandle`, `RegisterBoundary`, `BackgroundElement`, `AttachBackgroundSource` |
 | Snippet arguments | All nine [snippet argument types](/docs/reference/snippets) |
 
 `SettingsExtension = object`. `CropperSettings<E>` combines `DefaultSettings`, `CoreSettings`, `ModifierSettings`, `InitializeSettings` and `E`. `CropperSettingsInput<E>` describes unnormalized inputs for constraint functions; it is not the type of the extension-only `settings` prop.
 
-Not every component exports a separately named props type. Use `HandlerWrapperProps` for the declared SimpleHandler surface and `LineWrapperProps` for SimpleLine; their forwarded subset is documented in [stencil primitives](/docs/reference/stencil-primitives).
+Use `SimpleHandlerProps` and `SimpleLineProps` for the default controls. These expose a subset of `HandlerWrapperProps` and `LineWrapperProps`; their accepted props are documented in [stencil primitives](/docs/reference/stencil-primitives).
 
 ## Option normalizers
 

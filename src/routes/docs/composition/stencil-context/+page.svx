@@ -1,18 +1,13 @@
----
-title: "Build a stencil with context"
-description: "Register reactive stencil constraints during initialization."
----
-
-# Build a stencil with context
-
-Call `getCropperContext()` during component initialization. Its stable `cropper` API is available immediately. Register a getter for stencil options before state-dependent markup; the cropper reads it before the first reset and tracks subsequent reactive changes.
-
 <script>
 	import StencilHierarchy from '#site/demos/schemes/StencilHierarchy.svelte';
 	import StencilStructure from '#site/demos/schemes/StencilStructure.svelte';
 	import CodeBlock from '#site/components/CodeBlock.svelte';
 	import source from '#site/demos/tutorials/CustomStencil/CircleStencil.svelte?highlight';
 </script>
+
+# Build a stencil with context
+
+Call `getCropperContext()` during component initialization. Its stable `cropper` API is available immediately. Register a getter for stencil options before state-dependent markup; the cropper reads it before the first reset and tracks subsequent reactive changes.
 
 <CodeBlock html={source.html} code={source.code} />
 

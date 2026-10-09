@@ -1,8 +1,3 @@
----
-title: "Core extensions"
-description: "Supported core entry points and extension use cases."
----
-
 # Core extensions
 
 The package root includes the core root exports and the `StencilSize` type. Other extensions have their own `advanced-cropper/extensions/*` entry points. Add `advanced-cropper` as a direct application dependency when importing those entry points.

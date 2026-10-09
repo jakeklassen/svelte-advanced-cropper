@@ -1,8 +1,3 @@
----
-title: "Image and layout building blocks"
-description: "Public primitive props, callbacks, methods and styling."
----
-
 # Image and layout building blocks
 
 All optional props without a default remain `undefined`. `class` accepts Svelte `ClassValue`; `style` is a CSS string.
@@ -31,13 +26,13 @@ interface CropperWrapperSource {
 }
 ```
 
-A matching cropper or preview snippet argument can be spread directly into this primitive.
+Spread the `Cropper` or `FixedCropper` `wrapper` argument (`CropperWrapperSnippetProps<E>`) into this primitive. For a preview’s `wrapper` snippet, use [CropperPreviewWrapper](/docs/reference/image-primitives#cropper-preview-wrapper), which accepts `preview`.
 
 Selectors are listed in the [complete styling inventory](/docs/reference/styling).
 
 <h2 id="stretchable-boundary">StretchableBoundary</h2>
 
-Registers boundary measurement with the owning cropper or preview. Exposes `reset(): void` and `stretchTo(size: Size | null): Promise<Size | null>` through bind:this, typed as StretchableBoundaryMethods. Registration cleanup runs on destruction.
+Registers boundary measurement with the owning cropper or preview. Exposes `reset(): void` and `stretchTo(size: Size | null): Promise<Size | null>` through bind:this, typed as `BoundaryHandle`. Registration cleanup runs on destruction.
 
 | Prop | Type | Default |
 | --- | --- | --- |
@@ -77,7 +72,7 @@ interface CropperBackgroundWrapperSource {
 }
 ```
 
-A matching cropper or preview snippet argument can be spread directly into this primitive.
+Spread the `Cropper` or `FixedCropper` `backgroundWrapper` argument (`CropperBackgroundWrapperSnippetProps<E>`) into this primitive. `CropperPreview` has no `backgroundWrapper` snippet.
 
 Selectors are listed in the [complete styling inventory](/docs/reference/styling).
 
@@ -103,7 +98,7 @@ interface CropperBackgroundImageSource {
 }
 ```
 
-A matching cropper or preview snippet argument can be spread directly into this primitive.
+Spread the `Cropper` or `FixedCropper` `background` argument (`CropperBackgroundSnippetProps<E>`) into this primitive. For a preview’s `background` snippet, use [CropperPreviewBackground](/docs/reference/image-primitives#cropper-preview-background), which accepts `preview` and the fitted `size`.
 
 Selectors are listed in the [complete styling inventory](/docs/reference/styling).
 
@@ -138,7 +133,7 @@ interface CropperPreviewWrapperSource {
 }
 ```
 
-A matching cropper or preview snippet argument can be spread directly into this primitive.
+Spread the `CropperPreview` `wrapper` argument (`CropperPreviewWrapperSnippetProps`) into this primitive. It receives `preview`; cropper wrapper arguments instead receive `cropper` and belong with [CropperWrapper](/docs/reference/image-primitives#cropper-wrapper).
 
 Selectors are listed in the [complete styling inventory](/docs/reference/styling).
 
@@ -164,7 +159,7 @@ interface CropperPreviewBackgroundSource {
 }
 ```
 
-A matching cropper or preview snippet argument can be spread directly into this primitive.
+Spread the `CropperPreview` `background` argument (`CropperPreviewBackgroundSnippetProps`) into this primitive, including `preview` and `size`. Cropper background arguments belong with [CropperBackgroundImage](/docs/reference/image-primitives#cropper-background-image).
 
 Selectors are listed in the [complete styling inventory](/docs/reference/styling).
 

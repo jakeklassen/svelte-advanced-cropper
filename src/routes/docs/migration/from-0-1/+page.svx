@@ -1,8 +1,3 @@
----
-title: "Upgrade from 0.1.x"
-description: "Breaking changes and complete migration mappings for Svelte users."
----
-
 # Upgrade from 0.1.x
 
 Version 0.2 requires Svelte `^5.40` and replaces the old framework-shaped composition API. Keep the stylesheet import and cropping algorithms, then migrate the integration points below. The tables include all old exported names and customization props.
@@ -74,6 +69,8 @@ Custom stencils inherit disabled state, register before state guards, and comple
 | `CropperPreviewRef` | `CropperPreviewInstance` |
 | `CropperPreviewDesiredCropperRef` | `CropperPreviewSource` |
 | `DraggableElement` / duplicate `DraggableArea` | `DraggableArea`, with `DraggableAreaProps` |
+| `DraggableElementProps` | `DraggableAreaProps` |
+| `StretchableBoundaryMethods` | `BoundaryHandle` |
 | `ArbitraryProps` | No catch-all replacement; type the component’s own props |
 | `StencilComponent` | Ordinary child component; no library-specific component type |
 | `CropperWrapperComponent` | `Snippet<[CropperWrapperSnippetProps<E>]>` |
@@ -149,6 +146,8 @@ Custom stencils inherit disabled state, register before state guards, and comple
 | CropperBackgroundImage `ref` / `bind:ref` | `attachSource` attachment |
 | CropperSource `ref` / `bind:ref` | `element / bind:element, typed HTMLImageElement` \| `null` |
 | Deprecated custom-wrapper `loading`, `loaded` | `cropper.isLoading()`, `cropper.isLoaded()` |
+| CropperPreviewWrapper `cropper` | `preview` |
+| CropperPreviewBackground `cropper` | `preview` |
 | CropperPreview `wrapperComponent`, `wrapperProps` | `wrapper` snippet |
 | CropperPreview `boundaryComponent`, `boundaryProps` | `boundary` snippet |
 | CropperPreview `backgroundComponent`, `backgroundProps` | `background` snippet |
@@ -183,4 +182,4 @@ Movement callbacks retain the native event. `onMove`, `onMoveEnd`, `onTransform`
 
 `$effect` is not a drop-in replacement for the removed update-effect helper: the internal observer retains Object.is comparison (element-wise for dependency arrays), initial-value comparison and untracked callbacks. Cropper and preview still handle both window resize and orientation change internally. Application-specific resize work can use element dimension bindings or window listeners.
 
-Core root re-exports, `StencilOptions`, `StencilConstraints`, option types, `SettingsExtension`, `StencilSize`, `StretchableBoundaryMethods`, `styleToString` and `fillLayoutBoundary` remain. The supported component set is listed by the [reference](/docs/reference/types-and-utilities); no controller constructor is public.
+Core root re-exports, `StencilOptions`, `StencilConstraints`, option types, `SettingsExtension`, `StencilSize`, `styleToString` and `fillLayoutBoundary` remain. The supported component set is listed by the [reference](/docs/reference/types-and-utilities); no controller constructor is public.

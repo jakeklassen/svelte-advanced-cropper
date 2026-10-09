@@ -1,18 +1,13 @@
----
-title: "Compose a cropper"
-description: "Child stencils, layers, and typed settings in Svelte."
----
-
-# Compose a cropper
-
-`Cropper` and `FixedCropper` own image loading, geometry, cleanup and context. Compose their children to choose the crop region; use snippets to replace a visual layer.
-
 <script>
 	import ComponentsHierarchy from '#site/demos/schemes/ComponentsHierarchy.svelte';
 	import Example from '#site/components/Example.svelte';
 	import Demo from '#site/demos/examples/GettingStartedExample.svelte';
 	import source from '#site/demos/examples/GettingStartedExample.svelte?highlight';
 </script>
+
+# Compose a cropper
+
+`Cropper` and `FixedCropper` own image loading, geometry, cleanup and context. Compose their children to choose the crop region; use snippets to replace a visual layer.
 
 <Example {source} title="Child stencil and reactive coordinates">
 	<Demo />
