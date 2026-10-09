@@ -32,8 +32,8 @@
 	{verticalPosition}
 	{horizontalPosition}
 	{disabled}
-	onDrag={onMove}
-	onDragEnd={onMoveEnd}
+	{onMove}
+	{onMoveEnd}
 	onLeave={() => (hovered = false)}
 	onEnter={() => (hovered = true)}
 >

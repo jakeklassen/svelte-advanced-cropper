@@ -7,9 +7,9 @@
 		children?: Snippet;
 	}
 
-	let { class: className, children }: Props = $props();
+	let { class: cssClass, children }: Props = $props();
 </script>
 
-<div class={['advanced-cropper-stencil-overlay', className]}>
+<div class={['advanced-cropper-stencil-overlay', cssClass]}>
 	{@render children?.()}
 </div>

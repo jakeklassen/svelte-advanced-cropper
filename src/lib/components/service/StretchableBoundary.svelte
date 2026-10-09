@@ -21,7 +21,7 @@
 	import { fillLayoutBoundary } from '../../service/boundary';
 
 	let {
-		class: className,
+		class: cssClass,
 		style,
 		stretcherClassName,
 		contentClassName,
@@ -55,7 +55,7 @@
 	}
 </script>
 
-<div bind:this={boundary} {style} class={['advanced-cropper-boundary', className]}>
+<div bind:this={boundary} {style} class={['advanced-cropper-boundary', cssClass]}>
 	<div
 		bind:this={stretcher}
 		class={['advanced-cropper-boundary__stretcher', stretcherClassName]}

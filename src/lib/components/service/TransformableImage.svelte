@@ -49,7 +49,7 @@
 		wheelScale = true,
 		timeout = 500,
 		children,
-		class: className,
+		class: cssClass,
 		style,
 		preventDefault = true
 	}: TransformableImageProps = $props();
@@ -218,6 +218,6 @@
 	}
 </script>
 
-<div class={className} {style} {@attach listen}>
+<div class={cssClass} {style} {@attach listen}>
 	{@render children?.()}
 </div>

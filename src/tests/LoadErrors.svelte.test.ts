@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
-import type { CropperRef } from '#lib';
+import type { CropperInstance } from '#lib';
 import Harness from './Harness.svelte';
 import { delay, mountCropper, waitFor } from './fixtures';
 import orientedPhoto from './images/exif-orientation-6-quadrants.jpg?url';
@@ -22,8 +22,8 @@ const failingSources = {
 };
 
 async function mountFailing(src: string, checkOrientation: boolean) {
-	const onReady = vi.fn<(cropper: CropperRef) => void>();
-	const onError = vi.fn<(cropper: CropperRef) => void>();
+	const onReady = vi.fn<(cropper: CropperInstance) => void>();
+	const onError = vi.fn<(cropper: CropperInstance) => void>();
 	const screen = await render(Harness, { src, checkOrientation, onReady, onError });
 
 	return { screen, onReady, onError, cropper: () => screen.component.getCropper() };

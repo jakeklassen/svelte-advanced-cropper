@@ -2,7 +2,7 @@
 	import type { ClassValue } from 'svelte/elements';
 	import type { CropperImage, CropperState, CropperTransitions } from 'advanced-cropper';
 
-	interface DesiredCropperRef {
+	interface DesiredCropperInstance {
 		getState: () => CropperState | null;
 		getTransitions: () => CropperTransitions;
 		getImage: () => CropperImage | null;
@@ -10,11 +10,11 @@
 
 	export interface CropperBackgroundImageProps {
 		class?: ClassValue;
-		cropper: DesiredCropperRef;
+		cropper: DesiredCropperInstance;
 		crossOrigin?: 'anonymous' | 'use-credentials' | boolean;
 		style?: string;
-		/** The rendered `<img>` element (upstream's forwarded ref). */
-		ref?: HTMLImageElement | HTMLCanvasElement | null;
+		/** The rendered export source. */
+		element?: HTMLImageElement | HTMLCanvasElement | null;
 	}
 </script>
 
@@ -25,11 +25,11 @@
 	import { mergeStyles, styleToString } from '../../service/style';
 
 	let {
-		class: className,
+		class: cssClass,
 		style,
 		cropper,
 		crossOrigin = true,
-		ref = $bindable(null)
+		element = $bindable(null)
 	}: CropperBackgroundImageProps = $props();
 
 	const state = $derived(cropper.getState());
@@ -49,8 +49,8 @@
 		<!-- The mousedown handler only blocks the browser's native image drag. -->
 		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 		<img
-			bind:this={ref}
-			class={['advanced-cropper-background-image', className]}
+			bind:this={element}
+			class={['advanced-cropper-background-image', cssClass]}
 			{src}
 			alt=""
 			crossorigin={crossOriginAttribute(crossOrigin)}

@@ -2,12 +2,12 @@
 	import type { Snippet } from 'svelte';
 	import type { ClassValue } from 'svelte/elements';
 
-	interface DesiredCropperRef {
+	interface DesiredCropperInstance {
 		isLoaded: () => boolean;
 	}
 
 	export interface CropperPreviewWrapperProps {
-		cropper?: DesiredCropperRef | null;
+		cropper?: DesiredCropperInstance | null;
 		class?: ClassValue;
 		style?: string;
 		children?: Snippet;
@@ -17,10 +17,10 @@
 <script lang="ts">
 	import CropperFade from '../service/CropperFade.svelte';
 
-	let { children, cropper, class: className, style }: CropperPreviewWrapperProps = $props();
+	let { children, cropper, class: cssClass, style }: CropperPreviewWrapperProps = $props();
 </script>
 
-<div class={[className, 'cropper-preview-wrapper']} {style}>
+<div class={[cssClass, 'cropper-preview-wrapper']} {style}>
 	<CropperFade visible={cropper?.isLoaded()} class="cropper-preview-wrapper__fade">
 		{@render children?.()}
 	</CropperFade>

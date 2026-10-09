@@ -4,14 +4,14 @@
 	import type { CropperTransitions, ImageTransform } from 'advanced-cropper';
 	import type { MoveImageOptions, RotateImageOptions, ScaleImageOptions } from '../../types';
 
-	interface DesiredCropperRef {
+	interface DesiredCropperInstance {
 		transformImage: (transform: ImageTransform) => void;
 		transformImageEnd: () => void;
 		getTransitions: () => CropperTransitions;
 	}
 
 	export interface CropperBackgroundWrapperProps {
-		cropper: DesiredCropperRef;
+		cropper: DesiredCropperInstance;
 		rotateImage?: boolean | RotateImageOptions;
 		scaleImage?: boolean | ScaleImageOptions;
 		moveImage?: boolean | MoveImageOptions;
@@ -24,9 +24,9 @@
 </script>
 
 <script lang="ts">
-	import { useMoveImageOptions } from '../../hooks/useMoveImageOptions';
-	import { useRotateImageOptions } from '../../hooks/useRotateImageOptions';
-	import { useScaleImageOptions } from '../../hooks/useScaleImageOptions';
+	import { normalizeMoveImageOptions } from '../../controllers/normalizeMoveImageOptions';
+	import { normalizeRotateImageOptions } from '../../controllers/normalizeRotateImageOptions';
+	import { normalizeScaleImageOptions } from '../../controllers/normalizeScaleImageOptions';
 	import TransformableImage from './TransformableImage.svelte';
 
 	let {
@@ -34,7 +34,7 @@
 		moveImage = true,
 		rotateImage = false,
 		children,
-		class: className,
+		class: cssClass,
 		style,
 		cropper,
 		timeout,
@@ -42,13 +42,13 @@
 	}: CropperBackgroundWrapperProps = $props();
 
 	const transitionsActive = $derived(cropper.getTransitions().active);
-	const rotateImageOptions = $derived(useRotateImageOptions(rotateImage));
-	const scaleImageOptions = $derived(useScaleImageOptions(scaleImage));
-	const moveImageOptions = $derived(useMoveImageOptions(moveImage));
+	const rotateImageOptions = $derived(normalizeRotateImageOptions(rotateImage));
+	const scaleImageOptions = $derived(normalizeScaleImageOptions(scaleImage));
+	const moveImageOptions = $derived(normalizeMoveImageOptions(moveImage));
 </script>
 
 <TransformableImage
-	class={className}
+	class={cssClass}
 	{style}
 	onTransform={cropper.transformImage}
 	onTransformEnd={cropper.transformImageEnd}

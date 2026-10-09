@@ -21,10 +21,10 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { deepCompare, isNumber } from 'advanced-cropper';
-	import { useTransition } from '../../hooks/useTransition.svelte';
+	import { createTransition } from '../../controllers/createTransition.svelte';
 
 	let {
-		class: className,
+		class: cssClass,
 		transitions,
 		children,
 		width,
@@ -41,7 +41,7 @@
 	// The box the last animation was heading for.
 	let targetBox: Box = untrack(() => ({ width, height, left, top }));
 
-	const transition = useTransition(() => transitions);
+	const transition = createTransition(() => transitions);
 
 	$effect(() => {
 		const target: Box = { width, height, left, top };
@@ -76,7 +76,7 @@
 
 <div
 	bind:this={root}
-	class={['advanced-cropper-artificial-transition', className]}
+	class={['advanced-cropper-artificial-transition', cssClass]}
 	style:left="0px"
 	style:top="0px"
 	style:width="{current.width}px"

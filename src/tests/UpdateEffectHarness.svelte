@@ -1,15 +1,22 @@
 <script lang="ts">
-	import { useUpdateEffect } from '#lib';
+	import { observeChanges } from '#lib/controllers/observeChanges.svelte.ts';
 
 	interface Props {
 		log: string[];
+		changeOnMount?: boolean;
 	}
 
-	let { log }: Props = $props();
+	let { log, changeOnMount = false }: Props = $props();
 
 	let data = $state.raw({ value: 1, other: 1 });
 
-	useUpdateEffect(
+	$effect(() => {
+		if (changeOnMount) {
+			data = { value: 2, other: 1 };
+		}
+	});
+
+	observeChanges(
 		() => {
 			log.push(`run:${data.value}`);
 

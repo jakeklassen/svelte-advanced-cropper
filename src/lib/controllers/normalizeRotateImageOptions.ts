@@ -1,14 +1,13 @@
 import { getOptions } from 'advanced-cropper';
 import type { RotateImageOptions } from '../types';
 
-export interface DefinedRotateImageOptions {
+export interface NormalizedRotateImageOptions {
 	touch: boolean;
 }
 
-/** Normalises the `rotateImage` setting. Pure; wrap in `$derived` for reactive input. */
-export function useRotateImageOptions(
+export function normalizeRotateImageOptions(
 	rotateImage: RotateImageOptions | boolean
-): DefinedRotateImageOptions {
+): NormalizedRotateImageOptions {
 	return getOptions(
 		rotateImage,
 		{

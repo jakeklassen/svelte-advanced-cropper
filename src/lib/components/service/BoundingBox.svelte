@@ -37,8 +37,8 @@
 		onMoveEnd?: () => void;
 	}
 
-	export type HandlerComponent = Component<any>;
-	export type LineComponent = Component<any>;
+	export type HandlerComponent = Component<HandlerComponentProps>;
+	export type LineComponent = Component<LineComponentProps>;
 
 	export interface HandlerClassNames extends Partial<Record<OrdinalDirection, ClassValue>> {
 		default?: ClassValue;
@@ -109,7 +109,7 @@
 
 	let {
 		style,
-		class: className,
+		class: cssClass,
 		children,
 		onResize,
 		onResizeEnd,
@@ -147,7 +147,7 @@
 			.filter((point) => (isObject(lines) ? lines[point.name] : lines))
 			.map((point) => ({
 				name: point.name,
-				className: [
+				cssClass: [
 					lineClassNames.default,
 					lineClassNames[point.name],
 					disabled && lineClassNames.disabled
@@ -171,7 +171,7 @@
 			.filter((point) => (isObject(handlers) ? handlers[point.name] : handlers))
 			.map((point) => ({
 				name: point.name,
-				className: [handlerClassNames.default, handlerClassNames[point.name]],
+				cssClass: [handlerClassNames.default, handlerClassNames[point.name]],
 				containerClassName: [
 					'advanced-cropper-bounding-box__handler-wrapper',
 					`advanced-cropper-bounding-box__handler-wrapper--${point.modifier}`
@@ -199,7 +199,7 @@
 				return;
 			}
 
-			// Read the reference before resizing: unlike a React render's props, Svelte props
+			// Read the coordinates before resizing: Svelte props
 			// are live, so after onResize this would already be the new coordinates.
 			const currentReference = reference;
 			const anchor = getDirectionNames(horizontalPosition, verticalPosition).camelCase;
@@ -241,12 +241,12 @@
 	};
 </script>
 
-<div class={['advanced-cropper-bounding-box', className]} {style}>
+<div class={['advanced-cropper-bounding-box', cssClass]} {style}>
 	{@render children?.()}
 	<div>
 		{#each lineNodes as line (line.name)}
 			<Line
-				defaultClassName={line.className}
+				defaultClassName={line.cssClass}
 				hoverClassName={line.hoverClassName}
 				wrapperClassName={line.wrapperClassName}
 				position={line.name}
@@ -260,7 +260,7 @@
 		{#each handlerNodes as handler (handler.name)}
 			<div class={handler.containerClassName}>
 				<Handler
-					defaultClassName={handler.className}
+					defaultClassName={handler.cssClass}
 					hoverClassName={handler.hoverClassName}
 					wrapperClassName={handler.wrapperClassName}
 					horizontalPosition={handler.horizontalPosition}

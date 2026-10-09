@@ -11,8 +11,8 @@
 		class?: ClassValue;
 		style?: string;
 		children?: Snippet;
-		onDrag?: (shift: MoveDirections, event: MouseEvent | TouchEvent) => void;
-		onDragEnd?: () => void;
+		onMove?: (shift: MoveDirections, event: MouseEvent | TouchEvent) => void;
+		onMoveEnd?: () => void;
 		onLeave?: () => void;
 		onEnter?: () => void;
 		disabled?: boolean;
@@ -28,10 +28,10 @@
 	let {
 		horizontalPosition,
 		verticalPosition,
-		class: className,
+		class: cssClass,
 		disabled,
-		onDrag,
-		onDragEnd,
+		onMove,
+		onMoveEnd,
 		onLeave,
 		onEnter,
 		children,
@@ -48,7 +48,7 @@
 <div
 	{style}
 	class={[
-		className,
+		cssClass,
 		'advanced-cropper-handler-wrapper',
 		position && `advanced-cropper-handler-wrapper--${position}`,
 		disabled && 'advanced-cropper-handler-wrapper--disabled'
@@ -57,8 +57,8 @@
 	<DraggableElement
 		class="advanced-cropper-handler-wrapper__draggable"
 		{disabled}
-		onMove={onDrag}
-		onMoveEnd={onDragEnd}
+		{onMove}
+		{onMoveEnd}
 		{onLeave}
 		{onEnter}
 		activationDistance={0}

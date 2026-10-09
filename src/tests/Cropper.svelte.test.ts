@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { flushSync } from 'svelte';
 import { centerOf, drag, getElement, mountCropper, nextFrame, waitFor } from './fixtures';
-import { CircleStencil, FixedCropper, type CropperRef } from '#lib';
+import { FixedCropper, type CropperInstance } from '#lib';
 
 describe('Cropper', () => {
 	it('loads the image, creates a state and fires onReady after the reset', async () => {
@@ -72,12 +72,12 @@ describe('Cropper', () => {
 		expect(canvas?.height).toBe(Math.round(coordinates?.height ?? 0));
 	});
 
-	it('applies the aspect ratio from stencilProps and reacts to changes', async () => {
-		const { screen, cropper } = await mountCropper({ stencilProps: { aspectRatio: 1 } });
+	it('applies the aspect ratio from a child stencil and reacts to changes', async () => {
+		const { screen, cropper } = await mountCropper({ ratio: 1 });
 		const square = cropper().getCoordinates();
 		expect(square?.width).toBeCloseTo(square?.height ?? 0, 0);
 
-		await screen.rerender({ stencilProps: { aspectRatio: 16 / 9 } });
+		await screen.rerender({ ratio: 16 / 9 });
 		await waitFor(() => {
 			const coordinates = cropper().getCoordinates();
 
@@ -86,7 +86,7 @@ describe('Cropper', () => {
 	});
 
 	it('keeps CircleStencil at 1:1', async () => {
-		const { cropper, container } = await mountCropper({ stencilComponent: CircleStencil });
+		const { cropper, container } = await mountCropper({ circle: true });
 		const coordinates = cropper().getCoordinates();
 		expect(coordinates?.width).toBeCloseTo(coordinates?.height ?? 0, 0);
 		expect(container.querySelector('.advanced-cropper-circle-stencil')).not.toBeNull();
@@ -118,7 +118,7 @@ describe('Cropper', () => {
 	});
 
 	it('fires onChange with the cropper ref', async () => {
-		const onChange = vi.fn<(cropper: CropperRef) => void>();
+		const onChange = vi.fn<(cropper: CropperInstance) => void>();
 		const { cropper } = await mountCropper({ onChange, transitions: false });
 		onChange.mockClear();
 		cropper().moveCoordinates({ left: 10, top: 0 });
@@ -207,7 +207,7 @@ describe('Cropper', () => {
 
 describe('transitions', () => {
 	it('animates the stencil to new coordinates and settles on them', async () => {
-		const onTransitionsEnd = vi.fn<(cropper: CropperRef) => void>();
+		const onTransitionsEnd = vi.fn<(cropper: CropperInstance) => void>();
 		const { cropper, container } = await mountCropper({ onTransitionsEnd });
 		const stencil = getElement(container, '.advanced-cropper-stencil-wrapper', HTMLElement);
 		cropper().setCoordinates({ width: 100, height: 100, left: 0, top: 0 }, { transitions: true });

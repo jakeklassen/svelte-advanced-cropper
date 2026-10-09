@@ -9,12 +9,12 @@
 		children?: Snippet;
 	}
 
-	let { visible, class: className, style, children }: Props = $props();
+	let { visible, class: cssClass, style, children }: Props = $props();
 </script>
 
 <div
 	{style}
-	class={[className, 'advanced-cropper-fade', Boolean(visible) && 'advanced-cropper-fade--visible']}
+	class={[cssClass, 'advanced-cropper-fade', Boolean(visible) && 'advanced-cropper-fade--visible']}
 >
 	{@render children?.()}
 </div>

@@ -10,8 +10,8 @@
 	export interface LineWrapperProps {
 		class?: ClassValue;
 		children?: Snippet;
-		onDrag?: (directions: MoveDirections, event: TouchEvent | MouseEvent) => void;
-		onDragEnd?: () => void;
+		onMove?: (directions: MoveDirections, event: TouchEvent | MouseEvent) => void;
+		onMoveEnd?: () => void;
 		onLeave?: () => void;
 		onEnter?: () => void;
 		disabled?: boolean;
@@ -24,10 +24,10 @@
 
 	let {
 		position,
-		class: className,
+		class: cssClass,
 		disabled,
-		onDrag,
-		onDragEnd,
+		onMove,
+		onMoveEnd,
 		onLeave,
 		onEnter,
 		children
@@ -39,11 +39,11 @@
 		'advanced-cropper-line-wrapper',
 		position && `advanced-cropper-line-wrapper--${position}`,
 		disabled && 'advanced-cropper-line-wrapper--disabled',
-		className
+		cssClass
 	]}
 	{disabled}
-	onMove={onDrag}
-	onMoveEnd={onDragEnd}
+	{onMove}
+	{onMoveEnd}
 	{onLeave}
 	{onEnter}
 	activationDistance={0}

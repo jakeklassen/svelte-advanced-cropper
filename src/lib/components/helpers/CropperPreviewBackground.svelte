@@ -2,7 +2,7 @@
 	import type { ClassValue } from 'svelte/elements';
 	import type { CropperImage, CropperState, CropperTransitions, Size } from 'advanced-cropper';
 
-	interface DesiredCropperRef {
+	interface DesiredCropperInstance {
 		getState: () => CropperState | null;
 		getTransitions: () => CropperTransitions | null;
 		getImage: () => CropperImage | null;
@@ -10,7 +10,7 @@
 
 	export interface CropperPreviewBackgroundProps {
 		class?: ClassValue;
-		cropper: DesiredCropperRef;
+		cropper: DesiredCropperInstance;
 		crossOrigin?: 'anonymous' | 'use-credentials' | boolean;
 		size?: Size | null;
 		style?: string;
@@ -24,7 +24,7 @@
 	import { mergeStyles, styleToString } from '../../service/style';
 
 	let {
-		class: className,
+		class: cssClass,
 		cropper,
 		crossOrigin = true,
 		size,
@@ -50,7 +50,7 @@
 		<!-- The mousedown handler only blocks the browser's native image drag. -->
 		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 		<img
-			class={['advanced-cropper-background-image', className]}
+			class={['advanced-cropper-background-image', cssClass]}
 			{src}
 			alt=""
 			crossorigin={crossOriginAttribute(crossOrigin)}

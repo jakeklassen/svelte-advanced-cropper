@@ -1,15 +1,10 @@
 import { onDestroy } from 'svelte';
 import { Animation, type CropperTransitions } from 'advanced-cropper';
 
-/**
- * Runs a transition with the core `Animation`. Returns a runner and a reactive
- * `active` flag. Used by `ArtificialTransition`.
- */
-export function useTransition(getTransitions: () => CropperTransitions | null | undefined) {
+export function createTransition(getTransitions: () => CropperTransitions | null | undefined) {
 	const animation = new Animation();
 	let active = $state(false);
 
-	// Upstream leaves the animation running after unmount; stop it with the component.
 	onDestroy(() => animation.stop());
 
 	return {

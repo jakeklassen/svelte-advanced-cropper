@@ -14,11 +14,11 @@
 		top: number;
 	}
 
-	let { class: className, transitions, width, height, left, top, children }: Props = $props();
+	let { class: cssClass, transitions, width, height, left, top, children }: Props = $props();
 </script>
 
 <ArtificialTransition
-	class={['advanced-cropper-stencil-wrapper', className]}
+	class={['advanced-cropper-stencil-wrapper', cssClass]}
 	{transitions}
 	{width}
 	{height}

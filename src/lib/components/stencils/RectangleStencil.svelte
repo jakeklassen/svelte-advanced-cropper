@@ -1,11 +1,10 @@
 <script lang="ts" module>
+	import type { Snippet } from 'svelte';
 	import type { ClassValue } from 'svelte/elements';
 	import type {
 		CardinalDirection,
 		Coordinates,
-		CropperInteractions,
 		CropperState,
-		CropperTransitions,
 		MoveDirections,
 		OrdinalDirection,
 		RawAspectRatio,
@@ -18,29 +17,14 @@
 		LineComponent
 	} from '../service/BoundingBox.svelte';
 
-	interface DesiredCropperRef {
-		getState: () => CropperState | null;
-		getTransitions: () => CropperTransitions;
-		getInteractions: () => CropperInteractions;
-		hasInteractions: () => boolean;
-		resizeCoordinates: (
-			anchor: ResizeAnchor,
-			directions: Partial<MoveDirections>,
-			parameters: unknown
-		) => void;
-		resizeCoordinatesEnd: () => void;
-		moveCoordinates: (directions: Partial<MoveDirections>) => void;
-		moveCoordinatesEnd: () => void;
-	}
-
 	export interface RectangleStencilProps {
-		cropper: DesiredCropperRef;
+		children?: Snippet;
 		coordinates?: Coordinates | ((state: CropperState | null) => Coordinates);
 		handlerComponent?: HandlerComponent;
-		handlers?: Partial<Record<OrdinalDirection, boolean>>;
+		handlers?: boolean | Partial<Record<OrdinalDirection, boolean>>;
 		handlerClassNames?: HandlerClassNames;
 		handlerWrapperClassNames?: HandlerClassNames;
-		lines?: Partial<Record<CardinalDirection, boolean>>;
+		lines?: boolean | Partial<Record<CardinalDirection, boolean>>;
 		lineComponent?: LineComponent;
 		lineClassNames?: LineClassNames;
 		lineWrapperClassNames?: LineClassNames;
@@ -63,6 +47,7 @@
 </script>
 
 <script lang="ts">
+	import { getCropperContext } from '../../context/cropper';
 	import {
 		createAspectRatio,
 		getStencilCoordinates,
@@ -78,7 +63,7 @@
 	import StencilWrapper from '../service/StencilWrapper.svelte';
 
 	let {
-		cropper,
+		children,
 		coordinates,
 		aspectRatio,
 		minAspectRatio,
@@ -109,15 +94,19 @@
 		movable = true,
 		grid,
 		gridClassName,
-		class: className,
+		class: cssClass,
 		movingClassName,
 		resizingClassName,
 		previewClassName,
 		boundingBoxClassName,
 		overlayClassName,
 		draggableAreaClassName,
-		disabled
+		disabled: ownDisabled
 	}: RectangleStencilProps = $props();
+
+	const context = getCropperContext();
+	const cropper = context.cropper;
+	const disabled = $derived(context.disabled || ownDisabled);
 
 	const state = $derived(cropper.getState());
 	const transitions = $derived(cropper.getTransitions());
@@ -126,8 +115,6 @@
 	const resizeAllowed = $derived(resizable && !disabled);
 	const moveAllowed = $derived(movable && !disabled);
 
-	// Upstream exposes this through `useImperativeHandle`; the cropper reads it from
-	// the stencil instance and feeds it to `stencilConstraints`.
 	const stencilAspectRatio = $derived(
 		createAspectRatio(
 			aspectRatio || {
@@ -136,7 +123,7 @@
 			}
 		)
 	);
-	export { stencilAspectRatio as aspectRatio };
+	context.registerStencil(() => ({ aspectRatio: stencilAspectRatio }));
 
 	const onMove = (directions: MoveDirections) => {
 		if (moveAllowed) {
@@ -166,7 +153,7 @@
 	<StencilWrapper
 		class={[
 			'advanced-cropper-rectangle-stencil',
-			className,
+			cssClass,
 			interactions.moveCoordinates && movingClassName,
 			interactions.resizeCoordinates && resizingClassName,
 			moveAllowed && 'advanced-cropper-rectangle-stencil--movable',
@@ -213,6 +200,7 @@
 					{/if}
 					<div class={['advanced-cropper-rectangle-stencil__preview', previewClassName]}></div>
 				</StencilOverlay>
+				{@render children?.()}
 			</DraggableArea>
 		</BoundingBox>
 	</StencilWrapper>

@@ -6,20 +6,7 @@ import {
 	type AbstractCropperInstanceSettings
 } from 'advanced-cropper';
 
-export interface CropperInstanceProps<Settings extends AbstractCropperInstanceSettings, Instance> {
-	getProps: () => AbstractCropperInstanceProps<Settings, Instance>;
-	setData?: (data: AbstractCropperInstanceData) => void;
-}
-
-/**
- * Binds the framework-agnostic core instance to Svelte reactivity.
- *
- * Upstream stores the data in a plain field and forces a React re-render on every
- * change. Here the data is `$state.raw`: the core always replaces it with a new
- * object, and every getter (`getState`, `getTransitions`, `getInteractions`, ...)
- * reads it, so templates that call them re-render on their own.
- */
-export class CropperInstance<
+export class ReactiveCropperEngine<
 	Settings extends AbstractCropperInstanceSettings,
 	Instance = unknown
 > extends AbstractCropperInstance<Settings, Instance> {
@@ -31,10 +18,6 @@ export class CropperInstance<
 	notify: () => void;
 	props: () => AbstractCropperInstanceProps<Settings, Instance>;
 
-	/**
-	 * `onChange` is upstream's force-rerender hook. It is optional here: reactivity
-	 * comes from `data` itself, so pass it only to observe changes.
-	 */
 	constructor(
 		props: () => AbstractCropperInstanceProps<Settings, Instance>,
 		onChange: () => void = () => {}
@@ -42,6 +25,10 @@ export class CropperInstance<
 		super();
 		this.props = props;
 		this.notify = onChange;
+	}
+
+	dispose() {
+		this.endTransitions.clear();
 	}
 
 	protected getProps() {

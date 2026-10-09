@@ -4,7 +4,7 @@
 	import type { CropperImage, CropperState, CropperTransitions, Size } from 'advanced-cropper';
 	import type { ArbitraryProps, CropperBoundaryComponent } from '../../types';
 
-	export interface CropperPreviewDesiredCropperRef {
+	export interface CropperPreviewSource {
 		getState: () => CropperState | null;
 		getImage: () => CropperImage | null;
 		getTransitions: () => CropperTransitions | null;
@@ -12,13 +12,13 @@
 		isLoaded: () => boolean;
 	}
 
-	export interface CropperPreviewRef {
+	export interface CropperPreviewInstance {
 		refresh: () => void;
-		update: (cropper?: CropperPreviewDesiredCropperRef | null) => void;
+		update: (cropper?: CropperPreviewSource | null) => void;
 	}
 
 	export type PreviewWrapperComponent = Component<{
-		cropper: any;
+		cropper: CropperPreviewSource;
 		class?: ClassValue;
 		style?: string;
 		loading?: boolean;
@@ -27,7 +27,7 @@
 	}>;
 
 	export type PreviewBackgroundComponent = Component<{
-		cropper: any;
+		cropper: CropperPreviewSource;
 		size: Size | null;
 		class?: ClassValue;
 	}>;
@@ -51,24 +51,24 @@
 		style?: string;
 		/**
 		 * The cropper to mirror: the value bound with `bind:this` on a cropper.
-		 * Upstream takes a React ref object (`{ current }`); a Svelte binding is
+		 * The Svelte binding is
 		 * already reactive, so the instance is passed directly.
 		 */
-		cropper?: CropperPreviewDesiredCropperRef | null;
+		cropper?: CropperPreviewSource | null;
 	}
 </script>
 
 <script lang="ts">
 	import { onDestroy, untrack } from 'svelte';
 	import { isGreater, ratio, stretchPreviewBoundary } from 'advanced-cropper';
-	import { useWindowResize } from '../../hooks/useWindowResize.svelte';
+	import { listenForWindowResize } from '../../controllers/listenForWindowResize.svelte';
 	import StretchableBoundary from '../service/StretchableBoundary.svelte';
 	import type { StretchableBoundaryMethods } from '../service/methods';
 	import CropperPreviewBackground from './CropperPreviewBackground.svelte';
 	import CropperPreviewWrapper from './CropperPreviewWrapper.svelte';
 
 	let {
-		class: className,
+		class: cssClass,
 		contentClassName,
 		// Renamed: a local `state` would clash with the `$state` rune.
 		state: stateProp = null,
@@ -91,9 +91,9 @@
 	let boundary: StretchableBoundaryMethods | undefined = $state.raw();
 
 	// Set through the exported `update()`; takes priority over the props-based instance.
-	let internalInstance: CropperPreviewDesiredCropperRef | null = $state.raw(null);
+	let internalInstance: CropperPreviewSource | null = $state.raw(null);
 
-	const propsInstance: CropperPreviewDesiredCropperRef = {
+	const propsInstance: CropperPreviewSource = {
 		getState: () => stateProp,
 		getTransitions: () => transitions,
 		getImage: () => image,
@@ -106,7 +106,7 @@
 	// revision does the same: everything that reads `instance` re-evaluates.
 	let revision = $state(0);
 
-	const instance: CropperPreviewDesiredCropperRef = $derived.by(() => {
+	const instance: CropperPreviewSource = $derived.by(() => {
 		void revision;
 		const source = cropper || internalInstance || propsInstance;
 
@@ -163,12 +163,12 @@
 		stretch();
 	}
 
-	export function update(next?: CropperPreviewDesiredCropperRef | null) {
+	export function update(next?: CropperPreviewSource | null) {
 		internalInstance = next || null;
 		refresh();
 	}
 
-	useWindowResize(refresh);
+	listenForWindowResize(refresh);
 
 	// Upstream: useLayoutEffect(refresh, [coordinates?.height, coordinates?.width]). Here
 	// also once the boundary is bound, since bindings arrive after the first effect run.
@@ -182,7 +182,7 @@
 
 <WrapperComponent
 	{...wrapperProps}
-	class={[className, 'advanced-cropper-preview']}
+	class={[cssClass, 'advanced-cropper-preview']}
 	cropper={instance}
 	{style}
 >

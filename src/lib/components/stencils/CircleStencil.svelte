@@ -1,11 +1,10 @@
 <script lang="ts" module>
+	import type { Snippet } from 'svelte';
 	import type { ClassValue } from 'svelte/elements';
 	import type {
 		CardinalDirection,
 		Coordinates,
-		CropperInteractions,
 		CropperState,
-		CropperTransitions,
 		MoveDirections,
 		OrdinalDirection,
 		ResizeAnchor
@@ -17,29 +16,14 @@
 		LineComponent
 	} from '../service/BoundingBox.svelte';
 
-	interface DesiredCropperRef {
-		getState: () => CropperState | null;
-		getTransitions: () => CropperTransitions;
-		getInteractions: () => CropperInteractions;
-		hasInteractions: () => boolean;
-		resizeCoordinates: (
-			anchor: ResizeAnchor,
-			directions: Partial<MoveDirections>,
-			parameters: unknown
-		) => void;
-		resizeCoordinatesEnd: () => void;
-		moveCoordinates: (directions: Partial<MoveDirections>) => void;
-		moveCoordinatesEnd: () => void;
-	}
-
 	export interface CircleStencilProps {
-		cropper: DesiredCropperRef;
+		children?: Snippet;
 		coordinates?: Coordinates | ((state: CropperState | null) => Coordinates);
 		handlerComponent?: HandlerComponent;
-		handlers?: Partial<Record<OrdinalDirection, boolean>>;
+		handlers?: boolean | Partial<Record<OrdinalDirection, boolean>>;
 		handlerClassNames?: HandlerClassNames;
 		handlerWrapperClassNames?: HandlerClassNames;
-		lines?: Partial<Record<CardinalDirection, boolean>>;
+		lines?: boolean | Partial<Record<CardinalDirection, boolean>>;
 		lineComponent?: LineComponent;
 		lineClassNames?: LineClassNames;
 		lineWrapperClassNames?: LineClassNames;
@@ -59,6 +43,8 @@
 </script>
 
 <script lang="ts">
+	import { BoundingBoxType } from 'advanced-cropper/extensions/fit-to-image';
+	import { getCropperContext } from '../../context/cropper';
 	import { getStencilCoordinates, isFunction, type ResizeOptions } from 'advanced-cropper';
 	import SimpleHandler from '../handlers/SimpleHandler.svelte';
 	import SimpleLine from '../lines/SimpleLine.svelte';
@@ -69,7 +55,7 @@
 	import StencilWrapper from '../service/StencilWrapper.svelte';
 
 	let {
-		cropper,
+		children,
 		coordinates,
 		handlerComponent = SimpleHandler,
 		handlers = {
@@ -93,15 +79,19 @@
 		movable = true,
 		grid,
 		gridClassName,
-		class: className,
+		class: cssClass,
 		movingClassName,
 		resizingClassName,
 		previewClassName,
 		boundingBoxClassName,
 		overlayClassName,
 		draggableAreaClassName,
-		disabled
+		disabled: ownDisabled
 	}: CircleStencilProps = $props();
+
+	const context = getCropperContext();
+	const cropper = context.cropper;
+	const disabled = $derived(context.disabled || ownDisabled);
 
 	const state = $derived(cropper.getState());
 	const transitions = $derived(cropper.getTransitions());
@@ -110,10 +100,7 @@
 	const resizeAllowed = $derived(resizable && !disabled);
 	const moveAllowed = $derived(movable && !disabled);
 
-	// Upstream exposes these through `useImperativeHandle`; the cropper reads them from
-	// the stencil instance and feeds them to `stencilConstraints`.
-	export const aspectRatio = 1;
-	export const boundingBox = 'circle';
+	context.registerStencil(() => ({ aspectRatio: 1, boundingBox: BoundingBoxType.Circle }));
 
 	const onMove = (directions: MoveDirections) => {
 		if (moveAllowed) {
@@ -143,7 +130,7 @@
 	<StencilWrapper
 		class={[
 			'advanced-cropper-circle-stencil',
-			className,
+			cssClass,
 			interactions.moveCoordinates && movingClassName,
 			interactions.resizeCoordinates && resizingClassName,
 			moveAllowed && 'advanced-cropper-circle-stencil--movable',
@@ -190,6 +177,7 @@
 					{/if}
 					<div class={['advanced-cropper-circle-stencil__preview', previewClassName]}></div>
 				</StencilOverlay>
+				{@render children?.()}
 			</DraggableArea>
 		</BoundingBox>
 	</StencilWrapper>

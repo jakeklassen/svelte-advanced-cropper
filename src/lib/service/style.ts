@@ -1,5 +1,5 @@
 /**
- * The core returns styles as camelCase objects (React's `style` format). Svelte
+ * The core returns styles as camelCase objects . Svelte
  * takes a style string, so convert them here.
  */
 export function styleToString(

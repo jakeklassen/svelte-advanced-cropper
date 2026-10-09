@@ -1,19 +1,13 @@
 <script lang="ts" module>
-	import type { StencilSize } from 'advanced-cropper/extensions/stencil-size';
-	import type { CustomCropperProps, CustomCropperRef } from '../../types';
+	import type { SettingsExtension, FixedCropperProps } from '../../types';
 
-	type UnavailableProps = 'sizeRestrictions' | 'aspectRatio';
-
-	export interface FixedCropperSettings {
-		stencilSize: StencilSize<this>;
-	}
-
-	export type FixedCropperProps = Omit<CustomCropperProps<FixedCropperSettings>, UnavailableProps>;
-
-	export type FixedCropperRef = CustomCropperRef<FixedCropperSettings>;
+	export type { FixedCropperProps } from '../../types';
 </script>
 
-<script lang="ts">
+<script lang="ts" generics="E extends SettingsExtension = {}">
+	import { CropperController } from '../../controllers/CropperController.svelte';
+	import CropperView from '../internal/CropperView.svelte';
+	import RegistrationCheck from '../internal/RegistrationCheck.svelte';
 	import {
 		aspectRatio,
 		defaultSize,
@@ -22,19 +16,30 @@
 		sizeRestrictions
 	} from 'advanced-cropper/extensions/stencil-size';
 	import { withDefaultSizeRestrictions } from 'advanced-cropper';
-	import AbstractCropper from '../AbstractCropper.svelte';
-	import { settingPropNames, splitCropperProps } from '../../service/cropperProps';
-	import { forwardCropperRef } from '../../service/ref';
+	import type { CropperProps, FixedCropperSettings } from '../../types';
+	import { normalizeSettings } from '../../controllers/settings';
 
-	let props: FixedCropperProps = $props();
+	let props: FixedCropperProps<E> = $props();
+	const configured: CropperProps<E & FixedCropperSettings> = $derived({
+		defaultSize,
+		aspectRatio,
+		sizeRestrictions: withDefaultSizeRestrictions(sizeRestrictions),
+		postProcess: fixedStencil,
+		stencilConstraints: (raw, options) => ({
+			...raw,
+			...fixedStencilConstraints({ ...raw, stencilSize: props.stencilSize }, options)
+		}),
+		...props,
+		settings: { ...props.settings, stencilSize: props.stencilSize } as E & FixedCropperSettings
+	} satisfies CropperProps<E & FixedCropperSettings>);
+	const controller = new CropperController<E & FixedCropperSettings>(
+		() => configured,
+		(input, options) => {
+			const settings = normalizeSettings(input, options);
 
-	const cropperProps = $derived(
-		splitCropperProps<FixedCropperSettings>(props, [...settingPropNames, 'stencilSize'])
+			return { ...settings, transformImage: { ...settings.transformImage, adjustStencil: false } };
+		}
 	);
-
-	let abstractCropper: FixedCropperRef | undefined = $state.raw();
-
-	// Svelte needs static export names. A test checks that every ref method is exported.
 	export const {
 		reset,
 		refresh,
@@ -69,24 +74,8 @@
 		getImage,
 		isLoading,
 		isLoaded
-	} = forwardCropperRef(() => abstractCropper);
+	} = controller.api;
 </script>
 
-<AbstractCropper
-	postProcess={fixedStencil}
-	stencilConstraints={fixedStencilConstraints}
-	{...cropperProps.props}
-	settings={{
-		defaultSize,
-		aspectRatio,
-		sizeRestrictions: withDefaultSizeRestrictions(sizeRestrictions),
-		...cropperProps.settings,
-		// After the user's settings: the stencil size is fixed, so transforming the image
-		// must never resize the stencil.
-		transformImage: {
-			...cropperProps.settings.transformImage,
-			adjustStencil: false
-		}
-	}}
-	bind:this={abstractCropper}
-/>
+<CropperView {...configured} {controller} />
+<RegistrationCheck validate={controller.stencils.commit} />

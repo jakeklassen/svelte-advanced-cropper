@@ -23,7 +23,7 @@
 	import { screenScale } from '../../service/scale';
 
 	let {
-		class: className,
+		class: cssClass,
 		children,
 		disabled = false,
 		onMove,
@@ -223,7 +223,7 @@
 
 <!-- svelte-ignore a11y_mouse_events_have_key_events -->
 <div
-	class={['advanced-cropper-draggable-element', className]}
+	class={['advanced-cropper-draggable-element', cssClass]}
 	{@attach listen}
 	onmouseover={enter}
 	onmouseleave={onMouseLeave}
