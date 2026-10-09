@@ -1,4 +1,5 @@
 import { onDestroy, onMount, tick, untrack } from 'svelte';
+import { on } from 'svelte/events';
 import {
 	isConsistentState,
 	isInitializedState,
@@ -72,18 +73,55 @@ export class CropperController<E extends SettingsExtension = {}> {
 				const source = new ExportSource(element, image);
 				const cleanup = elements.source.register(source);
 				let active = true;
-				const loaded = element instanceof HTMLImageElement ? element.decode() : Promise.resolve();
-				void Promise.all([loaded, ready]).then(
-					() => {
-						if (active && displayedImage === image) {
-							source.ready = true;
+				const markReady = () => {
+					if (active && displayedImage === image) {
+						source.ready = true;
+					}
+				};
+
+				let removeListeners: (() => void) | undefined;
+				const awaitSource = () => {
+					if (!active || displayedImage !== image) {
+						return;
+					}
+
+					if (!(element instanceof HTMLImageElement)) {
+						markReady();
+
+						return;
+					}
+
+					if (element.complete) {
+						if (element.naturalWidth > 0) {
+							markReady();
 						}
-					},
-					() => {}
-				);
+					} else {
+						const loaded = () => {
+							removeListeners?.();
+							if (element.naturalWidth > 0) {
+								markReady();
+							}
+						};
+
+						const failed = () => removeListeners?.();
+						const removeLoad = on(element, 'load', loaded);
+						const removeError = on(element, 'error', failed);
+						removeListeners = () => {
+							removeLoad();
+							removeError();
+						};
+					}
+				};
+
+				if (ready) {
+					void ready.then(awaitSource, () => {});
+				} else {
+					awaitSource();
+				}
 
 				return () => {
 					active = false;
+					removeListeners?.();
 					cleanup();
 				};
 			};
