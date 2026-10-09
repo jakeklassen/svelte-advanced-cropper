@@ -1,5 +1,11 @@
 # svelte-advanced-cropper
 
+## 0.2.2
+
+### Patch Changes
+
+- [#44](https://github.com/jakeklassen/svelte-advanced-cropper/pull/44) [`e324a77`](https://github.com/jakeklassen/svelte-advanced-cropper/commit/e324a778c8fc6d68d188d639687b8c37c2215dba) Thanks [@jakeklassen](https://github.com/jakeklassen)! - Update the package README: it now describes only the current API and links to the current docs.
+
 ## 0.2.1
 
 ### Patch Changes
