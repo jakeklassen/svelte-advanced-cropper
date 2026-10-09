@@ -31,6 +31,9 @@
 	import CropperScrollExample from '#site/demos/examples/CropperScrollExample.svelte';
 	import cropperScrollSource from '#site/demos/examples/CropperScrollExample.svelte?highlight';
 	import backgroundWrapperSource from '#site/demos/examples/BackgroundWrapperWithNotifications.svelte?highlight';
+	import PrintStencilExample from '#site/demos/examples/PrintStencilExample.svelte';
+	import printStencilExampleSource from '#site/demos/examples/PrintStencilExample.svelte?highlight';
+	import printStencilSource from '#site/demos/examples/PrintStencil.svelte?highlight';
 </script>
 
 # Advanced Recipes
@@ -433,3 +436,26 @@ You can change that by passing your own `backgroundWrapperComponent`. The one be
 >
 	<CropperScrollExample />
 </Example>
+
+## Print guides on the stencil
+
+A crop that becomes a printed product needs more than a rectangle. The printer trims a thin band off every edge (the _bleed_), so the photo has to extend past the cut line, and anything important must stay a little further in (the _safe area_), because the cut can drift. A puzzle adds the lines where it will be split into pieces. Drawing these on the stencil shows people what will actually end up on the product while they crop.
+
+None of this needs changes to the library. The stencil below is built from the same public parts as `RectangleStencil`, which are all exported:
+
+- `StencilWrapper` positions the stencil, from `cropper.getStencilCoordinates()`.
+- `BoundingBox` draws the resize handlers and lines around it and reports drags through `onResize`. It defaults to all eight handlers.
+- `DraggableArea` moves the crop when the stencil itself is dragged.
+- `StencilOverlay` shades the photo outside the stencil.
+
+The guides are plain elements inside the `DraggableArea`, positioned in percentages of the crop, with `pointer-events: none` so drags pass through them. The stencil takes the print's size, bleed and safe margin as props, in any unit, and works out its own shape from them: the crop covers the print plus the bleed on each side. It exports that shape as `aspectRatio`, which the cropper reads and keeps the crop to, as it does for the built-in stencils. Pass the props with `stencilProps`; changing them, as the product buttons do, reshapes the crop.
+
+<Example
+	source={printStencilExampleSource}
+	title="PrintStencilExample"
+	files={{ 'PrintStencil.svelte': printStencilSource }}
+>
+	<PrintStencilExample />
+</Example>
+
+To export, crop as usual: the export includes the bleed, which is what printers ask for. If the output should be the finished size instead, trim the bleed off the coordinates first. For building a stencil from scratch, with your own handlers, see the [custom stencil tutorial](/docs/tutorials/custom-stencil).
