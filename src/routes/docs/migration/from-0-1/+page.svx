@@ -180,6 +180,6 @@ Stencil `coordinates`, ratio props, `grid`, `movable`, `resizable`, `disabled`, 
 
 Movement callbacks retain the native event. `onMove`, `onMoveEnd`, `onTransform`, `onTransformEnd` and `onEvent` remain. HandlerWrapper and LineWrapper specifically rename `onDrag`/`onDragEnd` to `onMove`/`onMoveEnd`.
 
-`$effect` is not a drop-in replacement for the removed update-effect helper: the internal observer retains Object.is comparison (element-wise for dependency arrays), initial-value comparison and untracked callbacks. Cropper and preview still handle both window resize and orientation change internally. Application-specific resize work can use element dimension bindings or window listeners.
+The removed dependency-array observer is replaced by explicit effects fed by scalar `$derived` image identities and loading status. Initialization snapshots preserve changes made during mount while skipping unchanged initial values; unchanged derived values suppress notifications. Callbacks run untracked, and native effect teardown owns cleanup where needed. Cropper and preview handle both window resize and orientation change through `<svelte:window>`. Application-specific resize work can use element dimension bindings or window listeners.
 
 Core root re-exports, `StencilOptions`, `StencilConstraints`, option types, `SettingsExtension`, `StencilSize`, `styleToString` and `fillLayoutBoundary` remain. The supported component set is listed by the [reference](/docs/reference/types-and-utilities); no controller constructor is public.

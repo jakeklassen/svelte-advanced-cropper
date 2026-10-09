@@ -12,7 +12,10 @@ import photo from './images/exif-orientation-6-quadrants.jpg?url';
 // fill up during the first mounts, which looks like growth but levels off.
 const WARM_UP_CYCLES = 300;
 const MEASURED_CYCLES = 200;
-// Warmed-up runs grow by about 0.6 KiB per cycle; a retained cropper costs over 5 KiB.
+const MEASURED_BATCHES = 3;
+const GC_SAMPLES = 3;
+// Budget per cycle, applied to the median batch growth rather than one noisy pair.
+// The scratch retained-instance experiment must exceed this without synthetic padding.
 const MAX_GROWTH_PER_CYCLE_BYTES = 2048;
 // The counters include the Vitest runner page, whose own DOM moves by a node or two. A
 // leaked cropper keeps at least one node per cycle, so hundreds over the measured cycles.
@@ -34,6 +37,30 @@ async function readMemory() {
 	const { nodes, jsEventListeners } = await session.send('Memory.getDOMCounters');
 
 	return { heap: usedSize, nodes, listeners: jsEventListeners };
+}
+
+function median(values: number[]) {
+	const middle = values.toSorted((a, b) => a - b)[Math.floor(values.length / 2)];
+	if (middle === undefined) {
+		throw new Error('Memory measurements must not be empty');
+	}
+
+	return middle;
+}
+
+async function settledMemory() {
+	const samples: Awaited<ReturnType<typeof readMemory>>[] = [];
+	for (let sample = 0; sample < GC_SAMPLES; sample++) {
+		await delay(50);
+		samples.push(await readMemory());
+	}
+
+	return {
+		heap: median(samples.map((sample) => sample.heap)),
+		nodes: median(samples.map((sample) => sample.nodes)),
+		listeners: median(samples.map((sample) => sample.listeners)),
+		samples
+	};
 }
 
 // Only the weak marker escapes this call; the test must not keep the buffer alive.
@@ -82,15 +109,32 @@ describe('Cropper lifecycle', () => {
 			await delay(700);
 		};
 
-		await runCycles(WARM_UP_CYCLES);
-		const before = await readMemory();
-		await runCycles(MEASURED_CYCLES);
-		const after = await readMemory();
-		target.remove();
+		try {
+			await runCycles(WARM_UP_CYCLES);
+			const before = await settledMemory();
+			const checkpoints = [before];
+			const growth: number[] = [];
+			let previous = before;
+			for (let batch = 0; batch < MEASURED_BATCHES; batch++) {
+				await runCycles(MEASURED_CYCLES);
+				const after = await settledMemory();
+				growth.push(after.heap - previous.heap);
+				checkpoints.push(after);
+				previous = after;
+			}
 
-		// Detached DOM or a listener left behind by every cycle shows up here.
-		expect(after.nodes - before.nodes).toBeLessThanOrEqual(NODE_JITTER);
-		expect(after.listeners).toBe(before.listeners);
-		expect(after.heap - before.heap).toBeLessThan(MEASURED_CYCLES * MAX_GROWTH_PER_CYCLE_BYTES);
+			// One-off runner/JIT allocations can affect a batch; persistent retention
+			// grows across batches. Log all samples for calibration, including failures.
+			const medianGrowth = median(growth);
+			console.log('Lifecycle memory:', JSON.stringify({ checkpoints, growth, medianGrowth }));
+			expect.soft(medianGrowth).toBeLessThan(MEASURED_CYCLES * MAX_GROWTH_PER_CYCLE_BYTES);
+			for (const after of checkpoints.slice(1)) {
+				// Detached DOM and listeners must remain bounded across every batch.
+				expect.soft(after.nodes - before.nodes).toBeLessThanOrEqual(NODE_JITTER);
+				expect.soft(after.listeners).toBe(before.listeners);
+			}
+		} finally {
+			target.remove();
+		}
 	});
 });

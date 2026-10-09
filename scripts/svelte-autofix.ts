@@ -7,6 +7,7 @@ import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 export interface ReviewedSuggestion {
 	suggestion: string;
 	reason: string;
+	count: number;
 }
 
 export type Allowlist = Record<string, ReviewedSuggestion[]>;
@@ -26,6 +27,7 @@ export function parseAllowlist(value: unknown): Allowlist {
 			throw new Error(`Expected an array of reviewed suggestions for ${file}`);
 		}
 
+		const seen = new Set<string>();
 		result[file] = entries.map((entry: unknown) => {
 			if (
 				!entry ||
@@ -35,12 +37,24 @@ export function parseAllowlist(value: unknown): Allowlist {
 				!entry.suggestion.trim() ||
 				!('reason' in entry) ||
 				typeof entry.reason !== 'string' ||
-				!entry.reason.trim()
+				!entry.reason.trim() ||
+				!('count' in entry) ||
+				typeof entry.count !== 'number' ||
+				!Number.isSafeInteger(entry.count) ||
+				entry.count < 1
 			) {
-				throw new Error(`Each suggestion in ${file} needs exact text and a reason.`);
+				throw new Error(
+					`Each suggestion in ${file} needs exact text, a reason and a positive count.`
+				);
 			}
 
-			return { suggestion: entry.suggestion, reason: entry.reason };
+			if (seen.has(entry.suggestion)) {
+				throw new Error(`Duplicate reviewed suggestion in ${file}: ${entry.suggestion}`);
+			}
+
+			seen.add(entry.suggestion);
+
+			return { suggestion: entry.suggestion, reason: entry.reason, count: entry.count };
 		});
 	}
 
@@ -73,10 +87,22 @@ export async function analyze(file: string, code: string) {
 	return svelteAutofixer({ code: input, filename: basename(file), desired_svelte_version: 5 });
 }
 
-export function unreviewed(suggestions: string[], reviewed: ReviewedSuggestion[]) {
-	return suggestions.filter(
-		(suggestion) => !reviewed.some((entry) => entry.suggestion === suggestion)
-	);
+export function reviewSuggestions(suggestions: string[], reviewed: ReviewedSuggestion[]) {
+	// Most autofixer suggestions have no location. Consume exact occurrence budgets
+	// per file and text so an existing review cannot approve another occurrence.
+	const remaining = new Map(reviewed.map((entry) => [entry.suggestion, entry.count]));
+	const occurrences = suggestions.map((suggestion) => {
+		const count = remaining.get(suggestion) ?? 0;
+		const entry = count > 0 ? reviewed.find((item) => item.suggestion === suggestion) : undefined;
+		if (entry) {
+			remaining.set(suggestion, count - 1);
+		}
+
+		return { suggestion, entry };
+	});
+	const stale = reviewed.filter((entry) => (remaining.get(entry.suggestion) ?? 0) > 0);
+
+	return { occurrences, stale };
 }
 
 export async function runGate(root: string, report: (message: string) => void = console.log) {
@@ -88,41 +114,54 @@ export async function runGate(root: string, report: (message: string) => void = 
 	let issues = 0;
 	let suggestions = 0;
 	let pending = 0;
+	let stale = 0;
+	const unseen = new Set(Object.keys(allowlist));
 	// The API is in-process; sequential analysis bounds memory and keeps output deterministic.
 	for (const file of files) {
 		const name = relative(root, file).split('\\').join('/');
 		const result = await analyze(file, await readFile(file, 'utf8'));
 		const reviewed = allowlist[name] ?? [];
-		const unknown = unreviewed(result.suggestions, reviewed);
+		unseen.delete(name);
+		const review = reviewSuggestions(result.suggestions, reviewed);
 		issues += result.issues.length;
 		suggestions += result.suggestions.length;
-		pending += unknown.length;
-		if (result.issues.length || result.suggestions.length) {
+		pending += review.occurrences.filter((item) => !item.entry).length;
+		stale += review.stale.length;
+		if (result.issues.length || result.suggestions.length || review.stale.length) {
 			report(`\n${name}`);
 			for (const issue of result.issues) {
 				report(`  ISSUE: ${issue}`);
 			}
 
-			for (const suggestion of result.suggestions) {
-				const entry = reviewed.find((item) => item.suggestion === suggestion);
+			for (const { suggestion, entry } of review.occurrences) {
 				report(`  ${entry ? 'REVIEWED' : 'UNREVIEWED'}: ${suggestion}`);
 				if (entry) {
 					report(`    Reason: ${entry.reason}`);
 				}
 			}
+
+			for (const entry of review.stale) {
+				report(`  STALE: expected ${entry.count} occurrences: ${entry.suggestion}`);
+				report(`    Reason: ${entry.reason}`);
+			}
 		}
 	}
 
+	for (const name of unseen) {
+		stale += Math.max(1, allowlist[name].length);
+		report(`\n${name}: STALE allowlist path (file not found).`);
+	}
+
 	report(
-		`\n${files.length} files: ${issues} issues, ${suggestions} suggestions, ${pending} unreviewed.`
+		`\n${files.length} files: ${issues} issues, ${suggestions} suggestions, ${pending} unreviewed, ${stale} stale reviews.`
 	);
 
-	return { files: files.length, issues, suggestions, pending };
+	return { files: files.length, issues, suggestions, pending, stale };
 }
 
 if (import.meta.main) {
-	const { issues, pending } = await runGate(resolve(import.meta.dirname, '..'));
-	if (issues || pending) {
+	const { issues, pending, stale } = await runGate(resolve(import.meta.dirname, '..'));
+	if (issues || pending || stale) {
 		process.exitCode = 1;
 	}
 }
