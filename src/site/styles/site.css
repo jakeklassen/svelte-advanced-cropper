@@ -127,7 +127,8 @@ pre.shiki code {
 }
 
 /* Prose inside docs pages */
-.prose :not(pre) > code {
+.prose {
+	/* API names in headings and prose must fit regardless of fallback font metrics. */
 	overflow-wrap: anywhere;
 }
 
