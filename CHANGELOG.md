@@ -1,5 +1,11 @@
 # svelte-advanced-cropper
 
+## 0.2.1
+
+### Patch Changes
+
+- [#40](https://github.com/jakeklassen/svelte-advanced-cropper/pull/40) [`0af281e`](https://github.com/jakeklassen/svelte-advanced-cropper/commit/0af281e6d93434f5c52a38da3c84e509acaca5ae) Thanks [@jakeklassen](https://github.com/jakeklassen)! - Fire `onReady` as soon as the image is loaded, without waiting for asynchronous decoding, while keeping canvas export available inside the callback.
+
 ## 0.2.0
 
 ### Minor Changes
