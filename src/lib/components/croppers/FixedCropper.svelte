@@ -1,5 +1,5 @@
 <script lang="ts" module>
-	import type { SettingsExtension, FixedCropperProps } from '../../types';
+	import type { SettingsExtension, CropperSettingProps, FixedCropperProps } from '../../types';
 
 	export type { FixedCropperProps } from '../../types';
 </script>
@@ -19,8 +19,10 @@
 	import type { CropperProps, FixedCropperSettings } from '../../types';
 	import { normalizeSettings } from '../../controllers/settings';
 
-	let props: FixedCropperProps<E> = $props();
-	const configured: CropperProps<E & FixedCropperSettings> = $derived({
+	// Exclude validation-only keys when inferring from a spread props object.
+	type Extension = Omit<E, keyof CropperSettingProps | 'stencilSize'>;
+	let props: FixedCropperProps<NoInfer<Extension>> & { settings?: E } = $props();
+	const configured: CropperProps<Extension & FixedCropperSettings> = $derived({
 		defaultSize,
 		aspectRatio,
 		sizeRestrictions: withDefaultSizeRestrictions(sizeRestrictions),
@@ -30,9 +32,10 @@
 			...fixedStencilConstraints({ ...raw, stencilSize: props.stencilSize }, options)
 		}),
 		...props,
-		settings: { ...props.settings, stencilSize: props.stencilSize } as E & FixedCropperSettings
-	} satisfies CropperProps<E & FixedCropperSettings>);
-	const controller = new CropperController<E & FixedCropperSettings>(
+		settings: { ...props.settings, stencilSize: props.stencilSize } as Extension &
+			FixedCropperSettings
+	} satisfies CropperProps<Extension & FixedCropperSettings>);
+	const controller = new CropperController<Extension & FixedCropperSettings>(
 		() => configured,
 		(input, options) => {
 			const settings = normalizeSettings(input, options);

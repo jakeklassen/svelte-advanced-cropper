@@ -1,7 +1,22 @@
+<script lang="ts" module>
+	import type { HandlerWrapperProps } from '../primitives/HandlerWrapper.svelte';
+
+	export type SimpleHandlerProps = Pick<
+		HandlerWrapperProps,
+		| 'class'
+		| 'style'
+		| 'position'
+		| 'disabled'
+		| 'onMove'
+		| 'onMoveEnd'
+		| 'horizontalPosition'
+		| 'verticalPosition'
+	>;
+</script>
+
 <script lang="ts">
 	import { handlerDirections } from '../../service/directions';
-	import HandlerWrapper from '../service/HandlerWrapper.svelte';
-	import type { HandlerWrapperProps } from '../service/HandlerWrapper.svelte';
+	import HandlerWrapper from '../primitives/HandlerWrapper.svelte';
 
 	let {
 		class: cssClass,
@@ -12,7 +27,7 @@
 		disabled,
 		onMove,
 		onMoveEnd
-	}: HandlerWrapperProps = $props();
+	}: SimpleHandlerProps = $props();
 
 	const directions = $derived(position ? handlerDirections(position) : { horizontal, vertical });
 	const horizontalPosition = $derived(directions.horizontal);

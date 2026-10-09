@@ -26,7 +26,7 @@
 <script lang="ts">
 	import { handlerDirections } from '../../service/directions';
 	import { getDirectionNames } from 'advanced-cropper';
-	import DraggableArea from './DraggableElement.svelte';
+	import DraggableArea from '../gestures/DraggableArea.svelte';
 
 	let {
 		horizontalPosition: horizontal,

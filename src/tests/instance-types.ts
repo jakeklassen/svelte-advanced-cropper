@@ -1,3 +1,14 @@
+import { expectTypeOf } from 'vitest';
+import type {
+	BoundaryHandle,
+	SimpleHandlerProps,
+	SimpleLineProps,
+	HandlerSnippetProps,
+	LineSnippetProps,
+	FixedCropper,
+	Cropper,
+	FixedCropperProps
+} from '#lib';
 import type { CropperInstance, CropperProps, FixedCropperInstance } from '#lib';
 
 interface PrintSettings {
@@ -85,3 +96,29 @@ export function verifyCallbacks(
 	});
 	fixed.setCoordinates([(_state, settings) => ({ width: settings.dpi })]);
 }
+
+// @ts-expect-error BoundaryHandle is the only public boundary instance name.
+export type RemovedBoundaryName = import('#lib').StretchableBoundaryMethods;
+
+expectTypeOf<HandlerSnippetProps>().toExtend<SimpleHandlerProps>();
+expectTypeOf<LineSnippetProps>().toExtend<SimpleLineProps>();
+expectTypeOf<BoundaryHandle['reset']>().toEqualTypeOf<() => void>();
+
+export const invalidFixedSettings: FixedCropperProps<{ stencilSize: number }> = {
+	stencilSize: { width: 200, height: 100 },
+	// @ts-expect-error Fixed stencil size cannot be redefined by extension settings.
+	settings: { stencilSize: 100 }
+};
+
+export const invalidCropperSettings: Parameters<typeof Cropper<{ minWidth: number }>>[1] = {
+	// @ts-expect-error Built-in settings remain flat component props.
+	settings: { minWidth: 100 }
+};
+
+export const invalidFixedComponentSettings: Parameters<
+	typeof FixedCropper<{ stencilSize: number }>
+>[1] = {
+	stencilSize: { width: 200, height: 100 },
+	// @ts-expect-error Normalizing inference must not allow forbidden extension values.
+	settings: { stencilSize: 100 }
+};

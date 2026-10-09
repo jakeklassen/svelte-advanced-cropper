@@ -15,7 +15,7 @@
 </script>
 
 <script lang="ts">
-	import CropperFade from '../service/CropperFade.svelte';
+	import CropperFade from '../layers/CropperFade.svelte';
 
 	let { children, preview, class: cssClass, style }: CropperPreviewWrapperProps = $props();
 </script>

@@ -6,11 +6,11 @@
 	import { normalizeMoveImageOptions } from '../../controllers/normalizeMoveImageOptions';
 	import { normalizeScaleImageOptions } from '../../controllers/normalizeScaleImageOptions';
 	import { normalizeRotateImageOptions } from '../../controllers/normalizeRotateImageOptions';
-	import CropperBackgroundImage from '../service/CropperBackgroundImage.svelte';
-	import CropperBackgroundWrapper from '../service/CropperBackgroundWrapper.svelte';
-	import CropperCanvas from '../service/CropperCanvas.svelte';
-	import CropperWrapper from '../service/CropperWrapper.svelte';
-	import StretchableBoundary from '../service/StretchableBoundary.svelte';
+	import CropperBackgroundImage from '../layers/CropperBackgroundImage.svelte';
+	import CropperBackgroundWrapper from '../layers/CropperBackgroundWrapper.svelte';
+	import CropperCanvas from './CropperCanvas.svelte';
+	import CropperWrapper from '../layers/CropperWrapper.svelte';
+	import StretchableBoundary from '../layers/StretchableBoundary.svelte';
 	import RectangleStencil from '../stencils/RectangleStencil.svelte';
 
 	let {

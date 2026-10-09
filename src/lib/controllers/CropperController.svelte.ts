@@ -5,10 +5,7 @@ import {
 	type CropperImage,
 	type DrawOptions
 } from 'advanced-cropper';
-import type {
-	CropperCanvasMethods,
-	StretchableBoundaryMethods
-} from '../components/service/methods';
+import type { CropperCanvasMethods } from '../components/internal/methods';
 import type {
 	CropperInstance,
 	CropperProps,
@@ -16,7 +13,8 @@ import type {
 	SettingsExtension,
 	StencilOptions,
 	AttachBackgroundSource,
-	BackgroundElement
+	BackgroundElement,
+	BoundaryHandle
 } from '../types';
 import { ReactiveCropperEngine } from './ReactiveCropperEngine.svelte';
 import { ImageLoader } from './ImageLoader.svelte';
@@ -37,7 +35,7 @@ class ExportSource {
 }
 class CropperElements {
 	readonly source = new RegistrationSlot<ExportSource>();
-	readonly boundarySlot = new RegistrationSlot<StretchableBoundaryMethods>();
+	readonly boundarySlot = new RegistrationSlot<BoundaryHandle>();
 	canvas: CropperCanvasMethods | null = $state.raw(null);
 	get boundary() {
 		return this.boundarySlot.value;

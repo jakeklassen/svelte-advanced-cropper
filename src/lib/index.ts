@@ -1,3 +1,7 @@
+// Croppers
+export { default as Cropper } from './components/croppers/Cropper.svelte';
+export { default as FixedCropper } from './components/croppers/FixedCropper.svelte';
+
 // Stencils
 export {
 	default as RectangleStencil,
@@ -8,56 +12,67 @@ export {
 	type CircleStencilProps
 } from './components/stencils/CircleStencil.svelte';
 
-// Service components
+// Context
+export { getCropperContext, type CropperContext } from './context/cropper';
+
+// Stencil building blocks
 export {
 	default as BoundingBox,
 	type BoundingBoxProps
-} from './components/service/BoundingBox.svelte';
-export {
-	default as CropperSource,
-	type CropperSourceProps
-} from './components/service/CropperSource.svelte';
-export {
-	default as StretchableBoundary,
-	type StretchableBoundaryMethods,
-	type StretchableBoundaryProps
-} from './components/service/StretchableBoundary.svelte';
-export {
-	default as CropperWrapper,
-	type CropperWrapperProps
-} from './components/service/CropperWrapper.svelte';
-export { default as StencilOverlay } from './components/service/StencilOverlay.svelte';
-export { default as StencilWrapper } from './components/service/StencilWrapper.svelte';
+} from './components/primitives/BoundingBox.svelte';
+export { default as StencilOverlay } from './components/primitives/StencilOverlay.svelte';
+export { default as StencilWrapper } from './components/primitives/StencilWrapper.svelte';
 export {
 	default as StencilGrid,
 	type StencilGridProps
-} from './components/service/StencilGrid.svelte';
-export {
-	default as DraggableArea,
-	type DraggableElementProps as DraggableAreaProps
-} from './components/service/DraggableElement.svelte';
-export {
-	default as TransformableImage,
-	type TransformableImageProps
-} from './components/service/TransformableImage.svelte';
-export { TransformableImageEvent } from './components/service/TransformableImageEvent';
-export { default as CropperFade } from './components/service/CropperFade.svelte';
-export {
-	default as CropperBackgroundImage,
-	type CropperBackgroundImageProps
-} from './components/service/CropperBackgroundImage.svelte';
-export {
-	default as CropperBackgroundWrapper,
-	type CropperBackgroundWrapperProps
-} from './components/service/CropperBackgroundWrapper.svelte';
+} from './components/primitives/StencilGrid.svelte';
 export {
 	default as HandlerWrapper,
 	type HandlerWrapperProps
-} from './components/service/HandlerWrapper.svelte';
+} from './components/primitives/HandlerWrapper.svelte';
 export {
 	default as LineWrapper,
 	type LineWrapperProps
-} from './components/service/LineWrapper.svelte';
+} from './components/primitives/LineWrapper.svelte';
+export {
+	default as SimpleHandler,
+	type SimpleHandlerProps
+} from './components/handlers/SimpleHandler.svelte';
+export { default as SimpleLine, type SimpleLineProps } from './components/lines/SimpleLine.svelte';
+
+// Layers
+export {
+	default as CropperSource,
+	type CropperSourceProps
+} from './components/layers/CropperSource.svelte';
+export {
+	default as StretchableBoundary,
+	type StretchableBoundaryProps
+} from './components/layers/StretchableBoundary.svelte';
+export {
+	default as CropperWrapper,
+	type CropperWrapperProps
+} from './components/layers/CropperWrapper.svelte';
+export { default as CropperFade } from './components/layers/CropperFade.svelte';
+export {
+	default as CropperBackgroundImage,
+	type CropperBackgroundImageProps
+} from './components/layers/CropperBackgroundImage.svelte';
+export {
+	default as CropperBackgroundWrapper,
+	type CropperBackgroundWrapperProps
+} from './components/layers/CropperBackgroundWrapper.svelte';
+
+// Gestures
+export {
+	default as DraggableArea,
+	type DraggableAreaProps
+} from './components/gestures/DraggableArea.svelte';
+export {
+	default as TransformableImage,
+	type TransformableImageProps
+} from './components/gestures/TransformableImage.svelte';
+export { TransformableImageEvent } from './components/gestures/TransformableImageEvent';
 
 // Preview
 export {
@@ -65,20 +80,17 @@ export {
 	type CropperPreviewProps,
 	type CropperPreviewInstance,
 	type CropperPreviewSource
-} from './components/helpers/CropperPreview.svelte';
+} from './components/preview/CropperPreview.svelte';
 export {
 	default as CropperPreviewBackground,
 	type CropperPreviewBackgroundProps
-} from './components/helpers/CropperPreviewBackground.svelte';
+} from './components/preview/CropperPreviewBackground.svelte';
 export {
 	default as CropperPreviewWrapper,
 	type CropperPreviewWrapperProps
-} from './components/helpers/CropperPreviewWrapper.svelte';
+} from './components/preview/CropperPreviewWrapper.svelte';
 
-// Lines and handlers
-export { default as SimpleLine } from './components/lines/SimpleLine.svelte';
-export { default as SimpleHandler } from './components/handlers/SimpleHandler.svelte';
-
+// Types
 export type {
 	CropperSettings,
 	SettingsExtension,
@@ -88,35 +100,13 @@ export type {
 	CropperInstance,
 	FixedCropperInstance,
 	FixedCropperSettings,
+	StencilOptions,
 	StencilConstraints,
 	CropperCallback,
 	CropperCallbacks,
 	MoveImageOptions,
 	ScaleImageOptions,
-	RotateImageOptions
-} from './types';
-export { getCropperContext, type CropperContext } from './context/cropper';
-export { default as Cropper } from './components/croppers/Cropper.svelte';
-export { default as FixedCropper } from './components/croppers/FixedCropper.svelte';
-export { styleToString } from './service/style';
-export { fillLayoutBoundary } from './service/boundary';
-export * from 'advanced-cropper';
-export type { StencilOptions } from './types';
-export type { StencilSize } from 'advanced-cropper/extensions/stencil-size';
-export {
-	normalizeMoveImageOptions,
-	type NormalizedMoveImageOptions
-} from './controllers/normalizeMoveImageOptions';
-export {
-	normalizeScaleImageOptions,
-	type NormalizedScaleImageOptions
-} from './controllers/normalizeScaleImageOptions';
-export {
-	normalizeRotateImageOptions,
-	type NormalizedRotateImageOptions
-} from './controllers/normalizeRotateImageOptions';
-
-export type {
+	RotateImageOptions,
 	PartProps,
 	CrossOrigin,
 	BoundaryHandle,
@@ -134,3 +124,23 @@ export type {
 	LineSnippetProps,
 	NativeMoveEvent
 } from './types';
+
+// Utilities
+export { styleToString } from './service/style';
+export { fillLayoutBoundary } from './service/boundary';
+export {
+	normalizeMoveImageOptions,
+	type NormalizedMoveImageOptions
+} from './controllers/normalizeMoveImageOptions';
+export {
+	normalizeScaleImageOptions,
+	type NormalizedScaleImageOptions
+} from './controllers/normalizeScaleImageOptions';
+export {
+	normalizeRotateImageOptions,
+	type NormalizedRotateImageOptions
+} from './controllers/normalizeRotateImageOptions';
+
+// Core re-export
+export * from 'advanced-cropper';
+export type { StencilSize } from 'advanced-cropper/extensions/stencil-size';

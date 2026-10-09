@@ -3,7 +3,7 @@
 	import type { ClassValue } from 'svelte/elements';
 	import type { MoveDirections } from 'advanced-cropper';
 
-	export interface DraggableElementProps {
+	export interface DraggableAreaProps {
 		class?: ClassValue;
 		style?: string;
 		children?: Snippet;
@@ -36,7 +36,7 @@
 		onEnter,
 		useAnchor = true,
 		activationDistance = 30
-	}: DraggableElementProps = $props();
+	}: DraggableAreaProps = $props();
 
 	// Gesture bookkeeping. Plain variables: none of it is rendered.
 	// The touches (or mouse position) of the previous event of the current gesture.

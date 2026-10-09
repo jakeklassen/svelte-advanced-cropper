@@ -1,15 +1,16 @@
-<script lang="ts">
-	import LineWrapper from '../service/LineWrapper.svelte';
-	import type { LineWrapperProps } from '../service/LineWrapper.svelte';
+<script lang="ts" module>
+	import type { LineWrapperProps } from '../primitives/LineWrapper.svelte';
 
-	let {
-		class: cssClass,
-		style,
-		position,
-		disabled,
-		onMove,
-		onMoveEnd
-	}: LineWrapperProps = $props();
+	export type SimpleLineProps = Pick<
+		LineWrapperProps,
+		'class' | 'style' | 'position' | 'disabled' | 'onMove' | 'onMoveEnd'
+	>;
+</script>
+
+<script lang="ts">
+	import LineWrapper from '../primitives/LineWrapper.svelte';
+
+	let { class: cssClass, style, position, disabled, onMove, onMoveEnd }: SimpleLineProps = $props();
 
 	let hovered = $state(false);
 </script>

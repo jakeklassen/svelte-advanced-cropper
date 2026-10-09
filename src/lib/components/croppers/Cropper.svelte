@@ -1,5 +1,5 @@
 <script lang="ts" module>
-	import type { SettingsExtension, CropperProps } from '../../types';
+	import type { SettingsExtension, CropperSettingProps, CropperProps } from '../../types';
 
 	export type { CropperProps } from '../../types';
 </script>
@@ -9,8 +9,10 @@
 	import CropperView from '../internal/CropperView.svelte';
 	import RegistrationCheck from '../internal/RegistrationCheck.svelte';
 
-	let props: CropperProps<E> = $props();
-	const controller = new CropperController<E>(() => props);
+	// Exclude validation-only keys when inferring from a spread props object.
+	type Extension = Omit<E, keyof CropperSettingProps>;
+	let props: CropperProps<NoInfer<Extension>> & { settings?: E } = $props();
+	const controller = new CropperController<Extension>(() => props);
 	export const {
 		reset,
 		refresh,

@@ -6,15 +6,11 @@
 <script lang="ts">
 	import { onDestroy, untrack } from 'svelte';
 	import type { Size } from 'advanced-cropper';
-	import {
-		StretchableBoundary,
-		type StretchableBoundaryMethods,
-		type StretchableBoundaryProps
-	} from '#lib';
+	import { StretchableBoundary, type BoundaryHandle, type StretchableBoundaryProps } from '#lib';
 
 	let { children, registerBoundary, ...props }: StretchableBoundaryProps = $props();
 
-	let boundary: StretchableBoundaryMethods | undefined = $state.raw();
+	let boundary: BoundaryHandle | undefined = $state.raw();
 
 	// A boundary whose stretch finishes only when the test releases it, like a custom
 	// boundary that measures asynchronously.

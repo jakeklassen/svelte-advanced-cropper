@@ -1,5 +1,5 @@
 <script lang="ts" module>
-	import type { TransformableImageProps } from './TransformableImage.svelte';
+	import type { TransformableImageProps } from '../gestures/TransformableImage.svelte';
 	import type { Snippet } from 'svelte';
 	import type { ClassValue } from 'svelte/elements';
 	import type { CropperTransitions, ImageTransform } from 'advanced-cropper';
@@ -29,7 +29,7 @@
 	import { normalizeMoveImageOptions } from '../../controllers/normalizeMoveImageOptions';
 	import { normalizeRotateImageOptions } from '../../controllers/normalizeRotateImageOptions';
 	import { normalizeScaleImageOptions } from '../../controllers/normalizeScaleImageOptions';
-	import TransformableImage from './TransformableImage.svelte';
+	import TransformableImage from '../gestures/TransformableImage.svelte';
 
 	let {
 		scaleImage = true,

@@ -21,7 +21,7 @@
 </script>
 
 <script lang="ts">
-	import DraggableArea from './DraggableElement.svelte';
+	import DraggableArea from '../gestures/DraggableArea.svelte';
 
 	let {
 		position,

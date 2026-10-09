@@ -1,7 +1,7 @@
 <script lang="ts">
 	import 'advanced-cropper/styles/index.scss';
 	import AsyncBoundary from './AsyncBoundary.svelte';
-	import StretchableBoundary from '../lib/components/service/StretchableBoundary.svelte';
+	import StretchableBoundary from '../lib/components/layers/StretchableBoundary.svelte';
 	import 'advanced-cropper/themes/default.scss';
 	import {
 		Cropper,

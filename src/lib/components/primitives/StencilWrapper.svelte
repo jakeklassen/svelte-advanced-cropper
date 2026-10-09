@@ -2,7 +2,7 @@
 	import type { Snippet } from 'svelte';
 	import type { ClassValue } from 'svelte/elements';
 	import type { CropperTransitions } from 'advanced-cropper';
-	import ArtificialTransition from './ArtificialTransition.svelte';
+	import ArtificialTransition from '../internal/ArtificialTransition.svelte';
 
 	interface Props {
 		children?: Snippet;

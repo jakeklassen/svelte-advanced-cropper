@@ -14,7 +14,7 @@ import type {
 import type { NormalizedMoveImageOptions } from './controllers/normalizeMoveImageOptions';
 import type { NormalizedScaleImageOptions } from './controllers/normalizeScaleImageOptions';
 import type { NormalizedRotateImageOptions } from './controllers/normalizeRotateImageOptions';
-import type { CropperPreviewSource } from './components/helpers/CropperPreview.svelte';
+import type { CropperPreviewSource } from './components/preview/CropperPreview.svelte';
 
 import type { Snippet } from 'svelte';
 import type { ClassValue } from 'svelte/elements';

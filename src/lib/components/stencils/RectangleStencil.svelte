@@ -39,11 +39,11 @@
 		isFunction,
 		type ResizeOptions
 	} from 'advanced-cropper';
-	import BoundingBox from '../service/BoundingBox.svelte';
-	import DraggableArea from '../service/DraggableElement.svelte';
-	import StencilGrid from '../service/StencilGrid.svelte';
-	import StencilOverlay from '../service/StencilOverlay.svelte';
-	import StencilWrapper from '../service/StencilWrapper.svelte';
+	import BoundingBox from '../primitives/BoundingBox.svelte';
+	import DraggableArea from '../gestures/DraggableArea.svelte';
+	import StencilGrid from '../primitives/StencilGrid.svelte';
+	import StencilOverlay from '../primitives/StencilOverlay.svelte';
+	import StencilWrapper from '../primitives/StencilWrapper.svelte';
 
 	let {
 		children,

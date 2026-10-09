@@ -35,7 +35,7 @@
 		crossOrigin?: CrossOrigin;
 		style?: string;
 		/**
-		 * The cropper to mirror: the value bound with `bind:this` on a cropper.
+		 * The cropper to preview: the value bound with `bind:this` on a cropper.
 		 * The Svelte binding is
 		 * already reactive, so the instance is passed directly.
 		 */
@@ -47,7 +47,7 @@
 	import { onDestroy, untrack } from 'svelte';
 	import { isGreater, ratio, stretchPreviewBoundary } from 'advanced-cropper';
 	import { listenForWindowResize } from '../../controllers/listenForWindowResize.svelte';
-	import StretchableBoundary from '../service/StretchableBoundary.svelte';
+	import StretchableBoundary from '../layers/StretchableBoundary.svelte';
 	import { RegistrationSlot } from '../../controllers/RegistrationSlot.svelte';
 	import type { BoundaryHandle } from '../../types';
 	import { fillLayoutBoundary } from '../../service/boundary';

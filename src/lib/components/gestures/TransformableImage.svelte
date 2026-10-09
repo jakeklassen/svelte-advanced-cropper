@@ -85,7 +85,7 @@
 		}
 	}
 
-	// Upstream creates the debounced function once, from the initial `timeout`.
+	// Keep one debounced function using the initial timeout.
 	const debouncedProcessEnd = debounce(
 		processEnd,
 		untrack(() => timeout)
