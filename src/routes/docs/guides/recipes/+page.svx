@@ -14,6 +14,8 @@
 	import previewResultsSource from '#site/demos/examples/PreviewResults.svelte?highlight';
 	import ResizeResultExample from '#site/demos/examples/ResizeResultExample.svelte';
 	import resizeResultSource from '#site/demos/examples/ResizeResultExample.svelte?highlight';
+	import PrintSizeExample from '#site/demos/examples/PrintSizeExample.svelte';
+	import printSizeSource from '#site/demos/examples/PrintSizeExample.svelte?highlight';
 	import PreviewResultExample from '#site/demos/examples/PreviewResultExample.svelte';
 	import previewResultSource from '#site/demos/examples/PreviewResultExample.svelte?highlight';
 	import LoadImageExample from '#site/demos/examples/LoadImageExample.svelte';
@@ -215,6 +217,31 @@ const canvas = cropper.getCanvas({
 </Example>
 
 Scaling uses the browser's built-in canvas drawing. If the quality isn't good enough for your use case, resize the canvas with a dedicated library such as [pica](https://github.com/nodeca/pica) or [downscale](https://github.com/ytiurin/downscale).
+
+## Check the crop's resolution
+
+When the crop becomes a print, a sticker or anything else with a fixed output size, a small crop gets upscaled and looks soft. You can warn about that while the user crops. `getCoordinates()` gives the crop's size in the photo's own pixels; compare it with the pixels the output needs, such as 1200 × 1200 for a 4-inch print at 300 DPI.
+
+The cropper's getters are reactive, so a `$derived` keeps the check up to date as the crop moves, with no `onChange` handler:
+
+```svelte
+<script lang="ts">
+	import { Cropper, type CropperRef } from 'svelte-advanced-cropper';
+
+	let cropper: CropperRef | undefined = $state();
+
+	let crop = $derived(cropper?.getCoordinates());
+	let tooSmall = $derived(crop ? crop.width < 1200 || crop.height < 1200 : false);
+</script>
+```
+
+Pick a print size, then resize the crop to see the warning come and go:
+
+<Example source={printSizeSource} title="PrintSizeExample">
+	<PrintSizeExample />
+</Example>
+
+To forbid a crop below the target instead, set [`minWidth`](/docs/components/Cropper#minwidth) and [`minHeight`](/docs/components/Cropper#minheight), which are also in the photo's pixels. That's stricter than it looks: a photo smaller than the target then can't be cropped to it at all, so a warning is often kinder, letting people whose cameras take smaller photos carry on.
 
 ## Preview the result
 
