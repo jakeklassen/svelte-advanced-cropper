@@ -64,6 +64,25 @@ Use the URL it returns as the cropper's `src`, show a message while it works, an
 
 svelte-advanced-cropper doesn't convert HEIC itself. heic-to is about 780 KB compressed and LGPL-licensed, which would be a heavy cost for every app using the cropper; with the dynamic import above, only someone who uploads a HEIC photo in a browser that can't decode it downloads it. Avoid `heic2any`, which many guides still recommend: it hasn't been updated since 2023 and fails on the 24 MP photos recent iPhones take by default.
 
+## Picked photos that stop loading later
+
+**Symptom:** a photo the customer picked a few minutes ago won't load when the cropper finally opens, and `onError` fires, though the same photo showed fine as a thumbnail right after it was picked. It happens mostly on Android, and is hard to reproduce on purpose.
+
+**Cause:** a `File` from `<input type="file">` is a reference to the photo, not a copy of it. On Android the reference is usually a handle onto a document that belongs to another app, and the permission to read it can run out while your page is still open. On a desktop, the same happens if the file is changed or deleted after it was picked. From then on the browser refuses every read: `file.arrayBuffer()` throws a `NotReadableError`, and an object URL made from the file stops loading. The cropper only ever sees that URL, so reporting `onError` is all it can do.
+
+**Fix:** copy the bytes as soon as the photo is picked, while reading still works, and make the object URL from the copy:
+
+```ts
+async function pickedPhotoUrl(file: File): Promise<string> {
+	// A copy this page holds stays readable for as long as the tab is open.
+	const copy = new Blob([await file.arrayBuffer()], { type: file.type });
+
+	return URL.createObjectURL(copy);
+}
+```
+
+The copy takes as much memory as the file until you revoke its URL, so revoke it once the photo is replaced. The `croppablePhotoUrl` helper in the previous section already copies: a photo it converts from HEIC is a new file by construction, and any other photo is copied as above.
+
 ## Exports that fail on phones
 
 **Symptom:** exporting works on your desktop, but on a phone the upload sometimes arrives empty or never happens, and nothing is logged. Or the exported JPEG has black corners where the photo was transparent.

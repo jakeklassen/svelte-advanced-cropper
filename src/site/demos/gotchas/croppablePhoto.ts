@@ -38,15 +38,19 @@ async function canDecode(file: Blob): Promise<boolean> {
 /**
  * Returns an object URL the cropper can load for a picked photo. A HEIC photo the browser
  * can't decode is converted to JPEG first, with heic-to, which is only downloaded then.
- * Rejects when the conversion fails. Revoke the URL once the photo is replaced.
+ * Any other photo is copied, because a picked file can stop being readable later. Rejects
+ * when the file can't be read or converted. Revoke the URL once the photo is replaced.
  */
 export async function croppablePhotoUrl(file: File): Promise<string> {
 	if ((await isHeic(file)) && !(await canDecode(file))) {
 		const { heicTo } = await import('heic-to');
+		// The JPEG is built from bytes this page holds, so it's already a copy.
 		const jpeg = await heicTo({ blob: file, type: 'image/jpeg', quality: 0.92 });
 
 		return URL.createObjectURL(jpeg);
 	}
 
-	return URL.createObjectURL(file);
+	const copy = new Blob([await file.arrayBuffer()], { type: file.type });
+
+	return URL.createObjectURL(copy);
 }
