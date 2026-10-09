@@ -35,8 +35,6 @@
 		top
 	}: ArtificialTransitionProps = $props();
 
-	let root: HTMLDivElement | undefined = $state();
-
 	// The box drawn by the current animation frame. Deliberately not reactive: each
 	// frame writes it straight to the DOM.
 	const frameBox: Box = untrack(() => ({ width, height, left, top }));
@@ -45,31 +43,33 @@
 
 	const transition = createTransition(() => transitions);
 
-	$effect(() => {
-		const target: Box = { width, height, left, top };
-		untrack(() => {
-			if (deepCompare(targetBox, target)) {
-				return;
-			}
-
-			// An interrupted animation continues from where it is now.
-			const start = transition.active ? { ...frameBox } : targetBox;
-			targetBox = target;
-			transition.run((progress) => {
-				for (const property of BOX_PROPERTIES) {
-					const from = start[property];
-					const to = target[property];
-					frameBox[property] = isNumber(from) && isNumber(to) ? from + (to - from) * progress : to;
+	// Own DOM animation work with the element that receives each frame.
+	function animate(root: HTMLDivElement) {
+		$effect(() => {
+			const target: Box = { width, height, left, top };
+			untrack(() => {
+				if (deepCompare(targetBox, target)) {
+					return;
 				}
 
-				if (root) {
+				// An interrupted animation continues from where it is now.
+				const start = transition.active ? { ...frameBox } : targetBox;
+				targetBox = target;
+				transition.run((progress) => {
+					for (const property of BOX_PROPERTIES) {
+						const from = start[property];
+						const to = target[property];
+						frameBox[property] =
+							isNumber(from) && isNumber(to) ? from + (to - from) * progress : to;
+					}
+
 					root.style.width = `${frameBox.width}px`;
 					root.style.height = `${frameBox.height}px`;
 					root.style.transform = `translate3d(${frameBox.left}px, ${frameBox.top}px, 0px)`;
-				}
+				});
 			});
 		});
-	});
+	}
 
 	// While a transition runs, render from the in-flight frame so that a re-render does
 	// not jump to the target and fight the animation.
@@ -78,7 +78,7 @@
 
 <div
 	{style}
-	bind:this={root}
+	{@attach animate}
 	class={['advanced-cropper-artificial-transition', cssClass]}
 	style:left="0px"
 	style:top="0px"

@@ -1,21 +1,38 @@
 <script lang="ts">
+	import { onDestroy } from 'svelte';
+	import type { HighlightedCode } from '#site/highlight-types.ts';
+
 	interface Props {
-		/** Pre-highlighted HTML from a `?highlight` import. */
-		html: string;
+		/** Build-generated tokens from a `?highlight` import. */
+		highlighted: HighlightedCode;
 		code: string;
 		title?: string;
 	}
 
-	let { html, code, title }: Props = $props();
+	let { highlighted, code, title }: Props = $props();
 
 	let label: 'Copy' | 'Copied' | 'Copy failed' = $state('Copy');
 	let resetTimer: ReturnType<typeof setTimeout> | undefined;
+	let active = true;
+
+	onDestroy(() => {
+		active = false;
+		clearTimeout(resetTimer);
+	});
 
 	async function copy() {
 		try {
 			await navigator.clipboard.writeText(code);
+			if (!active) {
+				return;
+			}
+
 			label = 'Copied';
 		} catch {
+			if (!active) {
+				return;
+			}
+
 			// No clipboard access (insecure context, denied permission).
 			label = 'Copy failed';
 		}
@@ -29,7 +46,19 @@
 <div class="code-block">
 	{#if title}<div class="code-block__title">{title}</div>{/if}
 	<button type="button" class="code-block__copy" onclick={copy}>{label}</button>
-	{@html html}
+	<!-- Keyboard users need to focus and scroll the code region. -->
+	<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+	<pre
+		class="shiki shiki-themes github-light github-dark"
+		style={highlighted.style}
+		role="region"
+		aria-label={title ?? 'Source code'}
+		tabindex="0"><code
+			>{#each highlighted.lines as line (line)}<span class="line"
+					>{#each line as token (token.offset)}<span style={token.style}>{token.content}</span
+						>{/each}</span
+				>{/each}</code
+		></pre>
 </div>
 
 <style>

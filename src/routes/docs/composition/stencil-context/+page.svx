@@ -9,7 +9,7 @@
 
 Call `getCropperContext()` during component initialization. Its stable `cropper` API is available immediately. Register a getter for stencil options before state-dependent markup; the cropper reads it before the first reset and tracks subsequent reactive changes.
 
-<CodeBlock html={source.html} code={source.code} />
+<CodeBlock highlighted={source.highlighted} code={source.code} />
 
 <StencilHierarchy />
 

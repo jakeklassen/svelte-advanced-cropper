@@ -22,7 +22,8 @@
 	}: StencilGridProps = $props();
 
 	// The grid keeps its size while hidden, so that it does not jump between 3x3 and
-	// 9x9 while fading out.
+	// 9x9 while fading out. These are the last rendered dimensions, not a derivation
+	// of the current hidden props; an effect records the visible DOM configuration.
 	let currentColumns = $state(untrack(() => columns));
 	let currentRows = $state(untrack(() => rows));
 

@@ -23,7 +23,7 @@ A zoom button applies a relative factor. A slider needs an absolute value that s
 
 `CustomCropper` wraps `FixedCropper`, forwards its typed props, and uses an inert rectangle unless the caller supplies children. It exposes the inner instance through an application-owned bindable `cropper` prop. Its `wrapper` snippet renders the custom toolbar wrapper.
 
-<CodeBlock html={cropperSource.html} code={cropperSource.code} />
+<CodeBlock highlighted={cropperSource.highlighted} code={cropperSource.code} />
 
 ## Read zoom with derived state
 
@@ -33,7 +33,7 @@ The normalized absolute value runs from `0` at the minimum allowed zoom to `1` a
 
 The wrapper reads state and settings with `$derived`, then derives absolute zoom. `getZoomFactor` converts a requested absolute value back to the relative factor accepted by `zoomImage`.
 
-<CodeBlock html={wrapperSource.html} code={wrapperSource.code} />
+<CodeBlock highlighted={wrapperSource.highlighted} code={wrapperSource.code} />
 
 ## Keep the wrapper contract
 

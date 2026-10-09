@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { observeChanges } from '#lib/controllers/observeChanges.svelte.ts';
 
 	interface Props {
@@ -10,7 +11,7 @@
 
 	let data = $state.raw({ value: 1, other: 1 });
 
-	$effect(() => {
+	onMount(() => {
 		if (changeOnMount) {
 			data = { value: 2, other: 1 };
 		}

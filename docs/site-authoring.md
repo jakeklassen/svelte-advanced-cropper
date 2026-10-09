@@ -49,7 +49,7 @@ path is added at build time.
 ```
 
 - `Example`: renders the live demo plus a "Show code" toggle with the demo's real, highlighted source. Pass extra files with `files={{ 'Helper.svelte': helperSource }}` (each imported with `?highlight`).
-- `CodeBlock html={x.html} code={x.code}`: shows a `?highlight` import without a demo.
+- `CodeBlock highlighted={x.highlighted} code={x.code}`: shows a `?highlight` import without a demo.
 - Plain fenced code blocks (`svelte`, `ts`, `css`, `shell`, …) are highlighted at build time. Use them for snippets that aren't whole demo files.
 - `Admonition type`: `note | tip | info | warning | danger`.
 - `Tabs` / `TabItem label="…"`.
@@ -87,6 +87,8 @@ The site defaults to dark, with a toggle in the navbar (`data-theme` on `<html>`
 - Deliberate demo visuals keep their own colours: the cropper's black backdrop, stencil and overlay colours, the showcase brand palettes, `--color-accent` (#61dafb). Give any such element a complete colour pair (background and text) so it doesn't inherit a colour that vanishes in one theme.
 - Code fences are highlighted for both themes automatically.
 - Check new demos in both themes before finishing.
+
+Run `mise x -- pnpm lint:svelte` after Svelte edits; fix issues and review every suggestion, recording retained suggestions with a reason in the gate allowlist.
 
 ## Quality bar
 

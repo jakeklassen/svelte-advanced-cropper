@@ -7,7 +7,7 @@
 
 `CropperInstance<E>` is a structural type for `bind:this` and callback arguments. It is not a constructor. `FixedCropperInstance<E>` adds `FixedCropperSettings` to the extension. Use a `$state` binding and `$derived` reads:
 
-<CodeBlock html={source.html} code={source.code} />
+<CodeBlock highlighted={source.highlighted} code={source.code} />
 
 ## Reading and changing state
 

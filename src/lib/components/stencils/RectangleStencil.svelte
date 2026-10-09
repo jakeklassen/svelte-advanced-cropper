@@ -142,7 +142,7 @@
 	>
 		<BoundingBox
 			reference={state.coordinates}
-			class={'advanced-cropper-rectangle-stencil__bounding-box'}
+			class="advanced-cropper-rectangle-stencil__bounding-box"
 			{handlers}
 			{handler}
 			{lines}
@@ -155,18 +155,18 @@
 				disabled={!moveAllowed}
 				{onMove}
 				onMoveEnd={cropper.moveCoordinatesEnd}
-				class={'advanced-cropper-rectangle-stencil__draggable-area'}
+				class="advanced-cropper-rectangle-stencil__draggable-area"
 			>
-				<StencilOverlay class={'advanced-cropper-rectangle-stencil__overlay'}>
+				<StencilOverlay class="advanced-cropper-rectangle-stencil__overlay">
 					{#if grid}
 						<StencilGrid
 							visible={cropper.hasInteractions()}
 							columns={gridSize}
 							rows={gridSize}
-							class={'advanced-cropper-rectangle-stencil__grid'}
+							class="advanced-cropper-rectangle-stencil__grid"
 						/>
 					{/if}
-					<div class={'advanced-cropper-rectangle-stencil__preview'}></div>
+					<div class="advanced-cropper-rectangle-stencil__preview"></div>
 				</StencilOverlay>
 				{@render children?.()}
 			</DraggableArea>

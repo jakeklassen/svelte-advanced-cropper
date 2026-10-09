@@ -1,0 +1,120 @@
+{
+	"src/site/demos/examples/CustomRestrictionsExample.svelte": [
+		{
+			"suggestion": "You are calling a function inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "Owns the current upload object URL; teardown revokes it on replacement and destruction. This is browser resource cleanup, not derived state."
+		},
+		{
+			"suggestion": "The usage of `bind:this` can often be replaced with an easier to read `action` or even better an `attachment`. Consider using the latter if possible.",
+			"reason": "The upload button needs to click a separate hidden file input; a DOM binding is the direct connection between these controls."
+		}
+	],
+	"src/site/demos/examples/DefaultTransformsExample.svelte": [
+		{
+			"suggestion": "You are calling a function inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "Owns the current upload object URL; teardown revokes it on replacement and destruction. This is browser resource cleanup, not derived state."
+		},
+		{
+			"suggestion": "The usage of `bind:this` can often be replaced with an easier to read `action` or even better an `attachment`. Consider using the latter if possible.",
+			"reason": "The upload button needs to click a separate hidden file input; a DOM binding is the direct connection between these controls."
+		}
+	],
+	"src/site/demos/examples/LoadImageExample.svelte": [
+		{
+			"suggestion": "You are calling a function inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "Owns the current upload object URL; teardown revokes it on replacement and destruction. This is browser resource cleanup, not derived state."
+		},
+		{
+			"suggestion": "The usage of `bind:this` can often be replaced with an easier to read `action` or even better an `attachment`. Consider using the latter if possible.",
+			"reason": "The upload button needs to click a separate hidden file input; a DOM binding is the direct connection between these controls."
+		}
+	],
+	"src/site/demos/examples/PreviewResultExample.svelte": [
+		{
+			"suggestion": "You are calling a function inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "Owns the current upload object URL; teardown revokes it on replacement and destruction. This is browser resource cleanup, not derived state."
+		},
+		{
+			"suggestion": "The usage of `bind:this` can often be replaced with an easier to read `action` or even better an `attachment`. Consider using the latter if possible.",
+			"reason": "The upload button needs to click a separate hidden file input; a DOM binding is the direct connection between these controls."
+		}
+	],
+	"src/site/demos/home/CroppersWizard.svelte": [
+		{
+			"suggestion": "You are calling a function inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "Owns the current uploaded photo URL and revokes it on replacement and destruction; the effect synchronizes browser resource lifetime."
+		},
+		{
+			"suggestion": "The usage of `bind:this` can often be replaced with an easier to read `action` or even better an `attachment`. Consider using the latter if possible.",
+			"reason": "The upload button opens a separate hidden file input through its bound DOM element."
+		}
+	],
+	"src/site/demos/gotchas/HeicUploadExample.svelte": [
+		{
+			"suggestion": "You are calling a function inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "Owns the current uploaded photo URL and revokes it on replacement and destruction; the effect synchronizes browser resource lifetime."
+		}
+	],
+	"src/routes/docs/+layout.svelte": [
+		{
+			"suggestion": "The usage of `bind:this` can often be replaced with an easier to read `action` or even better an `attachment`. Consider using the latter if possible.",
+			"reason": "The article element is passed to the table of contents, which observes its headings across navigation."
+		}
+	],
+	"src/site/demos/algorithms/ResizeAlgorithm.svelte": [
+		{
+			"suggestion": "The usage of `bind:this` can often be replaced with an easier to read `action` or even better an `attachment`. Consider using the latter if possible.",
+			"reason": "Mount and window resize handlers measure this container and constrain the draggable box to its layout dimensions."
+		}
+	],
+	"src/site/demos/gotchas/DialogExample.svelte": [
+		{
+			"suggestion": "The usage of `bind:this` can often be replaced with an easier to read `action` or even better an `attachment`. Consider using the latter if possible.",
+			"reason": "The cropper ready callback compares its measured boundary with this container during the dialog transition."
+		}
+	],
+	"src/site/demos/gotchas/ScaledContainerExample.svelte": [
+		{
+			"suggestion": "The usage of `bind:this` can often be replaced with an easier to read `action` or even better an `attachment`. Consider using the latter if possible.",
+			"reason": "Window pointer handlers measure the stencil within this specific frame to demonstrate transform-aware gesture distances."
+		}
+	],
+	"src/site/demos/tutorials/ImageEditor/AdjustableImage.svelte": [
+		{
+			"suggestion": "The usage of `bind:this` can often be replaced with an easier to read `action` or even better an `attachment`. Consider using the latter if possible.",
+			"reason": "The redraw effect and image load callback share the canvas; the separate source attachment registers its filtered pixels for export."
+		}
+	],
+	"src/site/demos/tutorials/ImageEditor/Navigation.svelte": [
+		{
+			"suggestion": "The usage of `bind:this` can often be replaced with an easier to read `action` or even better an `attachment`. Consider using the latter if possible.",
+			"reason": "The upload button opens the separate hidden file input through its bound DOM element."
+		}
+	],
+	"src/site/demos/examples/RefreshExample.svelte": [
+		{
+			"suggestion": "You are calling a function inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "Synchronizes the core boundary with dimensions after Svelte updates the container DOM."
+		}
+	],
+	"src/site/demos/gotchas/RefitExample.svelte": [
+		{
+			"suggestion": "You are calling a function inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "Refreshes the core boundary after container dimensions or the selected resize strategy change."
+		},
+		{
+			"suggestion": "You are calling the function `refit` inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "Measures the rendered boundary, then applies the core visible-area operation; this is engine synchronization."
+		}
+	],
+	"src/tests/EffectHarness.svelte": [
+		{
+			"suggestion": "You are calling a function inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "Regression harness deliberately calls core mutations inside an effect to prove their internal reads do not become reactive dependencies."
+		},
+		{
+			"suggestion": "You are calling the function `onEffectRun` inside an $effect. Please check if the function is reassigning a stateful variable because that's considered malpractice and check if it could use  `$derived` instead. Ignore this suggestion if you are sure this function is not assigning any stateful variable or if you can't check if it does.",
+			"reason": "Reports effect executions to the test so unintended engine subscriptions and reruns are observable."
+		}
+	]
+}

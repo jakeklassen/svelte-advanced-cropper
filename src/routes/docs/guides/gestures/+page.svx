@@ -35,7 +35,7 @@ Replace the `backgroundWrapper` snippet when the rule depends on the event. The 
 	<CropperScrollExample />
 </Example>
 
-<CodeBlock html={wrapperSource.html} code={wrapperSource.code} />
+<CodeBlock highlighted={wrapperSource.highlighted} code={wrapperSource.code} />
 
 The wrapper composes `CropperBackgroundWrapper` and uses its `onEvent` callback. Calling `preventDefault()` on the supplied `TransformableImageEvent` vetoes the image transform. This differs from calling it on the native event, which prevents the browser's own action. Accepted image gestures should not also scroll the page.
 

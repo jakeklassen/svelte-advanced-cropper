@@ -25,7 +25,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Docs site (`src/routes`, `src/site`)
 
 - SvelteKit with `adapter-static`, fully prerendered. Pages are mdsvex `.svx` files at `src/routes/docs/**/+page.svx`, with lowercase kebab-case URLs. `src/site/nav.ts` drives the sidebar, prev/next links and canonical e2e page sweep. There are no legacy redirects.
-- Demos live in `src/site/demos/**` and import the library by package name (`'svelte-advanced-cropper'`, a Vite alias plus a tsconfig path to `src/lib`), so the source we display is what users write. `import x from './Demo.svelte?highlight'` returns `{ code, html }`, highlighted by Shiki at build time (a plugin in `vite.config.ts`). `Example.svelte` shows the demo plus its source.
+- Demos live in `src/site/demos/**` and import the library by package name (`'svelte-advanced-cropper'`, a Vite alias plus a tsconfig path to `src/lib`), so the source we display is what users write. `import x from './Demo.svelte?highlight'` returns `{ code, highlighted }`, highlighted by Shiki at build time (a plugin in `vite.config.ts`). `Example.svelte` shows the demo plus its source.
 - **Before adding or editing docs content, read `docs/site-authoring.md`.** It covers the rules (original prose only, because upstream's text belongs to Norserium), mdsvex gotchas and theme scoping.
 - Light/dark: dark by default with a navbar toggle. Page surfaces use the colour tokens in `src/site/styles/site.css`; see "Light and dark themes" in `docs/site-authoring.md`.
 - Links in markdown are root-relative. A rehype plugin adds `BASE_PATH`. In Svelte, use `href()` / `image()` from `#site/paths.ts`.
@@ -38,6 +38,7 @@ Tool versions are pinned in `mise.toml`. Run the commands below through `mise x 
 - `pnpm build`: site build, then `svelte-package` → `dist/` + `build-styles` + `publint`
 - `BASE_PATH=/svelte-advanced-cropper STRICT_LINKS=1 pnpm exec vite build`: the Pages build. `STRICT_LINKS` fails the build on broken internal links or anchors. CI and deploys use it.
 - `pnpm check`: `svelte-check`, the only source of Svelte template, compiler and a11y diagnostics. `--config ./vite.config.ts` stops it crawling the whole tree (including `tmp/` clones) for Svelte configs
+- `pnpm lint:svelte`: official Svelte autofixer over every Svelte file in src; issues and suggestions without an exact reviewed entry and reason in `scripts/svelte-autofix-allow.json` fail. SCSS is preprocessed before analysis.
 - `pnpm lint`: oxlint, type-aware via `oxlint-tsgolint` (`.oxlintrc.json`). It lints only `<script>` blocks in `.svelte` files.
 - `pnpm format` / `pnpm format:check`: oxfmt (`.oxfmtrc.json`)
 - `pnpm test`: unit tests once, then e2e
@@ -58,6 +59,7 @@ Test gotcha: the core ignores `moveCoordinates` while a transition runs. Tests t
 
 - `tmp/` is git-ignored and the **only** place for scratch files. Never use the system temp dir. It also holds the upstream reference clones (`tmp/react-advanced-cropper`, `tmp/advanced-cropper`, and the old attempt in `tmp/old-svelte-advanced-cropper`). If they're missing, re-clone them with the commands in README.md.
 - SvelteKit 3 removed `$lib`. Use the `#lib` / `#site/*` subpath imports (package.json `imports`). In the site, import `.ts` modules with their extension (`#site/paths.ts`).
+- Agents must load both skills in `.agents/skills/` (`svelte-code-writer` and `svelte-core-bestpractices`) and run the autofixer on Svelte files they touch.
 - Runes mode is forced for all project files.
 - Strong types: no `any`, no unchecked casts where a real type works, and no non-null assertions (`!`, enforced by `typescript/no-non-null-assertion`).
 - Formatting: tabs, single quotes, no trailing commas, width 100. oxfmt formats `.svelte` files too (`"svelte": true`). It does not format `.svx` pages, so keep code samples in them in the same style by hand.

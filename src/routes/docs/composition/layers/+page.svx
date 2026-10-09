@@ -8,7 +8,7 @@
 
 A layer snippet receives the current cropper, positioning classes and the services that layer needs. Spread its argument into the default building block, then add your own controls. This example wraps image gestures with a scrolling notification. The [snippet contracts](/docs/reference/snippets) list every field.
 
-<CodeBlock html={source.html} code={source.code} />
+<CodeBlock highlighted={source.highlighted} code={source.code} />
 
 <CropperStructure />
 

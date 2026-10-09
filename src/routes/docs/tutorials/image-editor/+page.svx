@@ -34,15 +34,15 @@ Changing an adjustment redraws the canvas without changing `src` or resetting th
 
 `AdjustableImage` loads the photo through `CropperSource` with `bind:element`, then draws it into a canvas. An effect tracks the adjustment values; the source's load event triggers the first draw. The filter helper uses native canvas filters when supported and a pixel-processing fallback otherwise.
 
-<CodeBlock html={imageSource.html} code={imageSource.code} />
+<CodeBlock highlighted={imageSource.highlighted} code={imageSource.code} />
 
-<CodeBlock html={filtersSource.html} code={filtersSource.code} />
+<CodeBlock highlighted={filtersSource.highlighted} code={filtersSource.code} />
 
 ## Register the filtered export source
 
 `CropperBackgroundSnippetProps` supplies `cropper`, `crossOrigin`, `class`, `style` and `attachSource`. The background computes image placement with `getBackgroundStyle` and forwards those values to `AdjustableImage`.
 
-<CodeBlock html={backgroundSource.html} code={backgroundSource.code} />
+<CodeBlock highlighted={backgroundSource.highlighted} code={backgroundSource.code} />
 
 The actual canvas carries `{@attach attachSource?.(readiness.ready)}`. Each image generation owns a readiness promise, resolved after its first complete filtered draw. With canvas enabled, cropper `onReady` waits for that source. Without a current ready source, `getCanvas()` returns `null`; it does not silently export the unfiltered photo.
 
@@ -52,7 +52,7 @@ For a production background with asynchronous drawing, reject readiness when loa
 
 The preview's `background` snippet receives a read-only `preview` source and its fitted `size`. `getPreviewStyle` positions the same adjusted image within that space. It needs no export-source attachment because previews do not export pixels.
 
-<CodeBlock html={previewSource.html} code={previewSource.code} />
+<CodeBlock highlighted={previewSource.highlighted} code={previewSource.code} />
 
 Passing the bound cropper to `CropperPreview` keeps geometry reactive. Passing the same adjustments to both backgrounds keeps the pixels consistent. The download action calls `getCanvas()` on the cropper, so its result comes from the registered filtered canvas.
 

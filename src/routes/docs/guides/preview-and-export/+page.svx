@@ -71,7 +71,7 @@ Compare the selected pixel dimensions with the output requirement: a 4-inch squa
 
 Use `canvas.toBlob()` for binary output. Treat its `null` result as a failure and report it; a large image or memory pressure can prevent encoding. This helper retries at a smaller size and releases the output canvas's pixels after encoding.
 
-<CodeBlock html={exportSource.html} code={exportSource.code} />
+<CodeBlock highlighted={exportSource.highlighted} code={exportSource.code} />
 
 `getCanvas()` reuses the same output canvas on later calls. Encode or copy its pixels before another export. The library releases the spare canvas used for transforms, but the returned canvas stays allocated until it is resized or the cropper is destroyed. Serialize exports if you also shrink that shared canvas.
 

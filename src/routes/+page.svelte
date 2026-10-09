@@ -91,7 +91,7 @@
 		<div class="code-wrapper">
 			<div class="code">
 				<CodeBlock
-					html={gettingStarted.html}
+					highlighted={gettingStarted.highlighted}
 					code={gettingStarted.code}
 					title="GettingStarted.svelte"
 				/>

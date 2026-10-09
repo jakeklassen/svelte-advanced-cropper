@@ -52,7 +52,7 @@ Aspect-ratio, size and position restrictions still apply, so the result can diff
 
 For an animated reset after repeated rotations, use `getCloserAngle` to choose the equivalent default angle nearest the current rotation before calling `setState`. The composed cropper below shows both the comparison and reset action:
 
-<CodeBlock html={defaultCropperSource.html} code={defaultCropperSource.code} />
+<CodeBlock highlighted={defaultCropperSource.highlighted} code={defaultCropperSource.code} />
 
 `refresh()` measures layout while preserving the current crop where restrictions allow; it is not a reset. See [layout and lifecycle](/docs/guides/layout-and-lifecycle).
 

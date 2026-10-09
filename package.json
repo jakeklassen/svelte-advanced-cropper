@@ -60,7 +60,8 @@
 		"test:e2e": "playwright test",
 		"test:e2e:install": "playwright install chromium",
 		"version-packages": "changeset version && oxfmt CHANGELOG.md package.json",
-		"release": "changeset publish"
+		"release": "changeset publish",
+		"lint:svelte": "node scripts/svelte-autofix.ts"
 	},
 	"dependencies": {
 		"advanced-cropper": "~0.17.1"

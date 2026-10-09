@@ -25,7 +25,7 @@ The stencil reads its cropper from context and registers a getter for that ratio
 
 `StencilWrapper` receives displayed coordinates. `BoundingBox` handles resizing, `DraggableArea` handles movement, and `StencilOverlay` shades the outside. The guide layer uses percentages of the full crop so its cut line and safe area stay aligned at every zoom.
 
-<CodeBlock html={stencilSource.html} code={stencilSource.code} />
+<CodeBlock highlighted={stencilSource.highlighted} code={stencilSource.code} />
 
 The guide elements have `pointer-events: none`; dragging reaches the stencil beneath them. All interaction primitives inherit `context.disabled` and report completion to the cropper.
 

@@ -28,7 +28,6 @@
 
 	let { class: cssClass, label, value = $bindable(0) }: Props = $props();
 
-	let track: HTMLDivElement | undefined = $state();
 	let width = $state(0);
 	let dragging = $state(false);
 
@@ -41,28 +40,27 @@
 	const handleInsideDot = $derived((Math.abs(value) * width) / 2 <= 8);
 	const formattedValue = $derived(`${value > 0 ? '+' : ''}${Math.round(100 * value)}`);
 
-	function setValueFromPointer(clientX: number) {
-		if (track) {
-			const rect = track.getBoundingClientRect();
-			value = clamp((2 * (clientX - rect.left)) / rect.width - 1);
-		}
+	function setValueFromPointer(event: PointerEvent & { currentTarget: HTMLDivElement }) {
+		const track = event.currentTarget;
+		const rect = track.getBoundingClientRect();
+		value = clamp((2 * (event.clientX - rect.left)) / rect.width - 1);
 	}
 
 	// Pointer capture keeps the pointer events coming here while the drag leaves the slider.
-	function onpointerdown(event: PointerEvent) {
+	function onpointerdown(event: PointerEvent & { currentTarget: HTMLDivElement }) {
 		if (event.button !== 0) {
 			return;
 		}
 
 		dragging = true;
-		track?.setPointerCapture(event.pointerId);
-		setValueFromPointer(event.clientX);
+		event.currentTarget.setPointerCapture(event.pointerId);
+		setValueFromPointer(event);
 	}
 
-	function onpointermove(event: PointerEvent) {
+	function onpointermove(event: PointerEvent & { currentTarget: HTMLDivElement }) {
 		if (dragging) {
 			event.preventDefault();
-			setValueFromPointer(event.clientX);
+			setValueFromPointer(event);
 		}
 	}
 
@@ -76,7 +74,6 @@
 </script>
 
 <div
-	bind:this={track}
 	bind:clientWidth={width}
 	class={['image-editor-slider', cssClass]}
 	role="slider"

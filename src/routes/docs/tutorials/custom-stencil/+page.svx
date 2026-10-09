@@ -34,7 +34,7 @@ Two `DraggableArea` instances handle the body and the resize control. They insta
 
 The resize callback uses the `center` anchor and horizontal displacement for both dimensions. Moving right grows the circle evenly; moving left shrinks it. The registered ratio keeps it square.
 
-<CodeBlock html={stencilSource.html} code={stencilSource.code} />
+<CodeBlock highlighted={stencilSource.highlighted} code={stencilSource.code} />
 
 Each gesture calls its matching completion method: `moveCoordinatesEnd` for the body and `resizeCoordinatesEnd` for the handle. These end interaction state and allow pending reconciliation to run. When composing `BoundingBox` controls instead, preserve the native event in `onMove` forwarding so modifier-key behaviour survives.
 

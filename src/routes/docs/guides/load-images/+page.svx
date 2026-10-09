@@ -41,7 +41,7 @@ A remote source may fail because of [CORS](/docs/guides/cross-origin), even if a
 
 The cropper uses the browser's decoder; it does not convert HEIC itself. This helper inspects the file, tries native decoding, and dynamically imports a converter only when needed. Keep conversion and loading error messages in your UI.
 
-<CodeBlock html={photoSource.html} code={photoSource.code} />
+<CodeBlock highlighted={photoSource.highlighted} code={photoSource.code} />
 
 <Example source={HeicUploadExampleSource} title="HeicUploadExample" files={{ 'croppablePhoto.ts': HeicUploadExampleFile0 }}>
 	<HeicUploadExample />

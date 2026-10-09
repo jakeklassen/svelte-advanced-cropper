@@ -1,6 +1,8 @@
 import type { StencilOptions } from '../types';
 
 export class StencilRegistry {
+	// Membership is published through revision after each token-owned mutation.
+	// Keep storage untracked so reads observe the committed selection, not intermediate entries.
 	private entries = new Map<symbol, () => StencilOptions>();
 	private revision = $state(0);
 	epoch = 0;
