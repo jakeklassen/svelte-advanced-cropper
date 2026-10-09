@@ -71,7 +71,7 @@ import 'svelte-advanced-cropper/style.css';
 
 ## Minimal working example
 
-The cropper fills its container, so give it (or its parent) a size.
+The cropper fills its container, so give it (or its parent) a size. The line under it shows `getCoordinates()`, the crop in the photo's own pixels, updating as you move the crop.
 
 <Example {source} title="GettingStartedExample">
 	<GettingStartedExample />

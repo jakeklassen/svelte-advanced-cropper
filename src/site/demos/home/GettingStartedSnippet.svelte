@@ -5,7 +5,7 @@
 	const src = '/images/photo.jpg';
 
 	function onChange(cropper: CropperRef) {
-		console.log(cropper.getCoordinates(), cropper.getCanvas());
+		console.log(cropper.getCoordinates());
 	}
 </script>
 
