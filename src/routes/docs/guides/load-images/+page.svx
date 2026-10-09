@@ -1,0 +1,52 @@
+<script>
+	import Example from '#site/components/Example.svelte';
+	import CodeBlock from '#site/components/CodeBlock.svelte';
+	import LoadImageExample from '#site/demos/examples/LoadImageExample.svelte';
+	import LoadImageExampleSource from '#site/demos/examples/LoadImageExample.svelte?highlight';
+	import FailedLoadExample from '#site/demos/gotchas/FailedLoadExample.svelte';
+	import FailedLoadExampleSource from '#site/demos/gotchas/FailedLoadExample.svelte?highlight';
+	import HeicUploadExample from '#site/demos/gotchas/HeicUploadExample.svelte';
+	import HeicUploadExampleSource from '#site/demos/gotchas/HeicUploadExample.svelte?highlight';
+	import photoSource from '#site/demos/gotchas/croppablePhoto.ts?highlight';
+	import HeicUploadExampleFile0 from '#site/demos/gotchas/croppablePhoto.ts?highlight';
+</script>
+
+# Load images
+
+Pass a browser-readable URL as `src`. A new source loads and resets the cropper; clear it with `null` or `undefined`. Read `isLoading()` and `isLoaded()` reactively to drive your own UI, and handle `onError` so a failed load has a visible outcome.
+
+## Local files and URL ownership
+
+A file input can create an object URL for the selected file. The application owns that URL: revoke it after replacement, clearing, or destruction, once no consumer needs it. Do not revoke it immediately after assigning `src`.
+
+<Example source={LoadImageExampleSource} title="LoadImageExample">
+	<LoadImageExample />
+</Example>
+
+The demo also detects the image format from its bytes, so export can choose an appropriate MIME type. Core extension imports such as `advanced-cropper/extensions/mimes` need `advanced-cropper` as a direct application dependency with strict package managers.
+
+The library releases object URLs it creates internally for orientation correction. It does not revoke your `src` or URLs in an image you pass to `setImage`. That method takes a complete `CropperImage` value and replaces the displayed image without resetting geometry; use `src` for ordinary uploads.
+
+## Loading failures and orientation
+
+`checkOrientation` defaults to `true` and reads supported EXIF orientation before displaying the photo. A revoked or unreadable blob URL reports `onError`, including when orientation checking is enabled. Clearing the source during loading clears the loading status.
+
+<Example source={FailedLoadExampleSource} title="FailedLoadExample">
+	<FailedLoadExample />
+</Example>
+
+A remote source may fail because of [CORS](/docs/guides/cross-origin), even if a plain image element can display it. Check the network response and source readability before changing cropper settings.
+
+## HEIC and delayed file access
+
+The cropper uses the browser's decoder; it does not convert HEIC itself. This helper inspects the file, tries native decoding, and dynamically imports a converter only when needed. Keep conversion and loading error messages in your UI.
+
+<CodeBlock html={photoSource.html} code={photoSource.code} />
+
+<Example source={HeicUploadExampleSource} title="HeicUploadExample" files={{ 'croppablePhoto.ts': HeicUploadExampleFile0 }}>
+	<HeicUploadExample />
+</Example>
+
+A picked `File` can become unreadable if its underlying file changes or access expires. If cropping happens later, copy the bytes immediately while access is available. The helper above does that for unconverted files too. The copy uses memory until its object URL is released.
+
+Image replacement can race with asynchronous conversion. Keep ownership of each request and release results that arrive after a newer selection; the example includes that cleanup.

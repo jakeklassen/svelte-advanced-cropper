@@ -14,84 +14,90 @@ export function isGroup(entry: NavEntry): entry is NavGroup {
 	return 'items' in entry;
 }
 
-/** Docs sidebar, in upstream order. */
+/** Docs sidebar grouped by user task. */
 export const nav: NavEntry[] = [
-	{ title: 'Getting started', href: '/docs/intro' },
+	{
+		title: 'Getting started',
+		items: [{ title: 'Introduction', href: '/docs/intro' }]
+	},
 	{
 		title: 'Guides',
 		items: [
-			{ title: 'Recipes', href: '/docs/guides/recipes' },
-			{ title: 'Advanced Recipes', href: '/docs/guides/advanced-recipes' },
-			{ title: 'Cropper Types', href: '/docs/guides/cropper-types' },
-			{ title: 'Cropper Themes', href: '/docs/guides/themes' },
-			{ title: 'Customize Appearance', href: '/docs/guides/customize-appearance' },
-			{ title: 'Components / Hooks', href: '/docs/guides/components-and-hooks' },
-			{ title: 'Cross-Origin', href: '/docs/guides/cross-origin' },
-			{ title: 'Gotchas', href: '/docs/guides/gotchas' },
-			{ title: 'Coming from React', href: '/docs/guides/coming-from-react' }
+			{ title: 'Choose a cropper', href: '/docs/guides/cropper-types' },
+			{ title: 'Stencils and aspect ratios', href: '/docs/guides/stencils' },
+			{ title: 'Read and change the crop', href: '/docs/guides/crop-state' },
+			{ title: 'Load images', href: '/docs/guides/load-images' },
+			{ title: 'Preview and export', href: '/docs/guides/preview-and-export' },
+			{ title: 'Move, zoom, rotate, and flip', href: '/docs/guides/image-transforms' },
+			{ title: 'Defaults and restrictions', href: '/docs/guides/defaults-and-restrictions' },
+			{ title: 'Themes', href: '/docs/guides/themes' },
+			{ title: 'Styling', href: '/docs/guides/styling' },
+			{ title: 'Layout and lifecycle', href: '/docs/guides/layout-and-lifecycle' },
+			{ title: 'Gestures and page scrolling', href: '/docs/guides/gestures' },
+			{ title: 'Cross-origin images', href: '/docs/guides/cross-origin' },
+			{ title: 'Troubleshooting', href: '/docs/guides/gotchas' }
 		]
 	},
-	{ title: 'Showcase', href: '/docs/showcase' },
+	{
+		title: 'Composition',
+		items: [
+			{ title: 'Compose a cropper', href: '/docs/composition/overview' },
+			{ title: 'Replace layers with snippets', href: '/docs/composition/layers' },
+			{ title: 'Build a stencil with context', href: '/docs/composition/stencil-context' },
+			{ title: 'Customize previews', href: '/docs/composition/previews' }
+		]
+	},
 	{
 		title: 'Tutorials',
 		items: [
-			{ title: 'Custom Stencil', href: '/docs/tutorials/custom-stencil' },
-			{ title: 'Absolute Zoom', href: '/docs/tutorials/absolute-zoom' },
-			{ title: 'Image Editor', href: '/docs/tutorials/image-editor' }
+			{ title: 'Custom stencil', href: '/docs/tutorials/custom-stencil' },
+			{ title: 'Absolute zoom', href: '/docs/tutorials/absolute-zoom' },
+			{ title: 'Image editor', href: '/docs/tutorials/image-editor' },
+			{ title: 'Print guides', href: '/docs/tutorials/print-guides' }
 		]
 	},
 	{
-		title: 'Components',
+		title: 'Examples',
+		items: [{ title: 'Showcase', href: '/docs/showcase' }]
+	},
+	{
+		title: 'API reference',
 		items: [
-			{ title: 'Cropper', href: '/docs/components/Cropper' },
-			{ title: 'FixedCropper', href: '/docs/components/FixedCropper' },
-			{ title: 'RectangleStencil', href: '/docs/components/RectangleStencil' },
-			{ title: 'CircleStencil', href: '/docs/components/CircleStencil' },
-			{ title: 'CropperPreview', href: '/docs/components/CropperPreview' },
-			{ title: 'BoundingBox', href: '/docs/components/BoundingBox' },
-			{ title: 'CropperBackgroundImage', href: '/docs/components/CropperBackgroundImage' },
-			{ title: 'CropperBackgroundWrapper', href: '/docs/components/CropperBackgroundWrapper' },
-			{ title: 'CropperCanvas', href: '/docs/components/CropperCanvas' },
-			{ title: 'CropperSource', href: '/docs/components/CropperSource' },
-			{ title: 'CropperWrapper', href: '/docs/components/CropperWrapper' },
-			{ title: 'DraggableArea', href: '/docs/components/DraggableArea' },
-			{ title: 'DraggableElement', href: '/docs/components/DraggableElement' },
-			{ title: 'SimpleHandler', href: '/docs/components/SimpleHandler' },
-			{ title: 'SimpleLine', href: '/docs/components/SimpleLine' },
-			{ title: 'StencilOverlay', href: '/docs/components/StencilOverlay' },
-			{ title: 'StencilWrapper', href: '/docs/components/StencilWrapper' },
-			{ title: 'StretchableBoundary', href: '/docs/components/StretchableBoundary' },
-			{ title: 'TransformableImage', href: '/docs/components/TransformableImage' }
+			{ title: 'Cropper', href: '/docs/reference/cropper' },
+			{ title: 'FixedCropper', href: '/docs/reference/fixed-cropper' },
+			{ title: 'RectangleStencil', href: '/docs/reference/rectangle-stencil' },
+			{ title: 'CircleStencil', href: '/docs/reference/circle-stencil' },
+			{ title: 'CropperPreview', href: '/docs/reference/cropper-preview' },
+			{ title: 'Cropper instance', href: '/docs/reference/cropper-instance' },
+			{ title: 'Snippet contracts', href: '/docs/reference/snippets' },
+			{ title: 'Stencil context', href: '/docs/reference/stencil-context' },
+			{ title: 'Stencil building blocks', href: '/docs/reference/stencil-primitives' },
+			{ title: 'Image and layout building blocks', href: '/docs/reference/image-primitives' },
+			{
+				title: 'Gesture and transition building blocks',
+				href: '/docs/reference/interaction-primitives'
+			},
+			{ title: 'Styling contract', href: '/docs/reference/styling' },
+			{ title: 'Types and utilities', href: '/docs/reference/types-and-utilities' }
 		]
 	},
 	{
-		title: 'Hooks',
+		title: 'Core',
 		items: [
-			{ title: 'useAbstractCropper', href: '/docs/hooks/useAbstractCropper' },
-			{ title: 'useCropperInstance', href: '/docs/hooks/useCropperInstance' },
-			{ title: 'useCropperImage', href: '/docs/hooks/useCropperImage' },
-			{ title: 'useMoveImageOptions', href: '/docs/hooks/useMoveImageOptions' },
-			{ title: 'useScaleImageOptions', href: '/docs/hooks/useScaleImageOptions' },
-			{ title: 'useRotateImageOptions', href: '/docs/hooks/useRotateImageOptions' },
-			{ title: 'useUpdateEffect', href: '/docs/hooks/useUpdateEffect' },
-			{ title: 'useWindowResize', href: '/docs/hooks/useWindowResize' }
+			{ title: 'State and coordinate spaces', href: '/docs/core/state' },
+			{ title: 'Settings and defaults', href: '/docs/core/settings' },
+			{ title: 'State modifiers', href: '/docs/core/modifiers' },
+			{ title: 'Utilities', href: '/docs/core/utilities' },
+			{ title: 'Resize algorithm', href: '/docs/algorithms/resize-algorithm' },
+			{ title: 'Extensions', href: '/docs/core/extensions' }
 		]
 	},
 	{
-		title: 'Concept',
+		title: 'Migration',
 		items: [
-			{ title: 'Introduction', href: '/docs/concept/introduction' },
-			{ title: 'State', href: '/docs/concept/state' },
-			{ title: 'Modifiers', href: '/docs/concept/modifiers' },
-			{ title: 'Settings', href: '/docs/concept/settings' },
-			{ title: 'Defaults', href: '/docs/concept/defaults' },
-			{ title: 'Utils', href: '/docs/concept/utils' }
+			{ title: 'Upgrade from 0.1.x', href: '/docs/migration/from-0-1' },
+			{ title: 'Coming from react-advanced-cropper', href: '/docs/migration/from-react' }
 		]
-	},
-	{ title: 'FAQ', href: '/docs/faq' },
-	{
-		title: 'Algorithms',
-		items: [{ title: 'Resize Algorithm', href: '/docs/algorithms/resize-algorithm' }]
 	}
 ];
 

@@ -10,8 +10,6 @@
 	} from 'svelte-advanced-cropper';
 	import Wrapper from './Wrapper.svelte';
 
-	const StandardFixedCropper = FixedCropper<{}>;
-
 	type Props = Omit<FixedCropperProps, 'stencilSize'> & {
 		stencilType?: 'circle' | 'rectangle';
 	};
@@ -43,7 +41,7 @@
 	}
 </script>
 
-<StandardFixedCropper
+<FixedCropper
 	bind:this={cropper}
 	class={['fixed-cropper', cssClass]}
 	{stencilSize}
@@ -59,7 +57,7 @@
 	{:else}
 		<RectangleStencil handlers={false} lines={false} movable={false} resizable={false} />
 	{/if}
-</StandardFixedCropper>
+</FixedCropper>
 
 <style>
 	:global(.fixed-cropper.advanced-cropper) {

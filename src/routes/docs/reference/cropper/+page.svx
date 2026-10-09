@@ -1,0 +1,125 @@
+---
+title: "Cropper"
+description: "Cropper props, callbacks, context, and exported methods."
+---
+
+# Cropper
+
+A movable, resizable crop region with image gestures and canvas export.
+
+<script>
+	import Example from '#site/components/Example.svelte';
+	import Demo from '#site/demos/examples/GettingStartedExample.svelte';
+	import source from '#site/demos/examples/GettingStartedExample.svelte?highlight';
+</script>
+
+<Example {source} title="Cropper">
+	<Demo />
+</Example>
+
+## Props
+
+All optional props without a default remain `undefined`. `class` accepts Svelte `ClassValue`; `style` is a CSS string.
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `settings` | `E & { [K in keyof CropperSettingProps]?: never }` | `undefined` |
+| `src` | `string` \| `null` | `undefined` |
+| `canvas` | `boolean` | `true` |
+| `checkOrientation` | `boolean` | `true` |
+| `crossOrigin` | `boolean` \| `'anonymous'` \| `'use-credentials'` | `true` (anonymous) |
+| `unloadTime` | `number` | `500` ms |
+| `autoReconcileState` | `boolean` | `true` |
+| `disabled` | `boolean` | `false` |
+| `class` | `ClassValue` | `undefined` |
+| `style` | `string` | `undefined` |
+| `children` | `Snippet` | Default `RectangleStencil` |
+| `moveImage` | `boolean` \| `MoveImageOptions` | `true` |
+| `scaleImage` | `boolean` \| `ScaleImageOptions` | `true` |
+| `rotateImage` | `boolean` \| `RotateImageOptions` | `false` |
+| `stencilConstraints` | `StencilConstraints<E>` | `defaultStencilConstraints` |
+| `wrapper` | `Snippet<[CropperWrapperSnippetProps<E>]>` | `CropperWrapper` |
+| `boundary` | `Snippet<[CropperBoundarySnippetProps<E>]>` | `StretchableBoundary` |
+| `backgroundWrapper` | `Snippet<[CropperBackgroundWrapperSnippetProps<E>]>` | `CropperBackgroundWrapper` |
+| `background` | `Snippet<[CropperBackgroundSnippetProps<E>]>` | `CropperBackgroundImage` |
+
+Built-in settings are flat props. `settings` accepts only extension fields and excludes every built-in setting key.
+
+## Built-in settings
+
+The indexed types below are the exact public setting types, including value-or-function alternatives. [Settings and defaults](/docs/core/settings) expands their behavior.
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `transformImage` | `CropperSettingsInput<E>['transformImage']` | `{ adjustStencil: true }` |
+| `moveCoordinates` | `CropperSettingsInput<E>['moveCoordinates']` | `undefined`; no modifier override |
+| `resizeCoordinates` | `CropperSettingsInput<E>['resizeCoordinates']` | `undefined`; no modifier override |
+| `defaultCoordinates` | `CropperSettingsInput<E>['defaultCoordinates']` | Computed from `defaultSize`, then `defaultPosition` |
+| `defaultVisibleArea` | `CropperSettingsInput<E>['defaultVisibleArea']` | Core `defaultVisibleArea` function |
+| `areaPositionRestrictions` | `CropperSettingsInput<E>['areaPositionRestrictions']` | Core `defaultAreaPositionRestrictions` function |
+| `areaSizeRestrictions` | `CropperSettingsInput<E>['areaSizeRestrictions']` | Core `defaultAreaSizeRestrictions` function |
+| `sizeRestrictions` | `CropperSettingsInput<E>['sizeRestrictions']` | Core `pixelsRestrictions` function |
+| `positionRestrictions` | `CropperSettingsInput<E>['positionRestrictions']` | Core `defaultPositionRestrictions` function |
+| `aspectRatio` | `CropperSettingsInput<E>['aspectRatio']` | Stencil ratio, otherwise unrestricted (`0` to `Infinity`) |
+| `minWidth` | `CropperSettingsInput<E>['minWidth']` | `undefined`; effective minimum `0` |
+| `minHeight` | `CropperSettingsInput<E>['minHeight']` | `undefined`; effective minimum `0` |
+| `maxWidth` | `CropperSettingsInput<E>['maxWidth']` | `undefined`; effective maximum `Infinity` |
+| `maxHeight` | `CropperSettingsInput<E>['maxHeight']` | `undefined`; effective maximum `Infinity` |
+| `defaultSize` | `CropperSettingsInput<E>['defaultSize']` | Core `defaultSize` function |
+| `defaultPosition` | `CropperSettingsInput<E>['defaultPosition']` | Core `defaultPosition` function |
+| `defaultTransforms` | `CropperSettingsInput<E>['defaultTransforms']` | `undefined`; image transforms on initialization |
+| `imageRestriction` | `CropperSettingsInput<E>['imageRestriction']` | `ImageRestriction.fitArea` |
+| `priority` | `CropperSettingsInput<E>['priority']` | `undefined`; core `Priority.coordinates` |
+
+
+## Algorithms and transitions
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `transitions` | `CropperTransitionsSettings` \| `boolean` | `true`; duration `350`, timing `ease-in-out` |
+| `postProcess` | `PostprocessFunction<CropperSettings<E>>` \| `PostprocessFunction<CropperSettings<E>>[]` | None |
+| `setCoordinatesAlgorithm` | `SetCoordinatesAlgorithm<CropperSettings<E>>` | `undefined` |
+| `setVisibleAreaAlgorithm` | `SetVisibleAreaAlgorithm<CropperSettings<E>>` | `undefined` |
+| `setBoundaryAlgorithm` | `SetBoundaryAlgorithm<CropperSettings<E>>` | `undefined` |
+| `transformImageAlgorithm` | `TransformImageAlgorithm<CropperSettings<E>>` | `undefined` |
+| `moveCoordinatesAlgorithm` | `MoveAlgorithm<CropperSettings<E>>` | `undefined` |
+| `resizeCoordinatesAlgorithm` | `ResizeAlgorithm<CropperSettings<E>>` | `undefined` |
+| `createStateAlgorithm` | `CreateStateAlgorithm<CropperSettings<E>>` | `undefined` |
+| `reconcileStateAlgorithm` | `ReconcileStateAlgorithm<CropperSettings<E>>` | `undefined` |
+
+
+The eight algorithm props default to the corresponding core state modifier (`setCoordinates`, `setVisibleArea`, `setBoundary`, `transformImage`, `moveCoordinates`, `resizeCoordinates`, `createState`, `reconcileState`). `postProcess` runs configured functions after state operations.
+
+## Callbacks
+
+Every callback is optional, defaults to `undefined`, and has type `CropperCallback<E> = (cropper: CropperInstance<E>) => void`.
+
+| Callback | Notification |
+| --- | --- |
+| `onReady` | Current image, rendered initialized state and enabled export source are ready. |
+| `onError` | Image loading failed. |
+| `onChange` | Crop geometry changes. |
+| `onUpdate` | State, interactions, transitions or loading observations change. |
+| `onMove`, `onMoveEnd` | Stencil movement and completion. |
+| `onResize`, `onResizeEnd` | Stencil resize and completion. |
+| `onTransformImage`, `onTransformImageEnd` | Image transformation and completion. |
+| `onInteractionStart`, `onInteractionEnd` | Overall interaction lifetime. |
+| `onTransitionsStart`, `onTransitionsEnd` | Transition lifetime. |
+
+Callbacks run untracked while mounted. `onReady` is coalesced per displayed image; it is not emitted again for every reset. Clearing `src` clears pending loading, and stale asynchronous loads cannot commit after replacement or destruction.
+
+## Snippets and context
+
+The four layer signatures appear in the props table and [snippet contracts](/docs/reference/snippets). `children?: Snippet` selects stencil children; omitting it creates one rectangle stencil. Supplying empty children creates no stencil. This component provides isolated [CropperContext](/docs/reference/stencil-context) and requires no ancestor context.
+
+## Instance and styling
+
+`bind:this` exposes all [33 CropperInstance methods](/docs/reference/cropper-instance). Getters remain reactive; `disabled` prevents user gestures, not programmatic actions. `getCanvas()` returns `null` with export disabled.
+
+The root is `.advanced-cropper`, with `--disabled`, `__boundary`, `__background-wrapper` and `__background` selectors. See the [complete styling contract](/docs/reference/styling).
+
+## Loading and gesture options
+
+`src` may be an image URL, data URL or application-owned object URL; `null` or an empty string clears it. `checkOrientation` reads EXIF orientation. `crossOrigin={true}` requests anonymous CORS, `false` omits the attribute, and the string values select their corresponding modes. `unloadTime` gives the previous image time to fade out before replacement. `canvas` enables the internal export canvas.
+
+`moveImage` accepts `{ mouse?: boolean; touch?: boolean }`; `scaleImage` accepts `{ touch?: boolean; wheel?: boolean | { ratio?: number } }`; `rotateImage` accepts `{ touch?: boolean }`. A boolean enables or disables all gestures in that group. Omitted object fields are enabled; wheel ratio defaults to `0.1`. Rotation is disabled by the cropper default. `transformImage.adjustStencil` controls geometry during scaling, separately from input options.

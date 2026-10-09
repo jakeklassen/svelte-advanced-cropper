@@ -2,13 +2,15 @@
 	import Example from '#site/components/Example.svelte';
 	import ThemeExample from '#site/demos/examples/ThemeExample.svelte';
 	import themeSource from '#site/demos/examples/ThemeExample.svelte?highlight';
+	import ThemeExampleFile0 from '#site/demos/shared/SquareButton.svelte?highlight';
+	import ThemeExampleFile1 from '#site/demos/shared/VerticalButtons.svelte?highlight';
 </script>
 
-# Cropper Themes
+# Themes
 
 ## Introduction
 
-A theme is a stylesheet that sets the look of the default building blocks: `Cropper`, `RectangleStencil`, `CircleStencil`, `BoundingBox`, `SimpleHandler` and `SimpleLine`. It does this with plain global rules on their BEM class names, such as `.advanced-cropper`, `.advanced-cropper-rectangle-stencil` and `.advanced-cropper-simple-handler`. The class names come from the `advanced-cropper` core and are shared with the React and Vue versions.
+A theme is a stylesheet that sets the look of the default building blocks: `Cropper`, `RectangleStencil`, `CircleStencil`, `BoundingBox`, `SimpleHandler` and `SimpleLine`. It does this with plain global rules on their BEM class names, such as `.advanced-cropper`, `.advanced-cropper-rectangle-stencil` and `.advanced-cropper-simple-handler`. The stable selectors are listed in the [styling contract](/docs/reference/styling).
 
 The stylesheet you import while setting up the cropper contains two things: the structural styles the components need in order to work at all, and the default theme.
 
@@ -64,7 +66,7 @@ Every demo below has buttons on the left that switch between the rectangle and c
 
 This theme comes with `style.css`, so you have already seen it in the rest of these docs.
 
-<Example source={themeSource} title="ThemeExample">
+<Example source={themeSource} title="ThemeExample" files={{ 'SquareButton.svelte': ThemeExampleFile0, 'VerticalButtons.svelte': ThemeExampleFile1 }}>
 	<ThemeExample theme="default" />
 </Example>
 
@@ -91,7 +93,7 @@ Inspired by the croppers found on many Android phones: thick brackets at the cor
 import 'svelte-advanced-cropper/themes/corners.css';
 ```
 
-<Example source={themeSource} title="ThemeExample">
+<Example source={themeSource} title="ThemeExample" files={{ 'SquareButton.svelte': ThemeExampleFile0, 'VerticalButtons.svelte': ThemeExampleFile1 }}>
 	<ThemeExample theme="corners" />
 </Example>
 
@@ -124,7 +126,7 @@ The default theme with extras: square handles that stay faded until you hover th
 import 'svelte-advanced-cropper/themes/classic.css';
 ```
 
-<Example source={themeSource} title="ThemeExample">
+<Example source={themeSource} title="ThemeExample" files={{ 'SquareButton.svelte': ThemeExampleFile0, 'VerticalButtons.svelte': ThemeExampleFile1 }}>
 	<ThemeExample theme="classic" />
 </Example>
 
@@ -150,7 +152,7 @@ A minimal stencil that keeps attention on the image: thin lines, small edge hand
 import 'svelte-advanced-cropper/themes/compact.css';
 ```
 
-<Example source={themeSource} title="ThemeExample">
+<Example source={themeSource} title="ThemeExample" files={{ 'SquareButton.svelte': ThemeExampleFile0, 'VerticalButtons.svelte': ThemeExampleFile1 }}>
 	<ThemeExample theme="compact" />
 </Example>
 
@@ -180,7 +182,7 @@ A light, playful theme with round handles that grow when hovered. Its demo start
 import 'svelte-advanced-cropper/themes/bubble.css';
 ```
 
-<Example source={themeSource} title="ThemeExample">
+<Example source={themeSource} title="ThemeExample" files={{ 'SquareButton.svelte': ThemeExampleFile0, 'VerticalButtons.svelte': ThemeExampleFile1 }}>
 	<ThemeExample theme="bubble" grid={false} />
 </Example>
 

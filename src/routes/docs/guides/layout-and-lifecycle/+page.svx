@@ -1,0 +1,84 @@
+<script>
+	import Example from '#site/components/Example.svelte';
+	import RefreshExample from '#site/demos/examples/RefreshExample.svelte';
+	import RefreshExampleSource from '#site/demos/examples/RefreshExample.svelte?highlight';
+	import RefitExample from '#site/demos/gotchas/RefitExample.svelte';
+	import RefitExampleSource from '#site/demos/gotchas/RefitExample.svelte?highlight';
+	import DialogExample from '#site/demos/gotchas/DialogExample.svelte';
+	import DialogExampleSource from '#site/demos/gotchas/DialogExample.svelte?highlight';
+	import ScaledContainerExample from '#site/demos/gotchas/ScaledContainerExample.svelte';
+	import ScaledContainerExampleSource from '#site/demos/gotchas/ScaledContainerExample.svelte?highlight';
+</script>
+
+# Layout and lifecycle
+
+A cropper measures its boundary after mounting. Give it a definite size and refresh when your layout changes independently of the window.
+
+## Give the cropper a height
+
+Use an explicit height on the cropper or its containing layout. A `max-height` alone does not give percentage heights a definite parent size. In a flex column, give the column a height and its shrinking content `min-height: 0`.
+
+```css
+.dialog {
+	display: flex;
+	flex-direction: column;
+	height: 90vh;
+}
+
+.dialog-body {
+	flex: 1;
+	min-height: 0;
+}
+
+.dialog-body :global(.advanced-cropper) {
+	height: 100%;
+}
+```
+
+## Reset versus refresh
+
+`reset()` rebuilds state from defaults, including transforms. `refresh()` measures the boundary and reconciles the existing crop. Window resize and orientation changes trigger refresh automatically. Container-only changes, such as opening a sidebar, need an explicit refresh.
+
+Use Svelte dimension bindings and an effect to synchronize the cropper with a resizable container. Mutating instance methods run untracked, so their internal reads do not make the effect depend on crop state.
+
+<Example source={RefreshExampleSource} title="RefreshExample">
+	<RefreshExample />
+</Example>
+
+## Keep the opening view
+
+A refresh preserves zoom where restrictions allow; it does not reapply `defaultVisibleArea`. To keep a whole-image view after a resize, await `refresh()`, then apply your fitted visible area with `setVisibleArea`. Avoid resetting merely to remeasure, since that also discards transforms and the user's selection.
+
+<Example source={RefitExampleSource} title="RefitExample">
+	<RefitExample />
+</Example>
+
+## Dialogs and scaled containers
+
+If a cropper mounts while hidden, refresh once its container becomes visible. The default boundary uses layout dimensions, so a dialog's scale animation does not distort its measurement.
+
+<Example source={DialogExampleSource} title="DialogExample">
+	<DialogExample />
+</Example>
+
+Drag and image-transform distances account for ancestor scaling. Rotated or skewed ancestors are not supported by that conversion.
+
+<Example source={ScaledContainerExampleSource} title="ScaledContainerExample">
+	<ScaledContainerExample />
+</Example>
+
+If you replace the boundary measurement algorithm with an on-screen measurement, refresh after the animation finishes. Supply replacements through a [boundary snippet](/docs/composition/layers), preserving boundary registration.
+
+## Readiness and asynchronous work
+
+`onReady` waits for initialized geometry, rendering and the current export source when canvas is enabled. `onChange` and `onUpdate` do not make that rendering guarantee. Superseded stretches, loads and registrations cannot commit stale work after replacement or destruction.
+
+## Child stencil lifetime
+
+Built-in and custom stencils register before the first reset. Conditional insertion, removal, replacement and reactive option changes reconcile the current state rather than resetting it. At most one registration may remain live; overlapping outgoing and incoming stencils during a transition still counts as two. Animate decorative content instead.
+
+Nested croppers provide independent contexts. A custom stencil registers synchronously during component initialization, before checking for state, and cleanup is automatic.
+
+## Server rendering
+
+The library can render on the server. Context and stencil registration do not require browser APIs; image loading, measurement, canvas drawing and gesture listeners begin on the client. Keep application calls to browser APIs in actions, attachments or client lifecycle code too.

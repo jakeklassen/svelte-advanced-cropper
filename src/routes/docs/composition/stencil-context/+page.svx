@@ -1,0 +1,35 @@
+---
+title: "Build a stencil with context"
+description: "Register reactive stencil constraints during initialization."
+---
+
+# Build a stencil with context
+
+Call `getCropperContext()` during component initialization. Its stable `cropper` API is available immediately. Register a getter for stencil options before state-dependent markup; the cropper reads it before the first reset and tracks subsequent reactive changes.
+
+<script>
+	import StencilHierarchy from '#site/demos/schemes/StencilHierarchy.svelte';
+	import StencilStructure from '#site/demos/schemes/StencilStructure.svelte';
+	import CodeBlock from '#site/components/CodeBlock.svelte';
+	import source from '#site/demos/tutorials/CustomStencil/CircleStencil.svelte?highlight';
+</script>
+
+<CodeBlock html={source.html} code={source.code} />
+
+<StencilHierarchy />
+
+<StencilStructure />
+
+## Read reactive values
+
+Use `$derived(context.disabled)`, `$derived(context.image)` and `$derived(context.cropper.getStencilCoordinates())`. Reading a getter once into an ordinary constant takes a snapshot. `image` is the displayed image, including an image installed with `setImage`.
+
+The effective disabled state is `context.disabled || ownDisabled`. A child cannot enable gestures disabled by its parent. Custom controls call the corresponding end method when their gesture finishes.
+
+## Constraint lifecycle
+
+`registerStencil(() => options)` installs destruction cleanup itself and returns an idempotent cleanup for early removal. Options can include `aspectRatio` and `boundingBox`; a circle supplies both a square ratio and `BoundingBoxType.Circle` from the fit-to-image extension.
+
+The cropper reconciles registration, removal, replacement and option changes even with `autoReconcileState={false}`. It does not reset the crop to defaults. More than one registration after an update settles is an error. Nested croppers isolate registrations; calling the getter outside a cropper throws.
+
+Registration also works during SSR, without image loading, measurements or resets. Use the [complete custom stencil tutorial](/docs/tutorials/custom-stencil) for movement and resizing, and the [context contract](/docs/reference/stencil-context) for exact types.

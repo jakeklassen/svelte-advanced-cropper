@@ -1,0 +1,207 @@
+---
+title: "Coming from react-advanced-cropper"
+description: "Before and after examples and complete API migration tables."
+---
+
+# Coming from react-advanced-cropper
+
+Start with these three changes. Before examples use the previous framework API; after examples use Svelte 5.
+
+## Stencil child
+
+Before:
+
+```tsx
+<Cropper stencilComponent={CircleStencil} stencilProps={{ movable: false }} />
+```
+
+After:
+
+```svelte
+<Cropper>
+	<CircleStencil movable={false} />
+</Cropper>
+```
+
+## Layer snippet
+
+Before:
+
+```tsx
+<Cropper wrapperComponent={CustomWrapper} />
+```
+
+After:
+
+```svelte
+<Cropper>
+	{#snippet wrapper(props)}
+		<CustomWrapper {...props} />
+	{/snippet}
+</Cropper>
+```
+
+The custom wrapper must render `props.children()` and preserve supplied styling.
+
+## Instance binding
+
+Before:
+
+```tsx
+const cropper = useRef<CropperRef>(null);
+<Cropper ref={cropper} />;
+```
+
+After:
+
+```svelte
+<script lang="ts">
+	import { Cropper, type CropperInstance } from 'svelte-advanced-cropper';
+
+	let cropper: CropperInstance | undefined = $state();
+	const coordinates = $derived(cropper?.getCoordinates());
+</script>
+
+<Cropper bind:this={cropper} src="/photo.jpg" style="height: 360px" />
+```
+
+## Migration checklist
+
+Require Svelte `^5.40`, import `svelte-advanced-cropper/style.css`, and give the cropper a definite height. Keep built-in settings as flat props; use `settings` for typed extension values only. Replace component/props bags with child stencils and snippets, then update styling and source registration.
+
+`setCoordinates` still accepts functional and sequential updates. `setImage` takes a plain image value. There is no `bind:coordinates`. `CropperPreview {cropper}` reads the bound instance directly; loading/loaded remain valid preview snapshot props.
+
+The exhaustive tables also cover the Svelte 0.1.x API. Names below match the implemented package exports.
+
+<details>
+<summary>Complete export mapping</summary>
+
+| Old export | 0.2.0 name or concept |
+|---|---|
+| `CropperRef<E>` | `CropperInstance<E>` |
+| `CustomCropperRef<E>` | `CropperInstance<E>` |
+| `FixedCropperRef` | `FixedCropperInstance<E>` |
+| `AbstractCropperRef<S>` | `CropperInstance<E>`, where the settings extension is `E` |
+| Runtime `CropperInstance` class | Internal `CropperController`; public `CropperInstance` is type-only |
+| `CropperInstanceProps` | Internal controller configuration; use `CropperProps<E>` |
+| `AbstractCropper` | `Cropper` with settings, algorithms and layer snippets |
+| `AbstractCropperProps<S>` | `CropperProps<E>` |
+| `AbstractCropperIntrinsicProps<S>` | `CropperProps<E>` |
+| `AbstractCropperSettings` | `CropperSettings` |
+| `AbstractCropperSettingsProp<S>` | `CropperSettingsInput<E>` |
+| `CustomCropperProps<E>` | `CropperProps<E>` |
+| `CropperInstanceSettings` | `CropperSettings` |
+| `CropperInstanceSettingsProp<S>` | `CropperSettingsInput<E>` |
+| `CropperPreviewRef` | `CropperPreviewInstance` |
+| `CropperPreviewDesiredCropperRef` | `CropperPreviewSource` |
+| `DraggableElement` / duplicate `DraggableArea` | `DraggableArea`, with `DraggableAreaProps` |
+| `ArbitraryProps` | No catch-all replacement; type the component’s own props |
+| `StencilComponent` | Ordinary child component; no library-specific component type |
+| `CropperWrapperComponent` | `Snippet<[CropperWrapperSnippetProps<E>]>` |
+| `CropperWrapperComponentProps` | `CropperWrapperSnippetProps<E>` |
+| `CropperBoundaryComponent` | `Snippet<[CropperBoundarySnippetProps<E>]>` |
+| `CropperBackgroundComponent` | `Snippet<[CropperBackgroundSnippetProps<E>]>` |
+| `CropperBackgroundWrapperComponent` | `Snippet<[CropperBackgroundWrapperSnippetProps<E>]>` |
+| `CropperBackgroundWrapperComponentProps` | `CropperBackgroundWrapperSnippetProps<E>` |
+| `HandlerComponent` | `Snippet<[HandlerSnippetProps]>` |
+| `HandlerComponentProps` | `HandlerSnippetProps` for snippets; `HandlerWrapperProps` for that component |
+| `LineComponent` | `Snippet<[LineSnippetProps]>` |
+| `LineComponentProps` | `LineSnippetProps` for snippets; `LineWrapperProps` for that component |
+| `HandlerClassNames`, `LineClassNames` | Root class plus documented selectors |
+| `PreviewWrapperComponent` | `Snippet<[CropperPreviewWrapperSnippetProps]>` |
+| `PreviewBackgroundComponent` | `Snippet<[CropperPreviewBackgroundSnippetProps]>` |
+| `useAbstractCropper` | Compose `Cropper`; descendants use context |
+| `AbstractCropperHookProps`, `AbstractCropperRefs` | `CropperProps<E>` and typed layer registrations |
+| `useCropperInstance`, `CropperStateHook` | Component instance for Svelte composition; core API for independently owned headless integration |
+| `useCropperImage` | Cropper loading props/status; independently managed images use core loading utilities |
+| `CropperImageHook`, `CropperImageHookSettings` | No public loader abstraction replacement |
+| `useMoveImageOptions`, `DefinedMoveImageOptions` | `normalizeMoveImageOptions`; result `NormalizedMoveImageOptions` |
+| `useScaleImageOptions`, `DefinedScaleImageOptions` | `normalizeScaleImageOptions`; result `NormalizedScaleImageOptions` |
+| `useRotateImageOptions`, `DefinedRotateImageOptions` | `normalizeRotateImageOptions`; result `NormalizedRotateImageOptions` |
+| `useUpdateEffect` | Internal only; application effects express their own dependency/lifetime requirements |
+| `useWindowResize` | Element dimension bindings or `<svelte:window>` listeners |
+| `ExtendedSettings<E>` | `CropperSettings<E>` |
+| `CropperCanvas`, `CropperCanvasMethods` | Internal; call `CropperInstance.getCanvas()` |
+| `ArtificialTransition` and its props | Internal; compose `StencilWrapper` |
+| `PreviewBoundaryComponent` | `Snippet<[CropperPreviewBoundarySnippetProps]>` |
+| `HandlerWrapper.onDrag`, `LineWrapper.onDrag` | `onMove` with the native event |
+| `HandlerWrapper.onDragEnd`, `LineWrapper.onDragEnd` | `onMoveEnd` |
+
+</details>
+
+<details>
+<summary>Complete prop mapping</summary>
+
+| Owner and old prop | Replacement |
+|---|---|
+| React component `ref` | `bind:this`, typed as `CropperInstance<E>` |
+| React `className` | `class: ClassValue` |
+| React object `style` | `style: string` |
+| Cropper/FixedCropper `stencilComponent` | Child stencil |
+| `stencilProps` | Direct props on that child |
+| `wrapperComponent`, `wrapperProps` | `wrapper` snippet; pass local values directly |
+| `boundaryComponent`, `boundaryProps` | `boundary` snippet |
+| `backgroundWrapperComponent`, `backgroundWrapperProps` | `backgroundWrapper` snippet |
+| `backgroundComponent`, `backgroundProps` | `background` snippet |
+| `boundaryClassName` | Cropper root class + `.advanced-cropper__boundary` |
+| `backgroundWrapperClassName` | Root class + `.advanced-cropper__background-wrapper` |
+| `backgroundClassName` | Root class + `.advanced-cropper__background` |
+| Leaked `getInstance` callback prop | Removed; instance ownership is internal |
+| Stencil injected `cropper` | `getCropperContext().cropper` |
+| Stencil injected `image` | `getCropperContext().image` |
+| Stencil exported `aspectRatio`, `boundingBox` | `registerStencil(() => options)` |
+| Stencil `handlerComponent` | `handler` snippet |
+| Stencil `lineComponent` | `line` snippet |
+| BoundingBox `handlerComponent`, `lineComponent` | `handler`, `line` snippets |
+| `handlerClassNames`, `handlerWrapperClassNames` | Class on owning stencil/box; handler and direction selectors |
+| `lineClassNames`, `lineWrapperClassNames` | Class on owning stencil/box; line and direction selectors |
+| Stencil `movingClassName`, `resizingClassName` | Existing `--moving`, `--resizing` selectors |
+| Stencil `gridClassName` | `__grid` selector |
+| Stencil `previewClassName` | `__preview` selector |
+| Stencil `boundingBoxClassName` | `__bounding-box` selector |
+| Stencil `overlayClassName` | `__overlay` selector |
+| Stencil `draggableAreaClassName` | `__draggable-area` selector |
+| SimpleHandler/SimpleLine `defaultClassName` | Root `class`, targeting the inner visual when necessary |
+| SimpleHandler/SimpleLine `hoverClassName` | Documented hover modifier |
+| SimpleHandler/SimpleLine `wrapperClassName` | Root `class` |
+| SimpleHandler `wrapperStyle` | Root `style` |
+| StretchableBoundary `stretcherClassName` | Root class + `__stretcher` |
+| StretchableBoundary `contentClassName` | Root class + `__content` |
+| CropperBackgroundImage `ref` / `bind:ref` | `attachSource` attachment |
+| CropperSource `ref` / `bind:ref` | `element / bind:element, typed HTMLImageElement` \| `null` |
+| Deprecated custom-wrapper `loading`, `loaded` | `cropper.isLoading()`, `cropper.isLoaded()` |
+| CropperPreview `wrapperComponent`, `wrapperProps` | `wrapper` snippet |
+| CropperPreview `boundaryComponent`, `boundaryProps` | `boundary` snippet |
+| CropperPreview `backgroundComponent`, `backgroundProps` | `background` snippet |
+| CropperPreview `contentClassName` | Root class + `.advanced-cropper-preview__content` |
+| CropperPreview `backgroundClassName` | Root class + `.advanced-cropper-preview__image` |
+| CropperPreview `boundaryClassName` | Root class + `.advanced-cropper-preview__boundary` |
+| `ScaleImageOptions.adjustStencil` | Remove this currently ignored field; use `transformImage.adjustStencil` |
+| React deprecated `Cropper.stencilSize` | `FixedCropper.stencilSize` |
+| React deprecated `Cropper.autoZoom` | Explicit `postProcess` configuration |
+
+
+</details>
+
+### Names already absent from Svelte 0.1
+
+| React-only name | Svelte approach |
+| --- | --- |
+| `useForceRerender` | Reactive `$state` and `$derived` reads. |
+| `usePersistentFunction` | Closures reading current props. |
+| `useStateWithCallback` | State plus explicit application sequencing. |
+| `useFirstMountState` | Initialization and lifecycle functions. |
+| `createCropper` | Component composition with Cropper. |
+| `mergeRefs` | Explicit element bindings and attachments. |
+
+### Class-map keys and preserved behavior
+
+Old `HandlerClassNames` and `LineClassNames` keys map as follows: `default` targets the visual class; `hover` and `disabled` use state modifiers; each direction uses its kebab-case modifier. See the [complete selector inventory](/docs/reference/styling).
+
+Stencil `coordinates`, ratio props, `grid`, `movable`, `resizable`, `disabled`, `handlers` and `lines` remain. Both control collections accept booleans or direction maps. `useAnchor` remains a gesture option; it is not a public helper function.
+
+Movement callbacks retain the native event. `onMove`, `onMoveEnd`, `onTransform`, `onTransformEnd` and `onEvent` remain. HandlerWrapper and LineWrapper specifically rename `onDrag`/`onDragEnd` to `onMove`/`onMoveEnd`.
+
+`$effect` is not a drop-in replacement for the removed update-effect helper: the internal observer retains Object.is comparison (element-wise for dependency arrays), initial-value comparison and untracked callbacks. Cropper and preview still handle both window resize and orientation change internally. Application-specific resize work can use element dimension bindings or window listeners.
+
+Core root re-exports, `StencilOptions`, `StencilConstraints`, option types, `SettingsExtension`, `StencilSize`, `StretchableBoundaryMethods`, `styleToString` and `fillLayoutBoundary` remain. The supported component set is listed by the [reference](/docs/reference/types-and-utilities); no controller constructor is public.

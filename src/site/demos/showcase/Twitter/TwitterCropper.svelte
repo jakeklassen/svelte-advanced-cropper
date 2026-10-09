@@ -8,8 +8,6 @@
 	} from 'svelte-advanced-cropper';
 	import Wrapper from './Wrapper.svelte';
 
-	const StandardFixedCropper = FixedCropper<{}>;
-
 	type Props = Omit<FixedCropperProps, 'stencilSize' | 'transitions' | 'imageRestriction'>;
 
 	let { class: cssClass, children, wrapper: customWrapper, ...cropperProps }: Props = $props();
@@ -29,7 +27,7 @@
 	}
 </script>
 
-<StandardFixedCropper
+<FixedCropper
 	minWidth={150}
 	minHeight={150}
 	{defaultSize}
@@ -51,7 +49,7 @@
 			aspectRatio={1}
 		/>
 	{/if}
-</StandardFixedCropper>
+</FixedCropper>
 
 <style>
 	:global(.twitter-cropper.advanced-cropper) {

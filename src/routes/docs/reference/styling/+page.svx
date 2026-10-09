@@ -1,0 +1,319 @@
+---
+title: "Styling contract"
+description: "Complete tested selector inventory and ownership rules."
+---
+
+# Styling contract
+
+Import `svelte-advanced-cropper/style.css` once. Public visual components accept one `class` and a CSS `style` string. In application-scoped Svelte styles, use `:global(...)` for library-owned descendants. Theme entry points are described in [Themes](/docs/guides/themes).
+
+## Ownership
+
+A cropper's root class scopes its parts. SimpleHandler and SimpleLine put custom classes on the outer hit target; style their inner visuals through the simple-handler or simple-line classes. BoundingBox owns the `__lines` and `__handlers` groups and the handler placement wrappers. Use direct-child selectors when an outer box contains another cropper so outer styles do not reach inner controls.
+
+```css
+.avatar :global(.advanced-cropper-circle-stencil__overlay) {
+	color: rgb(20 20 40 / 75%);
+}
+```
+
+`--movable` and `--resizable` mean interaction is allowed; `--moving` and `--resizing` mean it is active. `--disabled` marks disabled hit targets or roots. `--hover` marks the control's hover state. `--visible` controls fading. Direction modifiers use kebab-case, while direction-map props use camelCase corner names such as `eastNorth`.
+
+## Complete inventory
+
+These expanded names are exercised by the class-inventory test in `src/tests/Customization.svelte.test.ts`. Internal canvas and transition elements remain styleable even though they are not public component exports. DraggableArea intentionally retains the `advanced-cropper-draggable-element` CSS name for theme compatibility.
+
+### advanced-cropper
+
+```text
+.advanced-cropper
+.advanced-cropper__boundary
+.advanced-cropper__background-wrapper
+.advanced-cropper__background
+.advanced-cropper--disabled
+```
+
+### advanced-cropper-wrapper
+
+```text
+.advanced-cropper-wrapper
+.advanced-cropper-wrapper__fade
+```
+
+### advanced-cropper-boundary
+
+```text
+.advanced-cropper-boundary
+.advanced-cropper-boundary__stretcher
+.advanced-cropper-boundary__content
+```
+
+### advanced-cropper-background-image
+
+```text
+.advanced-cropper-background-image
+```
+
+### advanced-cropper-canvas
+
+```text
+.advanced-cropper-canvas
+```
+
+### advanced-cropper-source
+
+```text
+.advanced-cropper-source
+```
+
+### advanced-cropper-artificial-transition
+
+```text
+.advanced-cropper-artificial-transition
+```
+
+### advanced-cropper-stencil-wrapper
+
+```text
+.advanced-cropper-stencil-wrapper
+```
+
+### advanced-cropper-stencil-overlay
+
+```text
+.advanced-cropper-stencil-overlay
+```
+
+### advanced-cropper-draggable-element
+
+```text
+.advanced-cropper-draggable-element
+.advanced-cropper-draggable-element--disabled
+```
+
+### advanced-cropper-fade
+
+```text
+.advanced-cropper-fade
+.advanced-cropper-fade--visible
+```
+
+### advanced-cropper-stencil-grid
+
+```text
+.advanced-cropper-stencil-grid
+.advanced-cropper-stencil-grid--visible
+.advanced-cropper-stencil-grid__row
+.advanced-cropper-stencil-grid__cell
+```
+
+### advanced-cropper-stencil-grid__cell
+
+```text
+.advanced-cropper-stencil-grid__cell
+.advanced-cropper-stencil-grid__cell--top
+.advanced-cropper-stencil-grid__cell--bottom
+.advanced-cropper-stencil-grid__cell--left
+.advanced-cropper-stencil-grid__cell--right
+```
+
+### advanced-cropper-rectangle-stencil
+
+```text
+.advanced-cropper-rectangle-stencil
+.advanced-cropper-rectangle-stencil--movable
+.advanced-cropper-rectangle-stencil--moving
+.advanced-cropper-rectangle-stencil--resizable
+.advanced-cropper-rectangle-stencil--resizing
+.advanced-cropper-rectangle-stencil--disabled
+.advanced-cropper-rectangle-stencil__bounding-box
+.advanced-cropper-rectangle-stencil__draggable-area
+.advanced-cropper-rectangle-stencil__overlay
+.advanced-cropper-rectangle-stencil__preview
+.advanced-cropper-rectangle-stencil__grid
+```
+
+### advanced-cropper-circle-stencil
+
+```text
+.advanced-cropper-circle-stencil
+.advanced-cropper-circle-stencil--movable
+.advanced-cropper-circle-stencil--moving
+.advanced-cropper-circle-stencil--resizable
+.advanced-cropper-circle-stencil--resizing
+.advanced-cropper-circle-stencil--disabled
+.advanced-cropper-circle-stencil__bounding-box
+.advanced-cropper-circle-stencil__draggable-area
+.advanced-cropper-circle-stencil__overlay
+.advanced-cropper-circle-stencil__preview
+.advanced-cropper-circle-stencil__grid
+```
+
+### advanced-cropper-bounding-box
+
+```text
+.advanced-cropper-bounding-box
+.advanced-cropper-bounding-box--disabled
+.advanced-cropper-bounding-box__lines
+.advanced-cropper-bounding-box__handlers
+.advanced-cropper-bounding-box__handler-wrapper
+.advanced-cropper-bounding-box__handler
+.advanced-cropper-bounding-box__line
+```
+
+### advanced-cropper-bounding-box__handler-wrapper
+
+```text
+.advanced-cropper-bounding-box__handler-wrapper
+.advanced-cropper-bounding-box__handler-wrapper--north
+.advanced-cropper-bounding-box__handler-wrapper--east
+.advanced-cropper-bounding-box__handler-wrapper--south
+.advanced-cropper-bounding-box__handler-wrapper--west
+.advanced-cropper-bounding-box__handler-wrapper--east-north
+.advanced-cropper-bounding-box__handler-wrapper--east-south
+.advanced-cropper-bounding-box__handler-wrapper--west-north
+.advanced-cropper-bounding-box__handler-wrapper--west-south
+```
+
+### advanced-cropper-bounding-box__handler
+
+```text
+.advanced-cropper-bounding-box__handler
+.advanced-cropper-bounding-box__handler--north
+.advanced-cropper-bounding-box__handler--east
+.advanced-cropper-bounding-box__handler--south
+.advanced-cropper-bounding-box__handler--west
+.advanced-cropper-bounding-box__handler--east-north
+.advanced-cropper-bounding-box__handler--east-south
+.advanced-cropper-bounding-box__handler--west-north
+.advanced-cropper-bounding-box__handler--west-south
+```
+
+### advanced-cropper-bounding-box__line
+
+```text
+.advanced-cropper-bounding-box__line
+.advanced-cropper-bounding-box__line--north
+.advanced-cropper-bounding-box__line--east
+.advanced-cropper-bounding-box__line--south
+.advanced-cropper-bounding-box__line--west
+```
+
+### advanced-cropper-handler-wrapper
+
+```text
+.advanced-cropper-handler-wrapper
+.advanced-cropper-handler-wrapper--north
+.advanced-cropper-handler-wrapper--east
+.advanced-cropper-handler-wrapper--south
+.advanced-cropper-handler-wrapper--west
+.advanced-cropper-handler-wrapper--east-north
+.advanced-cropper-handler-wrapper--east-south
+.advanced-cropper-handler-wrapper--west-north
+.advanced-cropper-handler-wrapper--west-south
+.advanced-cropper-handler-wrapper--disabled
+.advanced-cropper-handler-wrapper--hover
+.advanced-cropper-handler-wrapper__draggable
+```
+
+### advanced-cropper-line-wrapper
+
+```text
+.advanced-cropper-line-wrapper
+.advanced-cropper-line-wrapper--north
+.advanced-cropper-line-wrapper--east
+.advanced-cropper-line-wrapper--south
+.advanced-cropper-line-wrapper--west
+.advanced-cropper-line-wrapper--disabled
+.advanced-cropper-line-wrapper--hover
+.advanced-cropper-line-wrapper__content
+```
+
+### advanced-cropper-line-wrapper__content
+
+```text
+.advanced-cropper-line-wrapper__content
+.advanced-cropper-line-wrapper__content--north
+.advanced-cropper-line-wrapper__content--east
+.advanced-cropper-line-wrapper__content--south
+.advanced-cropper-line-wrapper__content--west
+```
+
+### advanced-cropper-simple-handler
+
+```text
+.advanced-cropper-simple-handler
+.advanced-cropper-simple-handler--north
+.advanced-cropper-simple-handler--east
+.advanced-cropper-simple-handler--south
+.advanced-cropper-simple-handler--west
+.advanced-cropper-simple-handler--east-north
+.advanced-cropper-simple-handler--east-south
+.advanced-cropper-simple-handler--west-north
+.advanced-cropper-simple-handler--west-south
+.advanced-cropper-simple-handler--disabled
+.advanced-cropper-simple-handler--hover
+```
+
+### advanced-cropper-simple-handler-wrapper
+
+```text
+.advanced-cropper-simple-handler-wrapper
+.advanced-cropper-simple-handler-wrapper--north
+.advanced-cropper-simple-handler-wrapper--east
+.advanced-cropper-simple-handler-wrapper--south
+.advanced-cropper-simple-handler-wrapper--west
+.advanced-cropper-simple-handler-wrapper--east-north
+.advanced-cropper-simple-handler-wrapper--east-south
+.advanced-cropper-simple-handler-wrapper--west-north
+.advanced-cropper-simple-handler-wrapper--west-south
+.advanced-cropper-simple-handler-wrapper--disabled
+.advanced-cropper-simple-handler-wrapper--hover
+```
+
+### advanced-cropper-simple-line
+
+```text
+.advanced-cropper-simple-line
+.advanced-cropper-simple-line--north
+.advanced-cropper-simple-line--east
+.advanced-cropper-simple-line--south
+.advanced-cropper-simple-line--west
+.advanced-cropper-simple-line--disabled
+.advanced-cropper-simple-line--hover
+```
+
+### advanced-cropper-simple-line-wrapper
+
+```text
+.advanced-cropper-simple-line-wrapper
+.advanced-cropper-simple-line-wrapper--north
+.advanced-cropper-simple-line-wrapper--east
+.advanced-cropper-simple-line-wrapper--south
+.advanced-cropper-simple-line-wrapper--west
+.advanced-cropper-simple-line-wrapper--disabled
+.advanced-cropper-simple-line-wrapper--hover
+```
+
+### advanced-cropper-preview
+
+```text
+.advanced-cropper-preview
+.advanced-cropper-preview__boundary
+.advanced-cropper-preview__content
+.advanced-cropper-preview__image
+```
+
+### advanced-cropper-preview__image
+
+```text
+.advanced-cropper-preview__image
+.advanced-cropper-preview__image--visible
+```
+
+### cropper-preview-wrapper
+
+```text
+.cropper-preview-wrapper
+.cropper-preview-wrapper__fade
+```

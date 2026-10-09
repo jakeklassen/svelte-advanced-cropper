@@ -1,0 +1,43 @@
+---
+title: "Stencil context"
+description: "CropperContext, registration options and constraint strategy."
+---
+
+# Stencil context
+
+`getCropperContext(): CropperContext` reads the nearest cropper's Svelte `createContext` value. Call it during initialization. Outside `Cropper` or `FixedCropper`, it throws a descriptive error. Nested croppers shadow the outer provider.
+
+```ts
+interface CropperContext {
+	readonly cropper: CropperInstance;
+	readonly disabled: boolean;
+	readonly image: CropperImage | null;
+	registerStencil(getOptions: () => StencilOptions): () => void;
+}
+
+interface StencilOptions {
+	aspectRatio?: RawAspectRatio | (() => RawAspectRatio);
+	boundingBox?: BoundingBoxType;
+	[key: string]: unknown;
+}
+
+type StencilConstraints<E extends SettingsExtension = {}> = (
+	settings: CropperSettingsInput<E>,
+	options: Readonly<StencilOptions>
+) => Partial<CropperSettingsInput<E>>;
+```
+
+`BoundingBoxType` comes from `advanced-cropper/extensions/fit-to-image`. All other types above are exported by `svelte-advanced-cropper`.
+
+| Member | Meaning |
+| --- | --- |
+| `cropper` | Stable base API, usable during child initialization. |
+| `disabled` | Reactive parent disabled getter; combine with local disabled state. |
+| `image` | Reactive displayed image, or `null`. |
+| `registerStencil` | Store a reactive options getter; install destruction cleanup and return idempotent early cleanup. |
+
+Register before a state guard. One live stencil is permitted; zero is valid when children are supplied. Registration changes reconcile the current state even when ordinary automatic reconciliation is disabled. SSR registration performs no browser work.
+
+The context intentionally has no extension generic. Use a typed snippet or explicit prop when an application control needs `CropperInstance<E>`. Boundary and source registration belong to [layer snippets](/docs/reference/snippets), not the stencil context.
+
+The default strategy gives explicit cropper ratio settings precedence over rectangle suggestions. A circle supplies both `aspectRatio: 1` and its circular bounding box. FixedCropper uses the fixed stencil-size strategy. [Build a stencil](/docs/composition/stencil-context) shows registration and reactive reads together.

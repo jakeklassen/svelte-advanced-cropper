@@ -1,3 +1,8 @@
+---
+title: "Resize algorithm"
+description: "Explore constrained core resizing with a live BoundingBox."
+---
+
 <script>
 	import Example from '#site/components/Example.svelte';
 	import ResizeAlgorithm from '#site/demos/algorithms/ResizeAlgorithm.svelte';
@@ -5,9 +10,7 @@
 	import utilsSource from '#site/demos/algorithms/utils.ts?highlight';
 </script>
 
-# Resize Algorithm
-
-## Resize Algorithm
+# Resize algorithm
 
 Drag the handles or the edges of the box below. Each drag runs `anchoredResizeCoordinatesAlgorithm` from the core, the same function the stencils use, with a fixed `1:1` aspect ratio and the demo area as its size and position limits. While you drag, a thin outline shows the box as it was when the gesture started: the algorithm uses it as the reference that keeps the opposite corner or edge in place.
 
@@ -36,4 +39,6 @@ anchoredResizeCoordinatesAlgorithm(coordinates, anchor, directions, options, {
 });
 ```
 
-See [Utils](/docs/concept/utils#anchoredresizecoordinatesalgorithm) for the signature, and [`resizeCoordinates`](/docs/concept/modifiers#resizecoordinates) for the modifier that applies it to a cropper state.
+See [Utils](/docs/core/utilities#anchoredresizecoordinatesalgorithm) for the signature, and [`resizeCoordinates`](/docs/core/modifiers#resizecoordinates) for the modifier that applies it to a cropper state.
+
+The demo binds element dimensions with Svelte and re-fits on size changes.

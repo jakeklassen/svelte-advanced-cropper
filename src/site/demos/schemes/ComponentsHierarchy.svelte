@@ -5,7 +5,7 @@
 	const root: HierarchyNode = {
 		title: 'Cropper / FixedCropper',
 		kind: 'component',
-		to: '/docs/components/Cropper',
+		to: '/docs/reference/cropper',
 		children: [
 			{
 				title: 'getCropperContext()',

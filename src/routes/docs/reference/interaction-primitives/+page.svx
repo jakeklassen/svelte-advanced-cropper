@@ -1,0 +1,72 @@
+---
+title: "Gesture and transition building blocks"
+description: "Public primitive props, callbacks, methods and styling."
+---
+
+# Gesture and transition building blocks
+
+All optional props without a default remain `undefined`. `class` accepts Svelte `ClassValue`; `style` is a CSS string.
+
+These primitives require and provide no cropper context. Supply their data and callbacks explicitly. Unless listed, they have no exported instance methods. Container children are optional `Snippet` values rendered without arguments.
+
+<h2 id="draggable-area">DraggableArea</h2>
+
+Reports incremental movement in layout pixels and the original MouseEvent or TouchEvent. activationDistance is the touch movement threshold. onMoveStart/onMoveEnd bracket an active gesture; onEnter/onLeave report hover.
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `class` | `ClassValue` | `undefined` |
+| `style` | `string` | `undefined` |
+| `children` | `Snippet` | `undefined` |
+| `disabled` | `boolean` | `false` |
+| `onMove` | `(directions: MoveDirections, nativeEvent: MouseEvent` \| `TouchEvent) => void` | `undefined` |
+| `onMoveEnd` | `() => void` | `undefined` |
+| `onMoveStart` | `() => void` | `undefined` |
+| `onLeave` | `() => void` | `undefined` |
+| `onEnter` | `() => void` | `undefined` |
+| `useAnchor` | `boolean` | `true` |
+| `activationDistance` | `number` | `30` |
+
+Selectors are listed in the [complete styling inventory](/docs/reference/styling).
+
+<h2 id="transformable-image">TransformableImage</h2>
+
+Converts mouse, touch and wheel events to ImageTransform values. onEvent can veto handling using TransformableImageEvent.preventDefault(). Gesture listeners are native and non-passive, installed through attachments.
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `onTransform` | `(transform: ImageTransform) => void` | `undefined` |
+| `onTransformEnd` | `() => void` | `undefined` |
+| `onEvent` | `(transformEvent: TransformableImageEvent, nativeEvent: Event) => unknown` | `undefined` |
+| `disabled` | `boolean` | `undefined` |
+| `touchMove` | `boolean` | `true` |
+| `mouseMove` | `boolean` | `true` |
+| `touchScale` | `boolean` | `true` |
+| `touchRotate` | `boolean` | `false` |
+| `wheelScale` | `boolean` \| `{ ratio: number; }` | `true` (ratio `0.1`) |
+| `timeout` | `number` | `500` ms |
+| `children` | `Snippet` | `undefined` |
+| `class` | `ClassValue` | `undefined` |
+| `style` | `string` | `undefined` |
+| `preventDefault` | `boolean` | `true` |
+
+Selectors are listed in the [complete styling inventory](/docs/reference/styling).
+
+<h2 id="cropper-fade">CropperFade</h2>
+
+Applies a visible modifier when visible is truthy; children remain mounted.
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `visible` | `unknown` | `undefined` |
+| `class` | `ClassValue` | `undefined` |
+| `style` | `string` | `undefined` |
+| `children` | `Snippet` | `undefined` |
+
+Selectors are listed in the [complete styling inventory](/docs/reference/styling).
+
+<h2 id="transformable-image-event">TransformableImageEvent</h2>
+
+Constructed with `{ active: boolean }`. Public fields are `active: boolean` and `defaultPrevented: boolean` (initially false). `preventDefault(): void` sets the latter to true, vetoing cropper handling. It does not itself call the native event's preventDefault. `onEvent` also receives that native `Event`.
+
+`DraggableArea` and `TransformableImage` account for ancestor scale transforms when converting pointer deltas. Rotated or skewed containers are not supported by that conversion.

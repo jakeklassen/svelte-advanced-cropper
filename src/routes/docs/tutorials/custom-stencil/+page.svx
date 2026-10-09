@@ -1,367 +1,47 @@
 <script>
-	import Example from '#site/components/Example.svelte';
-	import Admonition from '#site/components/Admonition.svelte';
-	import CustomStencil from '#site/demos/tutorials/CustomStencil/CustomStencil.svelte';
 	import StencilDiagram from '#site/demos/tutorials/CustomStencil/StencilDiagram.svelte';
-	import source from '#site/demos/tutorials/CustomStencil/CustomStencil.svelte?highlight';
+	import Example from '#site/components/Example.svelte';
+	import CodeBlock from '#site/components/CodeBlock.svelte';
+	import CustomStencil from '#site/demos/tutorials/CustomStencil/CustomStencil.svelte';
+	import CustomStencilSource from '#site/demos/tutorials/CustomStencil/CustomStencil.svelte?highlight';
 	import stencilSource from '#site/demos/tutorials/CustomStencil/CircleStencil.svelte?highlight';
+	import CustomStencilFile0 from '#site/demos/tutorials/CustomStencil/CircleStencil.svelte?highlight';
 </script>
 
-# Custom Stencil
+# Custom stencil
 
-## Idea
-
-The stencil is the part of the cropper that the user actually grabs: the frame that marks the crop area, its handlers, and the darkened overlay around it. `RectangleStencil` and `CircleStencil` cover most needs, but nothing stops you from writing your own. This tutorial builds one step by step. The same steps apply to any stencil you can imagine.
-
-Here is the stencil we are going to build:
+This tutorial builds a circle that moves by dragging its body and resizes around its centre from a single control. Its implementation uses public geometry and gesture primitives.
 
 <StencilDiagram variant="idea" />
 
-Two things set it apart from the built-in stencils. It has a single handler, and that handler sits on the circle itself instead of on a corner of the bounding box.
+## Register the stencil
 
-It also resizes differently. A built-in stencil keeps the opposite corner in place while you drag a handler. This one keeps its centre in place and grows or shrinks in every direction at once:
+Call `getCropperContext()` during component initialization. Register a getter before checking whether cropper state exists. The getter supplies `aspectRatio: 1` and `BoundingBoxType.Circle`; the cropper combines those options with its constraint strategy before the first reset. Registration automatically cleans up on destruction.
+
+The context exposes a stable `cropper` API, reactive `disabled`, and the currently displayed `image`. Read changing values with `$derived`. An enclosing cropper's disabled state must reach every gesture surface.
+
+## Position and draw
+
+`getStencilCoordinates()` supplies layout coordinates to `StencilWrapper`; `getTransitions()` keeps its movement aligned with the image. `StencilOverlay` shades outside the circle. The demo's CSS supplies the round outline and positions the resize control.
 
 <StencilDiagram variant="resize" />
 
-## Basic structure
+## Move and resize
 
-A custom stencil is an ordinary Svelte component that you pass to the cropper's `stencilComponent` prop. Start with an empty one:
-
-```svelte
-<!-- CircleStencil.svelte -->
-<div class="circle-stencil"></div>
-```
-
-Whatever it ends up looking like, a typical stencil has to do five things:
-
-- Place itself in the box described by the stencil coordinates (`width`, `height`, `left`, `top`).
-- Tell the cropper about its aspect ratio, if it has one, by exporting `aspectRatio`. The cropper's resize algorithm then respects it.
-- Call the cropper's methods when the user drags it: `moveCoordinates`, `moveCoordinatesEnd`, `resizeCoordinates` and `resizeCoordinatesEnd`.
-- Show the part of the image that will be cropped.
-- Darken the area around it with an overlay.
-
-## Stencil props
-
-The cropper renders the stencil with a few props of its own, on top of anything you pass through `stencilProps`.
-
-#### `cropper`
-
-The [cropper](/docs/components/Cropper) itself: the same object you get with `bind:this` and in the `onChange` callback. The stencil reads the [state](/docs/concept/state) from it and calls its methods to move and resize the crop area. Type it as `CropperRef`.
-
-#### `image`
-
-The current image (`CropperImage | null`). It has these properties:
-
-- `src`: the image URL.
-- `width` and `height`: the natural size of the image.
-- `transforms`: the rotation and flips applied to the image when it was loaded (from its EXIF orientation).
-- `revoke`: whether the URL is an object URL that the cropper will release with `URL.revokeObjectURL`.
-- `arrayBuffer`: the raw bytes of the image, when they were read.
-
-#### `disabled`
-
-`true` when the cropper is disabled. A stencil should then ignore user input. Our tutorial stencil skips this for brevity, while the built-in stencils honour it.
-
-## Stencil coordinates
-
-The cropper does not position the stencil for you. That is deliberate: it leaves you free to lay out the stencil however you want. The coordinates are one call away, though. `cropper.getStencilCoordinates()` converts the crop area from image pixels to boundary pixels, ready to use as a CSS box:
-
-```svelte
-<script lang="ts">
-	import type { CropperRef } from 'svelte-advanced-cropper';
-
-	let { cropper }: { cropper: CropperRef } = $props();
-
-	const coordinates = $derived(cropper.getStencilCoordinates());
-</script>
-
-<div class="circle-stencil"></div>
-```
-
-The cropper state is reactive, so a `$derived` that reads it updates whenever the user moves the stencil or the image.
-
-## Transitions
-
-When the cropper animates a change (for example, after zooming), the stencil should animate along with it. The current transition settings come from `cropper.getTransitions()`, in the same way:
-
-```svelte
-<script lang="ts">
-	import type { CropperRef } from 'svelte-advanced-cropper';
-
-	let { cropper }: { cropper: CropperRef } = $props();
-
-	const coordinates = $derived(cropper.getStencilCoordinates());
-	const transitions = $derived(cropper.getTransitions());
-</script>
-
-<div class="circle-stencil"></div>
-```
-
-## Applying the stencil coordinates
-
-You could turn the coordinates and transitions into an inline style yourself, but the `StencilWrapper` component already does it. It positions an absolutely placed box with a `transform`, and animates it with the cropper's transitions:
-
-```svelte
-<script lang="ts">
-	import { StencilWrapper, type CropperRef } from 'svelte-advanced-cropper';
-
-	let { cropper }: { cropper: CropperRef } = $props();
-
-	const coordinates = $derived(cropper.getStencilCoordinates());
-	const transitions = $derived(cropper.getTransitions());
-</script>
-
-<StencilWrapper class="circle-stencil" {transitions} {...coordinates}></StencilWrapper>
-```
-
-## Aspect ratio
-
-A circle stencil only makes sense if the crop area stays square, so the stencil has to tell the cropper about that limit. The cropper reads it from the stencil's **exports**: it binds the stencil component with `bind:this` and passes everything the component exports to `stencilConstraints`, which turns the `aspectRatio` export into the `aspectRatio` setting.
-
-The value is either a number or a range:
-
-```ts
-type StencilAspectRatio = number | { minimum?: number; maximum?: number };
-```
-
-So one line is enough:
-
-```svelte
-<script lang="ts">
-	import { StencilWrapper, type CropperRef } from 'svelte-advanced-cropper';
-
-	let { cropper }: { cropper: CropperRef } = $props();
-
-	const coordinates = $derived(cropper.getStencilCoordinates());
-	const transitions = $derived(cropper.getTransitions());
-
-	export const aspectRatio = 1;
-</script>
-
-<StencilWrapper class="circle-stencil" {transitions} {...coordinates}></StencilWrapper>
-```
-
-<Admonition type="tip">
-
-The ratio here is `1` because the stencil is always a circle. The cropper normalizes it to `minimum: 1, maximum: 1` before using it.
-
-</Admonition>
-
-<Admonition type="info" title="Coming from React">
-
-React stencils expose the aspect ratio through `forwardRef` and `useImperativeHandle`. In Svelte, a component export plays the same role. If the ratio depends on props, export a function instead of a constant (`export function aspectRatio() { … }`), as `RectangleStencil` does: the default constraints call it to get the current value. A user-level `aspectRatio` prop on the cropper still takes priority over the stencil.
-
-</Admonition>
-
-## Overlay
-
-The darkened area around the stencil is best drawn with `StencilOverlay`. It casts a huge box shadow around itself, so it follows the stencil through every transition. Other techniques, such as separate shaded panels, tend to lag behind or flicker while the stencil animates.
-
-```svelte
-<script lang="ts">
-	import { StencilOverlay, StencilWrapper, type CropperRef } from 'svelte-advanced-cropper';
-
-	let { cropper }: { cropper: CropperRef } = $props();
-
-	const coordinates = $derived(cropper.getStencilCoordinates());
-	const transitions = $derived(cropper.getTransitions());
-
-	export const aspectRatio = 1;
-</script>
-
-<StencilWrapper class="circle-stencil" {transitions} {...coordinates}>
-	<StencilOverlay class="circle-stencil__overlay" />
-</StencilWrapper>
-```
-
-Now make it round and give it a dashed outline. The classes are applied inside the library's components, not in this one, so Svelte's scoped styles won't reach them. Use `:global(…)` (or a global stylesheet):
-
-```css
-:global(.circle-stencil__overlay) {
-	border: dashed 2px white;
-	box-sizing: border-box;
-	border-radius: 50%;
-}
-```
-
-## Handler
-
-Next comes the handler that resizes the stencil. Any markup will do. Here it is an icon from `@lucide/svelte`, placed on the circle's top-right edge:
-
-```svelte
-<script lang="ts">
-	import { MoveDiagonal } from '@lucide/svelte';
-	import { StencilOverlay, StencilWrapper, type CropperRef } from 'svelte-advanced-cropper';
-
-	let { cropper }: { cropper: CropperRef } = $props();
-
-	const coordinates = $derived(cropper.getStencilCoordinates());
-	const transitions = $derived(cropper.getTransitions());
-
-	export const aspectRatio = 1;
-</script>
-
-<StencilWrapper class="circle-stencil" {transitions} {...coordinates}>
-	<div class="circle-stencil__handler">
-		<MoveDiagonal color="white" size={22} />
-	</div>
-	<StencilOverlay class="circle-stencil__overlay" />
-</StencilWrapper>
-```
-
-```css
-:global(.circle-stencil) {
-	cursor: move;
-}
-:global(.circle-stencil__handler) {
-	position: absolute;
-	/* A point on the circle at 45° */
-	right: 15%;
-	top: 14%;
-	z-index: 1;
-	cursor: ne-resize;
-	width: 30px;
-	height: 30px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	transform: translate(50%, -50%);
-}
-:global(.circle-stencil__overlay) {
-	border: dashed 2px white;
-	box-sizing: border-box;
-	border-radius: 50%;
-}
-:global(.circle-stencil__draggable-area) {
-	width: 100%;
-	height: 100%;
-}
-```
-
-## Events handling
-
-### Preparing
-
-You can listen to mouse and touch events yourself, but the library ships two components that already handle the hard parts (window-level move listeners, touch activation distance, and stopping the image underneath from reacting): `DraggableElement` and `DraggableArea`. They are the same component under two names. By convention, `DraggableElement` wraps handlers, lines and other small controls, and `DraggableArea` wraps the stencil body that moves the crop area.
-
-```svelte
-<StencilWrapper class="circle-stencil" {transitions} {...coordinates}>
-	<DraggableElement class="circle-stencil__handler">
-		<MoveDiagonal color="white" size={22} />
-	</DraggableElement>
-	<DraggableArea class="circle-stencil__draggable-area">
-		<StencilOverlay class="circle-stencil__overlay" />
-	</DraggableArea>
-</StencilWrapper>
-```
-
-Nothing happens yet, because neither component has callbacks. That is the next step.
-
-### Moving handler
-
-`DraggableElement` calls its `onMove` prop on every pointer move during a drag, with two arguments:
-
-- `directions: MoveDirections`, the shift since the previous call:
-
-  ```ts
-  interface MoveDirections {
-  	left: number;
-  	top: number;
-  }
-  ```
-
-- `nativeEvent: MouseEvent | TouchEvent`, the event that caused it.
-
-The first one is what matters. It says how many pixels the pointer moved horizontally and vertically since the last call. For our stencil, a handler shift has to become a change in the size of the crop area, applied evenly on every side:
+Two `DraggableArea` instances handle the body and the resize control. They install native non-passive listeners through attachments. The body forwards only the displacement to `moveCoordinates`; forwarding the native event as its second argument would incorrectly put it in the method's options position.
 
 <StencilDiagram variant="directions" />
 
-`cropper.resizeCoordinates` takes an **anchor** and the shift. With the `'center'` anchor, the cropper applies the horizontal shift to both the left and the right edge, so the box grows symmetrically around its centre. Because the stencil also has an aspect ratio of `1`, the vertical size follows along:
+The resize callback uses the `center` anchor and horizontal displacement for both dimensions. Moving right grows the circle evenly; moving left shrinks it. The registered ratio keeps it square.
 
-```ts
-function resize(shift: MoveDirections) {
-	// Only the horizontal shift is used, on both axes: the square stencil grows evenly.
-	cropper.resizeCoordinates('center', {
-		left: shift.left,
-		top: shift.left
-	});
-}
-```
+<CodeBlock html={stencilSource.html} code={stencilSource.code} />
 
-Only `shift.left` is used: dragging the handler to the right makes the circle bigger, and dragging it to the left makes it smaller.
+Each gesture calls its matching completion method: `moveCoordinatesEnd` for the body and `resizeCoordinatesEnd` for the handle. These end interaction state and allow pending reconciliation to run. When composing `BoundingBox` controls instead, preserve the native event in `onMove` forwarding so modifier-key behaviour survives.
 
-<Admonition type="tip">
+## Use it as a child
 
-All four resize directions get the same sign. A resize direction says how far an **edge** moves outward: a positive `left` pushes the left edge further left, and a positive `right` pushes the right edge further right. Equal positive values therefore grow the box in every direction.
-
-</Admonition>
-
-<Admonition type="tip">
-
-`resizeCoordinates` also takes an options object as its third argument. Its `compensate` flag tells the cropper what to do when an edge hits the boundary: instead of stopping, it moves the opposite edge further to make up the difference.
-
-</Admonition>
-
-### Last steps
-
-Only the remaining callbacks are left, and they are trivial, because the cropper's own methods do the work:
-
-- `onMoveEnd` on the `DraggableElement`: `cropper.resizeCoordinatesEnd`, passed as is.
-- `onMoveEnd` on the `DraggableArea`: `cropper.moveCoordinatesEnd`, passed as is.
-- `onMove` on the `DraggableArea`: a one-line arrow that forwards the directions to `cropper.moveCoordinates`. Don't pass the method itself here: `onMove` also receives the native event as its second argument, and `moveCoordinates` would read that as its options.
-
-The `…End` methods matter. They tell the cropper that the interaction is over, so it can, for example, hide the grid and fire `onInteractionEnd`.
-
-```svelte
-<script lang="ts">
-	import { MoveDiagonal } from '@lucide/svelte';
-	import {
-		DraggableArea,
-		DraggableElement,
-		StencilOverlay,
-		StencilWrapper,
-		type CropperRef,
-		type MoveDirections
-	} from 'svelte-advanced-cropper';
-
-	let { cropper }: { cropper: CropperRef } = $props();
-
-	const coordinates = $derived(cropper.getStencilCoordinates());
-	const transitions = $derived(cropper.getTransitions());
-
-	export const aspectRatio = 1;
-
-	function resize(shift: MoveDirections) {
-		// Only the horizontal shift is used, on both axes: the square stencil grows evenly.
-		cropper.resizeCoordinates('center', {
-			left: shift.left,
-			top: shift.left
-		});
-	}
-</script>
-
-<StencilWrapper class="circle-stencil" {transitions} {...coordinates}>
-	<DraggableElement
-		class="circle-stencil__handler"
-		onMove={resize}
-		onMoveEnd={cropper.resizeCoordinatesEnd}
-	>
-		<MoveDiagonal color="white" size={22} />
-	</DraggableElement>
-	<DraggableArea
-		class="circle-stencil__draggable-area"
-		onMove={(directions) => cropper.moveCoordinates(directions)}
-		onMoveEnd={cropper.moveCoordinatesEnd}
-	>
-		<StencilOverlay class="circle-stencil__overlay" />
-	</DraggableArea>
-</StencilWrapper>
-```
-
-## Result
-
-Pass the stencil to the cropper with `stencilComponent`, and that's it. Drag the circle to move it, and drag the arrow to resize it. "Show code" lists both files.
-
-<Example {source} title="CustomStencil" files={{ 'CircleStencil.svelte': stencilSource }}>
+<Example source={CustomStencilSource} title="CustomStencil" files={{ 'CircleStencil.svelte': CustomStencilFile0 }}>
 	<CustomStencil />
 </Example>
+
+Drag the circle, then its diagonal control. The cropper can configure core restrictions normally; the custom stencil owns only its presentation and interaction rules. See [stencil context](/docs/composition/stencil-context) for lifecycle details and [Print guides](/docs/tutorials/print-guides) for reactive, product-specific options.

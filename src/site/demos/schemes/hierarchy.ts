@@ -2,7 +2,7 @@
 export interface HierarchyNode {
 	title: string;
 	kind: 'component' | 'context' | 'snippet';
-	/** Docs path, e.g. `/docs/components/Cropper`. Omit when the item has no page. */
+	/** Docs path, e.g. `/docs/reference/cropper`. Omit when the item has no page. */
 	to?: string;
 	/** A short annotation, e.g. the snippet that renders this layer. */
 	note?: string;

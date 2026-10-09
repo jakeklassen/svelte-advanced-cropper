@@ -1,0 +1,244 @@
+---
+title: "Cropper instance"
+description: "All 33 methods exposed by Cropper and FixedCropper."
+---
+
+# Cropper instance
+
+`CropperInstance<E>` is a structural type for `bind:this` and callback arguments. It is not a constructor. `FixedCropperInstance<E>` adds `FixedCropperSettings` to the extension. Use a `$state` binding and `$derived` reads:
+
+<script>
+	import CodeBlock from '#site/components/CodeBlock.svelte';
+	import source from '#site/demos/examples/SetCoordinatesExample.svelte?highlight';
+</script>
+
+<CodeBlock html={source.html} code={source.code} />
+
+## Reading and changing state
+
+Getters are reactive. Mutation methods and callbacks run untracked. Treat returned observations as read-only; change the crop through methods. A disabled cropper still accepts programmatic actions.
+
+`reset()` rebuilds from defaults; `refresh()` measures and reconciles layout. Both are asynchronous. `setImage(image)` installs a plain displayed-image value without reloading or resetting coordinates. `setState` accepts a complete state, `null`, or an updater; it does not accept a partial state.
+
+`setCoordinates` accepts partial coordinates, functions and sequential arrays. Each function sees the result of earlier transforms. Its extension-aware update type is:
+
+```ts
+type CoordinateUpdate<E extends SettingsExtension> =
+	| Partial<Coordinates>
+	| null
+	| ((state: CropperState, settings: CropperSettings<E>) => Partial<Coordinates> | null);
+```
+
+`getCoordinates()` rounds by default; pass `{ round: false }` for fractional values. `getStencilCoordinates()` uses boundary pixels. `getTransforms()` returns identity transforms when empty.
+
+## Operation options
+
+The core option interfaces have optional boolean fields: `TransitionOptions.transitions`, `ImmediatelyOptions.immediately`, `InteractionOptions.interaction`, `NormalizeOptions.normalize` and `PostprocessOptions.postprocess`. Omitted options retain the core method's behavior. To perform an immediate edit without an animated transition, pass `{ transitions: false }`.
+
+Gesture methods accept boundary-pixel deltas with normalization enabled. Pair `moveCoordinates`, `resizeCoordinates` and `transformImage` with their corresponding end methods for custom interactions. The `parameters` argument of `resizeCoordinates` is typed `unknown` by the core; built-in stencils supply `ResizeOptions`.
+
+## Canvas lifetime
+
+`getCanvas(options?: DrawOptions)` returns `null` before readiness, without a usable source, or when canvas export is disabled. The returned canvas is reused by later exports; copy or encode it before another export if you need a snapshot. Rotated-image scratch pixels are released after drawing. The application owns images and object URLs it passes to `setImage`.
+
+## Methods
+
+All 33 public methods are listed below. Optional option objects default to the core's normal behavior; no argument is needed for observation methods.
+
+### reset
+
+```ts
+reset: () => Promise<void>;
+```
+
+### refresh
+
+```ts
+refresh: () => Promise<void>;
+```
+
+### clear
+
+```ts
+clear: () => void;
+```
+
+### setCoordinates
+
+```ts
+setCoordinates: ( transforms: CoordinateUpdate<E> | CoordinateUpdate<E>[], options?: ImmediatelyOptions & TransitionOptions ) => void;
+```
+
+### setState
+
+```ts
+setState: ( modifier: | CropperState | null | ((state: CropperState | null, settings: CropperSettings<E>) => CropperState | null), options?: TransitionOptions & ImmediatelyOptions & InteractionOptions & PostprocessOptions ) => void;
+```
+
+### setImage
+
+```ts
+setImage: (image: CropperImage) => void;
+```
+
+### flipImage
+
+```ts
+flipImage: (horizontal?: boolean | undefined, vertical?: boolean | undefined, options?: InteractionOptions & ImmediatelyOptions & NormalizeOptions & TransitionOptions) => void;
+```
+
+### zoomImage
+
+```ts
+zoomImage: (scale: Scale | number, options?: InteractionOptions & ImmediatelyOptions & NormalizeOptions & TransitionOptions) => void;
+```
+
+### rotateImage
+
+```ts
+rotateImage: (rotate: number | Rotate, options?: InteractionOptions & ImmediatelyOptions & NormalizeOptions & TransitionOptions) => void;
+```
+
+### reconcileState
+
+```ts
+reconcileState: (options?: TransitionOptions) => void;
+```
+
+### moveImage
+
+```ts
+moveImage: (left: number, top?: number | undefined, options?: InteractionOptions & ImmediatelyOptions & NormalizeOptions & TransitionOptions) => void;
+```
+
+### moveCoordinates
+
+```ts
+moveCoordinates: (directions: Partial<MoveDirections>, options?: InteractionOptions & ImmediatelyOptions & NormalizeOptions & TransitionOptions) => void;
+```
+
+### moveCoordinatesEnd
+
+```ts
+moveCoordinatesEnd: (options?: ImmediatelyOptions & TransitionOptions) => void;
+```
+
+### resizeCoordinates
+
+```ts
+resizeCoordinates: (anchor: ResizeAnchor, directions: Partial<MoveDirections>, parameters?: unknown, options?: InteractionOptions & ImmediatelyOptions & NormalizeOptions & TransitionOptions) => void;
+```
+
+### resizeCoordinatesEnd
+
+```ts
+resizeCoordinatesEnd: (options?: ImmediatelyOptions & TransitionOptions) => void;
+```
+
+### transformImage
+
+```ts
+transformImage: (transform: ImageTransform, options?: InteractionOptions & ImmediatelyOptions & NormalizeOptions & TransitionOptions) => void;
+```
+
+### transformImageEnd
+
+```ts
+transformImageEnd: (options?: ImmediatelyOptions & TransitionOptions) => void;
+```
+
+### setVisibleArea
+
+```ts
+setVisibleArea: (visibleArea: VisibleArea, options?: ImmediatelyOptions & TransitionOptions) => void;
+```
+
+### startTransitions
+
+```ts
+startTransitions: () => void;
+```
+
+### hasInteractions
+
+```ts
+hasInteractions: () => boolean;
+```
+
+### getInteractions
+
+```ts
+getInteractions: () => CropperInteractions;
+```
+
+### getCoordinates
+
+```ts
+getCoordinates: (options?: { round?: boolean }) => Coordinates | null;
+```
+
+### getVisibleArea
+
+```ts
+getVisibleArea: () => VisibleArea | null;
+```
+
+### getTransforms
+
+```ts
+getTransforms: () => Transforms;
+```
+
+### getStencilCoordinates
+
+```ts
+getStencilCoordinates: () => Coordinates;
+```
+
+### getDefaultState
+
+```ts
+getDefaultState: () => CropperState | null;
+```
+
+### getCanvas
+
+```ts
+getCanvas: (options?: DrawOptions) => HTMLCanvasElement | null;
+```
+
+### getSettings
+
+```ts
+getSettings: () => CropperSettings<E>;
+```
+
+### getImage
+
+```ts
+getImage: () => CropperImage | null;
+```
+
+### getState
+
+```ts
+getState: () => CropperState | null;
+```
+
+### getTransitions
+
+```ts
+getTransitions: () => CropperTransitions;
+```
+
+### isLoading
+
+```ts
+isLoading: () => boolean;
+```
+
+### isLoaded
+
+```ts
+isLoaded: () => boolean;
+```

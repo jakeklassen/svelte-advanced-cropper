@@ -5,7 +5,7 @@
 	const root: HierarchyNode = {
 		title: 'RectangleStencil / CircleStencil',
 		kind: 'component',
-		to: '/docs/components/RectangleStencil',
+		to: '/docs/reference/rectangle-stencil',
 		note: 'child of Cropper or FixedCropper',
 		children: [
 			{
@@ -16,12 +16,12 @@
 			{
 				title: 'StencilWrapper',
 				kind: 'component',
-				to: '/docs/components/StencilWrapper',
+				to: '/docs/reference/stencil-primitives#stencil-wrapper',
 				children: [
 					{
 						title: 'BoundingBox',
 						kind: 'component',
-						to: '/docs/components/BoundingBox',
+						to: '/docs/reference/stencil-primitives#bounding-box',
 						children: [
 							{
 								title: 'line',
@@ -38,12 +38,12 @@
 							{
 								title: 'DraggableArea',
 								kind: 'component',
-								to: '/docs/components/DraggableArea',
+								to: '/docs/reference/interaction-primitives#draggable-area',
 								children: [
 									{
 										title: 'StencilOverlay',
 										kind: 'component',
-										to: '/docs/components/StencilOverlay',
+										to: '/docs/reference/stencil-primitives#stencil-overlay',
 										children: [
 											{ title: 'StencilGrid', kind: 'component', note: 'grid prop' },
 											{ title: 'preview <div>', kind: 'component', note: '__preview selector' }

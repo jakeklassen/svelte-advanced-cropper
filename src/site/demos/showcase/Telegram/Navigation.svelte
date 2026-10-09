@@ -11,7 +11,7 @@
 		NormalizeOptions,
 		TransitionOptions
 	} from 'svelte-advanced-cropper';
-	import RotationDial from './RotateComponent.svelte';
+	import RotationDial from './RotationDial.svelte';
 	import type { NavigationStyle } from './types.ts';
 
 	interface Props extends NavigationStyle {

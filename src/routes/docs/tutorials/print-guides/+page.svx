@@ -1,0 +1,36 @@
+<script>
+	import Example from '#site/components/Example.svelte';
+	import CodeBlock from '#site/components/CodeBlock.svelte';
+	import PrintStencilExample from '#site/demos/examples/PrintStencilExample.svelte';
+	import PrintStencilExampleSource from '#site/demos/examples/PrintStencilExample.svelte?highlight';
+	import stencilSource from '#site/demos/examples/PrintStencil.svelte?highlight';
+	import PrintStencilExampleFile0 from '#site/demos/examples/PrintStencil.svelte?highlight';
+</script>
+
+# Print guides
+
+A printed product needs a crop that includes bleed, a cut line, and a safe area for important details. Puzzle divisions add another layer of guides. This tutorial keeps those marks in the stencil while exporting only the photo.
+
+<Example source={PrintStencilExampleSource} title="PrintStencilExample" files={{ 'PrintStencil.svelte': PrintStencilExampleFile0 }}>
+	<PrintStencilExample />
+</Example>
+
+## Describe the product with typed props
+
+`PrintStencil` takes `width`, `height`, `bleed` and `safeMargin` in the same unit, plus optional `columns` and `rows`. The full crop includes bleed on both sides, so its ratio is `(width + 2 * bleed) / (height + 2 * bleed)`.
+
+The stencil reads its cropper from context and registers a getter for that ratio during initialization. Product changes update the options reactively; the cropper reconciles the selection without resetting the user's transforms.
+
+## Position the guides
+
+`StencilWrapper` receives displayed coordinates. `BoundingBox` handles resizing, `DraggableArea` handles movement, and `StencilOverlay` shades the outside. The guide layer uses percentages of the full crop so its cut line and safe area stay aligned at every zoom.
+
+<CodeBlock html={stencilSource.html} code={stencilSource.code} />
+
+The guide elements have `pointer-events: none`; dragging reaches the stencil beneath them. All interaction primitives inherit `context.disabled` and report completion to the cropper.
+
+For purely decorative guides that do not change the constraint model, put children inside a built-in `RectangleStencil` instead of registering a second stencil.
+
+## Export the print
+
+The exported bitmap includes the bleed but none of the DOM guide lines. If you need the finished product area instead, trim the bleed from the crop before producing that output. Check [print resolution](/docs/guides/preview-and-export#print-resolution) against the full physical size and required DPI; increasing export dimensions cannot restore detail missing from a small selection.

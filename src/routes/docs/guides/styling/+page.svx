@@ -1,0 +1,82 @@
+<script>
+	import Example from '#site/components/Example.svelte';
+	import OverlayColorExample from '#site/demos/examples/OverlayColorExample.svelte';
+	import OverlayColorExampleSource from '#site/demos/examples/OverlayColorExample.svelte?highlight';
+	import CustomPreviewExample from '#site/demos/examples/CustomPreviewExample.svelte';
+	import CustomPreviewExampleSource from '#site/demos/examples/CustomPreviewExample.svelte?highlight';
+</script>
+
+# Styling
+
+Every public visual component accepts one `class` and a string `style`. Add a class to identify your instance, then target its stable parts. Load the base stylesheet first; see [Themes](/docs/guides/themes) for ready-made appearances.
+
+## Reach elements inside the cropper
+
+Svelte scopes ordinary styles to the component that declares them. Library elements need `:global(...)`, preferably below a local wrapper so the rule affects only this cropper.
+
+```svelte
+<div class="avatar-editor">
+	<Cropper {src}>
+		<CircleStencil class="avatar-stencil" />
+	</Cropper>
+</div>
+
+<style>
+	.avatar-editor :global(.avatar-stencil .advanced-cropper-circle-stencil__overlay) {
+		color: rgb(20 30 40 / 65%);
+	}
+
+	.avatar-editor :global(.avatar-stencil .advanced-cropper-circle-stencil__preview) {
+		border: 2px solid white;
+	}
+</style>
+```
+
+Use `class={['avatar-stencil', busy && 'is-busy']}` for conditional classes and `style="height: 400px"` for inline styles. The shipped themes use selectors, Sass variables and `currentColor`; they do not define a public CSS-variable API.
+
+## Find the right part
+
+| What you want to change | Selector to target below your class |
+| --- | --- |
+| Cropper boundary | `.advanced-cropper__boundary` |
+| Image layer | `.advanced-cropper__background` |
+| Image gesture layer | `.advanced-cropper__background-wrapper` |
+| Rectangle overlay | `.advanced-cropper-rectangle-stencil__overlay` |
+| Circle crop outline | `.advanced-cropper-circle-stencil__preview` |
+| Handle visual | `.advanced-cropper-simple-handler` |
+| Edge visual | `.advanced-cropper-simple-line` |
+| Standalone preview image | `.advanced-cropper-preview__image` |
+
+State modifiers such as `.advanced-cropper-rectangle-stencil--moving`, `--resizing` and `--disabled` live on the stencil root. Controls have their own hover, disabled and direction modifiers. See the [complete styling contract](/docs/reference/styling) for exact names and ownership.
+
+## Overlay and crop outline
+
+The overlay shades the outside using `currentColor`; change `color` to change the shade.
+
+<Example source={OverlayColorExampleSource} title="OverlayColorExample">
+	<OverlayColorExample />
+</Example>
+
+The stencil's `__preview` part marks the selected area. It is separate from the standalone `CropperPreview` component.
+
+<Example source={CustomPreviewExampleSource} title="CustomPreviewExample">
+	<CustomPreviewExample />
+</Example>
+
+## Controls and nested boxes
+
+Style handle visuals separately from their larger hit targets. Lines draw one border side; set `border-left-width`, `border-top-width`, `border-right-width` or `border-bottom-width` for the corresponding direction instead of adding borders to every side.
+
+If an outer `BoundingBox` contains a cropper, a broad descendant selector also reaches the stencil's box. Use the direct `__lines` and `__handlers` groups to select only the outer controls. The [resizable-container example](/docs/guides/layout-and-lifecycle#reset-versus-refresh) shows that pattern.
+
+When markup must change, provide `handler` or `line` snippets on the stencil. Forward the snippet props so positioning, disabled state and native movement events survive:
+
+```svelte
+<RectangleStencil>
+	{#snippet handler(p)}
+		<SimpleHandler {...p} class={[p.class, 'avatar-handle']} />
+	{/snippet}
+</RectangleStencil>
+```
+
+Use [layer snippets](/docs/composition/layers) for wrappers and backgrounds, and the [custom stencil tutorial](/docs/tutorials/custom-stencil) for a different interaction model.

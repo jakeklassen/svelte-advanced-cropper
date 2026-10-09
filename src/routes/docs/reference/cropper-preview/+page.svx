@@ -1,0 +1,55 @@
+---
+title: "CropperPreview"
+description: "Preview inputs, layer snippets, and adapter methods."
+---
+
+# CropperPreview
+
+Displays the current crop without creating a second cropper.
+
+<script>
+	import Example from '#site/components/Example.svelte';
+	import Demo from '#site/demos/components/CropperPreviewDemo.svelte';
+	import source from '#site/demos/components/CropperPreviewDemo.svelte?highlight';
+</script>
+
+<Example {source} title="CropperPreview">
+	<Demo />
+</Example>
+
+## Props
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `state` | `CropperState` \| `null` | `null` |
+| `image` | `CropperImage` \| `null` | `null` |
+| `transitions` | `CropperTransitions` \| `null` | `null` |
+| `loading` | `boolean` | `false` |
+| `loaded` | `boolean` | `true` |
+| `class` | `ClassValue` | `undefined` |
+| `wrapper` | `Snippet<[CropperPreviewWrapperSnippetProps]>` | `CropperPreviewWrapper` |
+| `boundary` | `Snippet<[CropperPreviewBoundarySnippetProps]>` | `StretchableBoundary` |
+| `background` | `Snippet<[CropperPreviewBackgroundSnippetProps]>` | `CropperPreviewBackground` |
+| `crossOrigin` | `CrossOrigin` | `true` |
+| `style` | `string` | `undefined` |
+| `cropper` | `CropperPreviewSource` \| `null` | `undefined` |
+
+
+## Source and exports
+
+`CropperPreviewSource` supplies `getState(): CropperState | null`, `getImage(): CropperImage | null`, `getTransitions(): CropperTransitions | null`, `isLoading(): boolean` and `isLoaded(): boolean`.
+
+Source precedence is `cropper`, then the adapter installed with `update`, then the snapshot props. A source must be non-null to win. Reactive getters update the preview automatically.
+
+| Export on `CropperPreviewInstance` | Behavior |
+| --- | --- |
+| `refresh(): void` | Re-read the source and stretch the boundary, including nonreactive adapters. |
+| `update(cropper?: CropperPreviewSource` \| `null): void` | Store or clear the adapter and refresh. |
+
+## Snippets and context
+
+[Preview snippets](/docs/reference/snippets#preview-snippets) receive `preview` and, for the background, the fitted `size`. The default boundary uses `stretchPreviewBoundary`. Async results are ignored when superseded or destroyed. No cropper context is provided or required. There is no export method on a preview.
+
+## Selectors
+
+`.advanced-cropper-preview`, `__boundary`, `__content`, `__image` and `__image--visible` identify the preview. The wrapper additionally emits `.cropper-preview-wrapper` and `__fade`. See [styling](/docs/reference/styling).
