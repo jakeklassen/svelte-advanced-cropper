@@ -1,5 +1,7 @@
 # 03 — Hooks, instance, service, types: react-advanced-cropper → Svelte 5
 
+> Historical study of the upstream implementation and earlier port. Proposed mappings and release observations below are not the 0.2.0 API; see the [current design log](00-index.md) for superseding decisions.
+
 Scope: `tmp/react-advanced-cropper/src/{hooks/**, instance/**, service/**, types.ts, deprecated/**, index.ts}`
 (react-advanced-cropper 0.20.2, `git describe` = `0.15.0-39-ga51e293`) and the parts of
 `tmp/advanced-cropper/src/instance/AbstractCropperInstance.ts` (core 0.17.1, the same version as

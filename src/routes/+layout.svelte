@@ -13,7 +13,7 @@
 	<link rel="icon" href={asset('favicon.svg')} />
 	<meta
 		name="description"
-		content="A flexible Svelte 5 image cropper: build the cropper your design needs. A port of react-advanced-cropper."
+		content="A Svelte 5 image cropper with child stencils, typed layer snippets, reactive previews and canvas export."
 	/>
 </svelte:head>
 

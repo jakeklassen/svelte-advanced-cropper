@@ -1,5 +1,7 @@
 # Prior attempt: jakeklassen/svelte-advanced-cropper (May 2026)
 
+> Historical study of the upstream implementation and earlier port. Proposed mappings and release observations below are not the 0.2.0 API; see the [current design log](00-index.md) for superseding decisions.
+
 Clone: `tmp/old-svelte-advanced-cropper` (git-ignored). Backup: `../svelte-advanced-cropper-backup`.
 
 It is a Svelte 5 runes port that wraps the `advanced-cropper` core, built as a tsdown/rollup library with a Storybook demo. It has 13 commits from 2026-05-28 to 05-29, a single `main` branch, no tags, and was **never published to npm**, so the name and version are free. Every upstream component exists, with 20 browser tests.

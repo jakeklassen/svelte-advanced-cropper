@@ -26,6 +26,30 @@ import 'svelte-advanced-cropper/style.css';
 
 Supply an image URL and give the cropper a definite height. A `max-height` alone does not establish a height for percentage-sized children. The demo uses a child `RectangleStencil` to set its aspect ratio.
 
+The same first example is used in the README. `/photo.jpg` is an application-owned public image; the live demo below substitutes a credited local photo through `image()` and uses the stylesheet already loaded by the site layout.
+
+```svelte
+<script lang="ts">
+	import { Cropper, RectangleStencil, type CropperInstance } from 'svelte-advanced-cropper';
+	import 'svelte-advanced-cropper/style.css';
+
+	let cropper: CropperInstance | undefined = $state();
+	const coordinates = $derived(cropper?.getCoordinates());
+</script>
+
+<Cropper bind:this={cropper} src="/photo.jpg" style="height: 360px">
+	<RectangleStencil aspectRatio={16 / 9} />
+</Cropper>
+
+{#if coordinates}
+	<p>{coordinates.width} × {coordinates.height} pixels</p>
+{/if}
+
+<button type="button" disabled={!coordinates} onclick={() => cropper?.rotateImage(90)}>
+	Rotate
+</button>
+```
+
 <Example source={GettingStartedExampleSource} title="GettingStartedExample">
 	<GettingStartedExample />
 </Example>

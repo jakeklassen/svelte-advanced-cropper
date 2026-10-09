@@ -1,7 +1,7 @@
 {
 	"name": "svelte-advanced-cropper",
 	"version": "0.1.4",
-	"description": "Svelte 5 port of react-advanced-cropper: build croppers exactly suited to your design",
+	"description": "Svelte 5 image cropper with child stencils, typed snippets, reactive previews and canvas export",
 	"keywords": [
 		"advanced-cropper",
 		"cropper",

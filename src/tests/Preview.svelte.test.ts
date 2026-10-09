@@ -6,7 +6,7 @@ import { createTestImage, nextFrame, waitFor } from './fixtures';
 import type { CropperInstance } from '#lib';
 
 describe('CropperPreview', () => {
-	it('mirrors the cropper image and resizes with the coordinates', async () => {
+	it('displays the cropper image and resizes with the coordinates', async () => {
 		const onReady = vi.fn<(cropper: CropperInstance) => void>();
 		const screen = await render(PreviewHarness, { src: createTestImage(), onReady });
 		await waitFor(() => onReady.mock.calls.length > 0);
