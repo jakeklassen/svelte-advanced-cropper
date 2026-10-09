@@ -94,10 +94,7 @@ export const nav: NavEntry[] = [
 	},
 	{
 		title: 'Migration',
-		items: [
-			{ title: 'Upgrade from 0.1.x', href: '/docs/migration/from-0-1' },
-			{ title: 'Coming from react-advanced-cropper', href: '/docs/migration/from-react' }
-		]
+		items: [{ title: 'Upgrade from 0.1.x', href: '/docs/migration/from-0-1' }]
 	}
 ];
 

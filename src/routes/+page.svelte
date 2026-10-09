@@ -44,11 +44,11 @@
 				every piece can be restyled or swapped out.
 			</p>
 			<p class="credit">
-				A community Svelte port of
+				Includes code derived from Norserium's MIT-licensed
 				<a href="https://github.com/advanced-cropper/react-advanced-cropper"
 					>react-advanced-cropper</a
 				>
-				by Norserium, built on the
+				and is built on the
 				<a href="https://github.com/advanced-cropper/advanced-cropper">advanced-cropper</a> core. Not
 				affiliated with the Advanced Cropper project.
 			</p>
@@ -135,7 +135,7 @@
 		max-width: 100%;
 		margin: 0 auto 24px;
 	}
-	/* Credit, not a version switcher: this port isn't part of the upstream project. */
+	/* Project attribution. */
 	.credit {
 		width: 520px;
 		max-width: 100%;

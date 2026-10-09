@@ -4,7 +4,7 @@ This site documents the Svelte-native API of `svelte-advanced-cropper`. Organize
 
 ## Hard rules
 
-1. **Write original prose.** Norserium's upstream documentation text must not be copied. Explain behaviour from the current implementation and tests. Preserve appropriate attribution for MIT-derived code.
+1. **Write original prose.** Norserium's upstream documentation text must not be copied. Explain behaviour from the current implementation and tests. Do not describe or compare other cropper libraries' behaviour, APIs, naming, bugs or performance, or publish migration guides for them. Credit derived code only, with short, factual licence attribution.
 2. **Start with Svelte concepts:** `$state` for local UI state, `$derived` for cropper reads, child components for stencils, snippets for replaceable layers, context for custom stencils and `bind:this` for imperative methods. Use effects only for actual synchronization. Callbacks are props (`onChange={...}`); DOM events use `onclick`. Use `class` arrays/objects and style strings.
 3. **Demos import the library by package name**: `import { Cropper } from 'svelte-advanced-cropper'` (aliased to `src/lib`). The source we display is then exactly what users would write. Never import `#lib` in a demo.
 4. **Images**: only use the photos in `static/img/images/` through `import { image } from '#site/paths.ts'` and `image('calico-cat.jpg')`. The set is our own: animals and nature from Unsplash, with no people (see its `CREDITS.md`). Pick a photo whose shape suits the demo; don't reuse upstream's photos. A new photo must follow the same rules and be credited in `CREDITS.md`. Never hotlink, and never copy upstream SVG illustrations, diagrams or logos. Recreate diagrams as simple HTML/CSS or inline SVG of your own.
@@ -19,7 +19,7 @@ This site documents the Svelte-native API of `svelte-advanced-cropper`. Organize
 
 ## Files
 
-- Page: `src/routes/docs/<section>/<lowercase-kebab-name>/+page.svx` (or an existing top-level page such as `/docs/intro`). Canonical URLs are independent of upstream names. Add each page to `src/site/nav.ts`; do not create legacy redirects. Migration pages live at `/docs/migration/from-0-1` and `/docs/migration/from-react`.
+- Page: `src/routes/docs/<section>/<lowercase-kebab-name>/+page.svx` (or an existing top-level page such as `/docs/intro`). Add each page to `src/site/nav.ts`; do not create legacy redirects. The upgrade guide for our own release history lives at `/docs/migration/from-0-1`.
 - Demo: `src/site/demos/<group>/<Name>.svelte`. Groups: `examples`, `showcase`, `tutorials`, `croppers`, `schemes`, `algorithms`, `home`. Small helpers live next to the demo.
 - Shared demo primitives you may use: `#site/demos/shared/SquareButton.svelte` and `VerticalButtons.svelte`. Plus the global `.demo-buttons` / `.demo-button` classes from `site.css`.
 
@@ -92,6 +92,6 @@ Run `mise x -- pnpm lint:svelte` after Svelte edits; fix issues and review every
 
 ## Quality bar
 
-- Every supported capability has a working example or meaningful automated coverage. Every retained demo works through the public 0.2.0 API; pages need not match upstream sections, names or ordering.
+- Every supported capability has a working example or meaningful automated coverage. Every retained demo works through the public 0.2.0 API.
 - Use `src/lib/index.ts`, public declarations, executable demos and contract tests as the source of truth for props, defaults and types.
 - Responsive: demos must not overflow on a 375px-wide screen. Check both light and dark themes.
