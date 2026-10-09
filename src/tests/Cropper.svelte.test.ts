@@ -45,8 +45,8 @@ describe('Cropper', () => {
 	it('getCanvas works inside onReady', async () => {
 		let canvas: HTMLCanvasElement | null = null;
 		await mountCropper({
-			onReady: (ref) => {
-				canvas = ref.getCanvas();
+			onReady: (instance) => {
+				canvas = instance.getCanvas();
 			}
 		});
 		expect(canvas).not.toBeNull();
@@ -117,7 +117,7 @@ describe('Cropper', () => {
 		expect(cropper().getVisibleArea()?.width).toBeLessThan(before);
 	});
 
-	it('fires onChange with the cropper ref', async () => {
+	it('fires onChange with the cropper instance', async () => {
 		const onChange = vi.fn<(cropper: CropperInstance) => void>();
 		const { cropper } = await mountCropper({ onChange, transitions: false });
 		onChange.mockClear();

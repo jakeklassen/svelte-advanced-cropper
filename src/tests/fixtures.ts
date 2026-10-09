@@ -1,3 +1,4 @@
+import type { ComponentProps } from 'svelte';
 import { vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import Harness from './Harness.svelte';
@@ -78,26 +79,19 @@ export function getElement<T extends Element = Element>(
 	return element as T;
 }
 
-interface MountOptions {
-	/** Whether the cropper animates changes. Off makes state changes immediate. */
-	transitions?: boolean;
-	/** Called on top of the internal spy that `mountCropper` waits on. */
-	onReady?: (cropper: CropperInstance) => void;
-	/** Any other Cropper prop, or `component` to mount another cropper. */
-	[prop: string]: unknown;
-}
+type MountOptions = ComponentProps<typeof Harness>;
 
 /** Renders a cropper with a generated 800×600 photo and waits until it is ready. */
 export async function mountCropper({ onReady: userOnReady, ...props }: MountOptions = {}) {
 	const onReady = vi.fn<(cropper: CropperInstance) => void>(userOnReady);
 	const screen = await render(Harness, { src: createTestImage(), onReady, ...props });
 	const cropper = (): CropperInstance => {
-		const ref = screen.component.getCropper();
-		if (!ref) {
+		const instance = screen.component.getCropper();
+		if (!instance) {
 			throw new Error('The cropper is not mounted');
 		}
 
-		return ref;
+		return instance;
 	};
 
 	await waitFor(() => onReady.mock.calls.length > 0);

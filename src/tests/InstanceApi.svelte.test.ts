@@ -42,7 +42,7 @@ describe('cropper instance', () => {
 		const screen = await render(Harness, {
 			src: createTestImage(),
 			asyncBoundary: true,
-			onReady: (ref: CropperInstance) => readyWithState.push(ref.getState() !== null)
+			onReady: (instance: CropperInstance) => readyWithState.push(instance.getState() !== null)
 		});
 		const cropper = () => screen.component.getCropper();
 		// The image has loaded and its reset is waiting for the boundary.

@@ -152,7 +152,8 @@ export class CropperController<E extends SettingsExtension = {}> {
 		const refreshWaiters: { resolve: () => void; reject: (error: unknown) => void }[] = [];
 
 		let imageShownByReset: CropperImage | null = null;
-		let lastReadyImage: CropperImage | null = null;
+		// Remember notification identity without retaining unloaded image bytes.
+		let lastReadyImage: WeakRef<CropperImage> | null = null;
 
 		async function notifyReady(image: CropperImage, isCurrent: () => boolean) {
 			await tick();
@@ -160,7 +161,7 @@ export class CropperController<E extends SettingsExtension = {}> {
 				!isCurrent() ||
 				!isInitializedState(cropper.getState()) ||
 				displayedImage !== image ||
-				lastReadyImage === image
+				lastReadyImage?.deref() === image
 			) {
 				return;
 			}
@@ -172,8 +173,8 @@ export class CropperController<E extends SettingsExtension = {}> {
 				}
 			}
 
-			if (isCurrent() && displayedImage === image && lastReadyImage !== image) {
-				lastReadyImage = image;
+			if (isCurrent() && displayedImage === image && lastReadyImage?.deref() !== image) {
+				lastReadyImage = new WeakRef(image);
 				fire('onReady');
 			}
 		}

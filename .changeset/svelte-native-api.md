@@ -14,4 +14,12 @@ Rebuild the framework layer around a Svelte-native API: compose stencils as chil
 - Svelte `^5.29.0` → `^5.40` for typed context and attachments.
 - Deprecated wrapper `loading`/`loaded` and `getInstance` props → instance getters and `bind:this`; ignored `scaleImage.adjustStencil` → `transformImage.adjustStencil`. Built-in settings stay flat; `settings` accepts extension keys only. `CropperSource bind:ref` → `bind:element`; `DraggableElement` → `DraggableArea`; handler/line `onDrag`/`onDragEnd` → `onMove`/`onMoveEnd`.
 
+- `CropperPreviewWrapper` / `CropperPreviewBackground` `cropper` prop → `preview`.
+- `DraggableElementProps` → `DraggableAreaProps`; custom boundary instance typing uses `BoundaryHandle`.
+
+### Fixes
+
+- Honor mouse and touch movement settings independently: `moveImage={{ mouse: true, touch: false }}` now allows mouse dragging.
+- Release unloaded image bytes while the cropper remains mounted.
+
 See [Upgrade from 0.1.x](https://jakeklassen.github.io/svelte-advanced-cropper/docs/migration/from-0-1) and [Coming from react-advanced-cropper](https://jakeklassen.github.io/svelte-advanced-cropper/docs/migration/from-react) for migration examples and complete mappings.

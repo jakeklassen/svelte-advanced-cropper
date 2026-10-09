@@ -62,16 +62,16 @@
 	let transforming = false;
 	let container: HTMLDivElement | undefined;
 
-	function processMove(touches: SimpleTouch[]) {
+	function processMove(touches: SimpleTouch[], input: 'mouse' | 'touch') {
 		if (!container || !onTransform) {
 			return;
 		}
 
 		// The core measures in screen pixels; convert to the container's own (see screenScale).
 		const transform = touchesToImageTransform(touches, lastTouches, container, {
-			scale: touchScale,
-			rotate: touchRotate,
-			move: touchMove
+			scale: input === 'touch' && touchScale,
+			rotate: input === 'touch' && touchRotate,
+			move: input === 'touch' ? touchMove : mouseMove
 		});
 		onTransform(unscaleImageTransform(transform, screenScale(container)));
 		lastTouches = touches;
@@ -168,7 +168,7 @@
 				!touch.identifier || lastTouches.some((tracked) => tracked.identifier === touch.identifier)
 		);
 		if (acceptEvent(event)) {
-			processMove(trackedTouches);
+			processMove(trackedTouches, 'touch');
 			processStart();
 		}
 	};
@@ -184,7 +184,7 @@
 
 	const onMouseMove = (event: MouseEvent) => {
 		if (lastTouches.length && acceptEvent(event)) {
-			processMove([{ clientX: event.clientX, clientY: event.clientY }]);
+			processMove([{ clientX: event.clientX, clientY: event.clientY }], 'mouse');
 		}
 	};
 

@@ -2,8 +2,11 @@ import 'advanced-cropper/styles/index.scss';
 import { describe, expect, it } from 'vitest';
 import { cdp } from 'vitest/browser';
 import { mount, unmount } from 'svelte';
-import { Cropper } from '#lib';
-import { createTestImage, delay } from './fixtures';
+import { render } from 'vitest-browser-svelte';
+import { Cropper, type CropperInstance } from '#lib';
+import { createTestImage, delay, waitFor } from './fixtures';
+import Harness from './Harness.svelte';
+import photo from './images/exif-orientation-6-quadrants.jpg?url';
 
 // Cycles before the first reading: the engine's code caches and Svelte's template cache
 // fill up during the first mounts, which looks like growth but levels off.
@@ -33,7 +36,36 @@ async function readMemory() {
 	return { heap: usedSize, nodes, listeners: jsEventListeners };
 }
 
+// Only the weak marker escapes this call; the test must not keep the buffer alive.
+const imageBytes = (cropper: CropperInstance | undefined) => {
+	const buffer = cropper?.getImage()?.arrayBuffer;
+	if (!buffer) {
+		throw new Error('The orientation-enabled image load must retain source bytes');
+	}
+
+	return new WeakRef(buffer);
+};
+
 describe('Cropper lifecycle', () => {
+	it('releases image bytes after unloading while still mounted', async () => {
+		let ready = false;
+		const screen = await render(Harness, {
+			src: photo,
+			unloadTime: 0,
+			onReady: () => {
+				ready = true;
+			}
+		});
+		await waitFor(() => ready);
+		const bytes = imageBytes(screen.component.getCropper());
+		await screen.rerender({ src: null });
+		await waitFor(() => screen.component.getCropper()?.getImage() === null);
+		await waitFor(() => screen.component.getCropper()?.getState() === null);
+		await readMemory();
+		expect(bytes.deref()).toBeUndefined();
+		expect(screen.component.getCropper()).toBeDefined();
+	});
+
 	it('releases everything it creates when unmounted', async () => {
 		const target = document.createElement('div');
 		target.style.width = '500px';
